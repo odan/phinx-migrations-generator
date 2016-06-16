@@ -20,5 +20,5 @@ composer require odan/migrations
 ## Generating Migrations Automatically
 
 ```
-php migrations.php generate
+php migrations.php migration:generate
 ```
