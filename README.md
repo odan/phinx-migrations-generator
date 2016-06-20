@@ -34,7 +34,7 @@ return array(
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-dsn | string |  | Data source name
+dsn | string |  | Data source name (mysql:host=127.0.0.1;dbname=test)
 username | string |  | Database username
 password | string |  | Database password
 options | string | array | Database options
