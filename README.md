@@ -35,9 +35,9 @@ return array(
 Name | Type | Default | Description
 --- | --- | --- | ---
 dsn | string |  | Data source name (mysql:host=127.0.0.1;dbname=test)
-username | string |  | Database username
-password | string |  | Database password
-options | string | array | Database options
+username | string | | Database username
+password | string | | Database password
+options | array | | Database options
 schema_file | string | schema.php | Database schema file (schema.php or schema.json)
 
 
