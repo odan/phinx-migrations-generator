@@ -14,7 +14,7 @@ composer require odan/migrations
 
 # Configuration
 
-* Default configruation file: migrations-config.php
+* Default configuration file: migrations-config.php
 
 Example:
 
