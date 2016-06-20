@@ -12,3 +12,5 @@ src/Config/environment.php
 
 vendor/
 build/
+bin/schema.php
+bin/schema.json
