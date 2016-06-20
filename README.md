@@ -13,12 +13,44 @@ composer require odan/migrations
 ```
 
 # Configuration
-@todo
+
+* Default configruation file: migrations-config.php
+
+Example:
+
+```php
+<?php
+
+return array(
+    'dsn' => 'mysql:host=127.0.0.1;dbname=test',
+    'username' => 'root',
+    'password' => '',
+    'options' => array(
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+    ),
+    'schema_file' => __DIR__ . '/schema.php'
+);
+```
+
+Name | Type | Default | Description
+--- | --- | --- | ---
+dsn | string |  | Data source name
+username | string |  | Database username
+password | string |  | Database password
+options | string | array | Database options
+schema_file | string | schema.php | Database schema file (schema.php or schema.json)
+
 
 # Usage
 
-## Generating Migrations Automatically
+## Generating migrations
 
 ```
 php migrations.php migration:generate
+```
+
+## Load custom config file
+
+```
+php migrations.php migration:generate --config=myconfig.php
 ```
