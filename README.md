@@ -11,7 +11,7 @@ In reality, you should rarely need to write migrations manually, as the migratio
 ```
 git clone https://github.com/odan/migrations.git
 cd migrations
-composer install
+composer install --no-dev
 ```
 
 # Integration
