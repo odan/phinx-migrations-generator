@@ -9,6 +9,8 @@ use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
 use Odan\Migration\Adapter\Generator\GeneratorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * MigrationGenertor
@@ -48,6 +50,18 @@ class MigrationGenertor
 
     /**
      *
+     * @var InputInterface
+     */
+    protected $input;
+
+    /**
+     *
+     * @var SymfonyStyle
+     */
+    protected $io;
+
+    /**
+     *
      * @param DatabaseAdapterInterface $db
      * @param GeneratorInterface $generator
      */
@@ -56,8 +70,9 @@ class MigrationGenertor
         $this->dbAdapter = $dbAdapter;
         $this->generator = $generatorAdapter;
         $this->output = $output;
+        $this->input = $input;
+        $this->io = new SymfonyStyle($input, $output);
 
-        //$this->configFile = $input->getArgument('config');
         $this->configFile = $input->getOption('config');
     }
 
@@ -77,12 +92,111 @@ class MigrationGenertor
         $this->output->writeln(sprintf('Database: <info>%s</>', $this->dbName));
 
         $schema = $this->getCurrentSchema();
-        $this->saveSchemaFile($schema, $settings);
+        $oldSchema = $this->getOldSchema($settings);
+        $diffs = $this->compareSchema($schema, $oldSchema);
 
-        $this->output->writeln('Comparing schema file to the database.');
+        // Overwrite schema file
+        //$overwrite = 'n';
+        // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
+        $overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
+        if ($overwrite == 'y') {
+            $this->saveSchemaFile($schema, $settings);
+        }
+
         $this->output->writeln('No database changes detected.');
         //$this->output->writeln('Generate migration finished');
         return true;
+    }
+
+    /**
+     *
+     * @param array $settings
+     * @return mixed
+     */
+    public function getOldSchema($settings)
+    {
+        return $this->getSchemaFileData($settings);
+    }
+
+    /**
+     *
+     * @param array $newSchema
+     * @param array $oldSchema
+     * @return array
+     */
+    public function compareSchema($newSchema, $oldSchema)
+    {
+        $this->output->writeln('Comparing schema file to the database.');
+        $result = $this->diff($newSchema, $oldSchema);
+        $result2 = $this->diff($oldSchema, $newSchema);
+        return array($result, $result2);
+    }
+
+    /**
+     * Intersect of recursive arrays
+     *
+     * @param array $array1
+     * @param array $array2
+     * @return array
+     */
+    protected function diff($array1, $array2)
+    {
+        $difference = array();
+        foreach ($array1 as $key => $value) {
+            if (is_array($value)) {
+                if (!isset($array2[$key]) || !is_array($array2[$key])) {
+                    $difference[$key] = $value;
+                } else {
+                    $new_diff = $this->diff($value, $array2[$key]);
+                    if (!empty($new_diff)) {
+                        $difference[$key] = $new_diff;
+                    }
+                }
+            } else {
+                if (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
+                    $difference[$key] = $value;
+                }
+            }
+        }
+
+        return $difference;
+    }
+
+    /**
+     *
+     * @param array $settings
+     * @return string
+     */
+    public function getSchemaFilename($settings)
+    {
+        // Default
+        $schemaFile = sprintf('%s/%s', getcwd(), 'schema.php');
+        if (!empty($settings['schema_file'])) {
+            $schemaFile = $settings['schema_file'];
+        }
+        return $schemaFile;
+    }
+
+    /**
+     *
+     * @param array $settings
+     * @return mixed
+     * @throws Exception
+     */
+    public function getSchemaFileData($settings)
+    {
+        $schemaFile = $this->getSchemaFilename($settings);
+        $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
+
+        if ($fileExt == 'php') {
+            $data = $this->read($schemaFile);
+        } elseif ($fileExt == 'json') {
+            $content = file_put_contents($schemaFile);
+            $data = json_decode($content, true);
+        } else {
+            throw new Exception(sprintf('Invalid schema file extension: %s', $fileExt));
+        }
+        return $data;
     }
 
     /**
@@ -93,11 +207,7 @@ class MigrationGenertor
      */
     protected function saveSchemaFile($schema, $settings)
     {
-        // Default
-        $schemaFile = sprintf('%s/%s', getcwd(), 'schema.php');
-        if (!empty($settings['schema_file'])) {
-            $schemaFile = $settings['schema_file'];
-        }
+        $schemaFile = $this->getSchemaFilename($settings);
         $this->output->writeln(sprintf('Save schema file: %s', basename($schemaFile)));
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
 
@@ -112,6 +222,11 @@ class MigrationGenertor
         file_put_contents($schemaFile, $content);
     }
 
+    /**
+     * getCurrentSchema
+     *
+     * @return array
+     */
     public function getCurrentSchema()
     {
         $this->output->writeln('Load current database schema.');
@@ -126,10 +241,15 @@ class MigrationGenertor
             $result['tables'][$tableName]['contraints'] = $this->getTableContraints($tableName);
             $result['tables'][$tableName]['create_table'] = $this->getTableCreateSql($tableName);
         }
-        $this->ksort($result);
+        //$this->ksort($result);
         return $result;
     }
 
+    /**
+     * getTables
+     *
+     * @return array
+     */
     protected function getTables()
     {
         $result = $this->db
@@ -140,6 +260,11 @@ class MigrationGenertor
         return $result;
     }
 
+    /**
+     *
+     * @param type $tableName
+     * @return type
+     */
     protected function getTableColumns($tableName)
     {
         $result = $this->db
@@ -150,6 +275,11 @@ class MigrationGenertor
         return $result;
     }
 
+    /**
+     *
+     * @param type $tableName
+     * @return type
+     */
     protected function getTableKeys($tableName)
     {
         $result = $this->db
@@ -160,6 +290,11 @@ class MigrationGenertor
         return $result;
     }
 
+    /**
+     *
+     * @param type $tableName
+     * @return type
+     */
     protected function getTableContraints($tableName)
     {
         $result = $this->db
@@ -170,6 +305,11 @@ class MigrationGenertor
         return $result;
     }
 
+    /**
+     *
+     * @param type $tableName
+     * @return type
+     */
     protected function getTableCreateSql($tableName)
     {
         $pdo = $this->db->getPdo();
@@ -197,6 +337,7 @@ class MigrationGenertor
     }
 
     /**
+     * Get Db
      *
      * @param array $settings
      * @return FluentPDO
@@ -213,6 +354,7 @@ class MigrationGenertor
     }
 
     /**
+     * getSettings
      *
      * @return mixed
      * @throws Exception
@@ -227,6 +369,7 @@ class MigrationGenertor
     }
 
     /**
+     * Read php file
      *
      * @param string $filename
      * @return mixed
@@ -235,4 +378,5 @@ class MigrationGenertor
     {
         return require $filename;
     }
+
 }
