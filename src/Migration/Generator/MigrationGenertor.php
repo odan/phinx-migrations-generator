@@ -127,8 +127,13 @@ class MigrationGenertor
     public function compareSchema($newSchema, $oldSchema)
     {
         $this->output->writeln('Comparing schema file to the database.');
+
+        // To add or modify
         $result = $this->diff($newSchema, $oldSchema);
+
+        // To remove
         $result2 = $this->diff($oldSchema, $newSchema);
+
         return array($result, $result2);
     }
 
@@ -237,9 +242,9 @@ class MigrationGenertor
             $this->output->writeln(sprintf('Table: <info>%s</>', $tableName));
             $result['tables'][$tableName]['table'] = $table;
             $result['tables'][$tableName]['columns'] = $this->getTableColumns($tableName);
-            $result['tables'][$tableName]['keys'] = $this->getTableKeys($tableName);
-            $result['tables'][$tableName]['contraints'] = $this->getTableContraints($tableName);
-            $result['tables'][$tableName]['create_table'] = $this->getTableCreateSql($tableName);
+            $result['tables'][$tableName]['indexes'] = $this->getTableIndex($tableName);
+            $result['tables'][$tableName]['foreign_keys'] = $this->getTableContraints($tableName);
+            //$result['tables'][$tableName]['create_table'] = $this->getTableCreateSql($tableName);
         }
         //$this->ksort($result);
         return $result;
@@ -267,11 +272,32 @@ class MigrationGenertor
      */
     protected function getTableColumns($tableName)
     {
-        $result = $this->db
+        $rows = $this->db
                 ->from('information_schema.columns')
                 ->where('table_schema', $this->dbName)
                 ->where('table_name', $tableName)
                 ->fetchAll();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $name = $row['column_name'];
+            $result[$name] = [
+                'column_default' => $row['column_default'],
+                'is_nullable' => $row['is_nullable'],
+                'data_type' => $row['data_type'],
+                'character_maximum_length' => $row['character_maximum_length'],
+                'numeric_precision' => $row['numeric_precision'],
+                'numeric_scale' => $row['numeric_scale'],
+                'datetime_precision' => $row['datetime_precision'],
+                'character_set_name' => $row['character_set_name'],
+                'collation_name' => $row['collation_name'],
+                'column_type' => $row['column_type'],
+                'column_key' => $row['column_key'],
+                'extra' => $row['extra'],
+                'column_comment' => $row['column_comment']
+            ];
+        }
+
         return $result;
     }
 
@@ -280,13 +306,16 @@ class MigrationGenertor
      * @param type $tableName
      * @return type
      */
-    protected function getTableKeys($tableName)
+    protected function getTableIndex($tableName)
     {
-        $result = $this->db
-                ->from('information_schema.key_column_usage')
-                ->where('table_schema', $this->dbName)
-                ->where('table_name', $tableName)
-                ->fetchAll();
+        $pdo = $this->db->getPdo();
+        $sql = sprintf('SHOW INDEX FROM %s', $this->quoteIdent($tableName));
+        $rows = $pdo->query($sql)->fetchAll();
+        $result = [];
+        foreach ($rows as $row) {
+            $name = $row['key_name'];
+            $result[$name] = $row;
+        }
         return $result;
     }
 
@@ -297,11 +326,18 @@ class MigrationGenertor
      */
     protected function getTableContraints($tableName)
     {
-        $result = $this->db
+        $rows = $this->db
                 ->from('information_schema.table_constraints')
                 ->where('constraint_schema', $this->dbName)
                 ->where('table_name', $tableName)
+                ->where('constraint_name <> ?', 'PRIMARY')
                 ->fetchAll();
+
+        $result = [];
+        foreach ($rows as $row) {
+            $name = $row['constraint_name'];
+            $result[$name] = $row;
+        }
         return $result;
     }
 
@@ -313,9 +349,7 @@ class MigrationGenertor
     protected function getTableCreateSql($tableName)
     {
         $pdo = $this->db->getPdo();
-        $table = preg_replace('/[^A-Za-z0-9_]+/', '', $tableName);
-        $tableName = $pdo->quote($tableName);
-        $sql = sprintf('SHOW CREATE TABLE `%s`', $table);
+        $sql = sprintf('SHOW CREATE TABLE %s', $this->quoteIdent($tableName));
         $result = $pdo->query($sql)->fetch();
         return $result['create table'];
     }
@@ -345,8 +379,12 @@ class MigrationGenertor
     public function getDb($settings)
     {
         $options = array_replace_recursive($settings['options'], [
-            PDO::ATTR_CASE => PDO::CASE_LOWER,
+            // Enable exceptions
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            // Convert column names to lower case.
+            PDO::ATTR_CASE => PDO::CASE_LOWER,
+            // Set default fetch mode
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
         $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
         $fpdo = new FluentPDO($pdo);
@@ -366,6 +404,27 @@ class MigrationGenertor
             throw new Exception(sprintf('File not found: %s', $this->configFile));
         }
         return $this->read($this->configFile);
+    }
+
+    /**
+     * Escape identifier (column, table) with backtick
+     *
+     * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
+     *
+     * @param string $value
+     * @param string $quote
+     * @return string identifier escaped string
+     */
+    public function quoteIdent($value, $quote = "`")
+    {
+        $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
+        if (strpos($value, '.') !== false) {
+            $values = explode('.', $value);
+            $value = $quote . implode($quote . '.' . $quote, $values) . $quote;
+        } else {
+            $value = $quote . $value . $quote;
+        }
+        return $value;
     }
 
     /**
