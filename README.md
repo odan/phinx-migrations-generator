@@ -9,6 +9,14 @@ In reality, you should rarely need to write migrations manually, as the migratio
 # Installation
 
 ```
+git clone https://github.com/odan/migrations.git
+cd migrations
+composer install
+```
+
+# Integration
+
+```
 composer require odan/migrations
 ```
 
@@ -46,6 +54,7 @@ schema_file | string | schema.php | Database schema file (schema.php or schema.j
 ## Generating migrations
 
 ```
+cd bin
 php migrations.php migration:generate
 ```
 
