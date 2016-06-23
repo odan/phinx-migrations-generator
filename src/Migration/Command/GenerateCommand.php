@@ -32,9 +32,33 @@ class GenerateCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dbAdapter = new \Odan\Migration\Adapter\Database\MySqlAdapter();
-        $phinxAdapter = new \Odan\Migration\Adapter\Generator\PhinxGenerator();
-        $generator = new \Odan\Migration\Generator\MigrationGenertor($dbAdapter, $phinxAdapter, $input, $output);
+        $settings = $this->getSettings($input);
+        $generator = new \Odan\Migration\Generator\MigrationGenertor($settings, $input, $output);
         $generator->generate();
+    }
+
+    /**
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    protected function getSettings(InputInterface $input)
+    {
+        $configFile = $input->getOption('config');
+        if (!file_exists($configFile)) {
+            throw new Exception(sprintf('File not found: %s', $configFile));
+        }
+        return $this->read($configFile);
+    }
+
+    /**
+     * Get config
+     *
+     * @param string $filename
+     * @return mixed
+     */
+    protected function read($filename)
+    {
+        return require $filename;
     }
 }

@@ -3,13 +3,11 @@
 namespace Odan\Migration\Generator;
 
 use Exception;
-use FluentPDO;
 use PDO;
-use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
-use Odan\Migration\Adapter\Generator\GeneratorInterface;
+//use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
+//use Odan\Migration\Adapter\Generator\GeneratorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -18,23 +16,25 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class MigrationGenertor
 {
 
-    /**
-     *
-     * @var DatabaseAdapterInterface
-     */
-    protected $dbAdapter;
+      protected $settings = array();
 
     /**
      *
-     * @var GeneratorInterface
+     * @var \Odan\Migration\Adapter\Database\MySqlAdapter
+     */
+    protected $db;
+
+    /**
+     *
+     * @var \Odan\Migration\Adapter\Generator\PhinxGenerator
      */
     protected $generator;
 
     /**
      *
-     * @var FluentPDO
+     * @var PDO
      */
-    protected $db;
+    protected $pdo;
 
     /**
      *
@@ -62,18 +62,19 @@ class MigrationGenertor
 
     /**
      *
-     * @param DatabaseAdapterInterface $db
-     * @param GeneratorInterface $generator
+     * @param array $settings
+     * @param InputInterface $input
+     * @param OutputInterface $output
      */
-    public function __construct(DatabaseAdapterInterface $dbAdapter, GeneratorInterface $generatorAdapter, InputInterface $input, OutputInterface $output)
+    public function __construct(array $settings, InputInterface $input, OutputInterface $output)
     {
-        $this->dbAdapter = $dbAdapter;
-        $this->generator = $generatorAdapter;
+        $this->settings = $settings;
+        $this->pdo = $this->getPdo($settings);
+        $this->db = new \Odan\Migration\Adapter\Database\MySqlAdapter($this->pdo, $output);
+        $this->generator = new \Odan\Migration\Adapter\Generator\PhinxGenerator();
         $this->output = $output;
         $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);
-
-        $this->configFile = $input->getOption('config');
     }
 
     /**
@@ -85,27 +86,42 @@ class MigrationGenertor
      */
     public function generate()
     {
-        $settings = $this->getSettings();
-        $this->db = $this->getDb($settings);
-
-        $this->dbName = $this->db->getPdo()->query('select database()')->fetchColumn();
-        $this->output->writeln(sprintf('Database: <info>%s</>', $this->dbName));
-
-        $schema = $this->getCurrentSchema();
-        $oldSchema = $this->getOldSchema($settings);
+        $schema = $this->db->getSchema();
+        $oldSchema = $this->getOldSchema($this->settings);
         $diffs = $this->compareSchema($schema, $oldSchema);
 
-        // Overwrite schema file
-        //$overwrite = 'n';
-        // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
-        $overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
-        if ($overwrite == 'y') {
-            $this->saveSchemaFile($schema, $settings);
+        if (empty($diffs[0]) && empty($diffs[1])) {
+            $this->output->writeln('No database changes detected.');
+            return false;
         }
 
-        $this->output->writeln('No database changes detected.');
-        //$this->output->writeln('Generate migration finished');
+        $migration = $this->generator->createMigration($diffs);
+
+        $name = $this->io->ask('Enter migration name', '');
+        if (empty($name)) {
+            $this->output->writeln('Aborted');
+            return false;
+        }
+        $this->saveMigrationFile($name, $migration);
+
+        // Overwrite schema file
+        $overwrite = 'y';
+        // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
+        //$overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
+        if ($overwrite == 'y') {
+            $this->saveSchemaFile($schema, $this->settings);
+        }
+
+        $this->output->writeln('Generate migration finished');
         return true;
+    }
+
+    protected function saveMigrationFile($name, $migration)
+    {
+        $migrationPath = $this->settings['migration_path'];
+        $migrationFile = sprintf('%s/%s_%s.php', $migrationPath, date('YmdHis'), $name);
+        $this->output->writeln(sprintf('Generate migration file: %s', $migrationFile));
+        file_put_contents($migrationFile, $migration);
     }
 
     /**
@@ -193,6 +209,10 @@ class MigrationGenertor
         $schemaFile = $this->getSchemaFilename($settings);
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
 
+        if (!file_exists($schemaFile)) {
+            return array();
+        }
+
         if ($fileExt == 'php') {
             $data = $this->read($schemaFile);
         } elseif ($fileExt == 'json') {
@@ -228,155 +248,12 @@ class MigrationGenertor
     }
 
     /**
-     * getCurrentSchema
-     *
-     * @return array
-     */
-    public function getCurrentSchema()
-    {
-        $this->output->writeln('Load current database schema.');
-        $result = array();
-        $tables = $this->getTables();
-        foreach ($tables as $table) {
-            $tableName = $table['table_name'];
-            $this->output->writeln(sprintf('Table: <info>%s</>', $tableName));
-            $result['tables'][$tableName]['table'] = $table;
-            $result['tables'][$tableName]['columns'] = $this->getTableColumns($tableName);
-            $result['tables'][$tableName]['indexes'] = $this->getTableIndex($tableName);
-            $result['tables'][$tableName]['foreign_keys'] = $this->getTableContraints($tableName);
-            //$result['tables'][$tableName]['create_table'] = $this->getTableCreateSql($tableName);
-        }
-        //$this->ksort($result);
-        return $result;
-    }
-
-    /**
-     * getTables
-     *
-     * @return array
-     */
-    protected function getTables()
-    {
-        $result = $this->db
-                ->from('information_schema.tables')
-                ->where('table_schema', $this->dbName)
-                ->where('table_type', 'BASE TABLE')
-                ->fetchAll();
-        return $result;
-    }
-
-    /**
-     *
-     * @param type $tableName
-     * @return type
-     */
-    protected function getTableColumns($tableName)
-    {
-        $rows = $this->db
-                ->from('information_schema.columns')
-                ->where('table_schema', $this->dbName)
-                ->where('table_name', $tableName)
-                ->fetchAll();
-
-        $result = [];
-        foreach ($rows as $row) {
-            $name = $row['column_name'];
-            $result[$name] = [
-                'column_default' => $row['column_default'],
-                'is_nullable' => $row['is_nullable'],
-                'data_type' => $row['data_type'],
-                'character_maximum_length' => $row['character_maximum_length'],
-                'numeric_precision' => $row['numeric_precision'],
-                'numeric_scale' => $row['numeric_scale'],
-                'datetime_precision' => $row['datetime_precision'],
-                'character_set_name' => $row['character_set_name'],
-                'collation_name' => $row['collation_name'],
-                'column_type' => $row['column_type'],
-                'column_key' => $row['column_key'],
-                'extra' => $row['extra'],
-                'column_comment' => $row['column_comment']
-            ];
-        }
-
-        return $result;
-    }
-
-    /**
-     *
-     * @param type $tableName
-     * @return type
-     */
-    protected function getTableIndex($tableName)
-    {
-        $pdo = $this->db->getPdo();
-        $sql = sprintf('SHOW INDEX FROM %s', $this->quoteIdent($tableName));
-        $rows = $pdo->query($sql)->fetchAll();
-        $result = [];
-        foreach ($rows as $row) {
-            $name = $row['key_name'];
-            $result[$name] = $row;
-        }
-        return $result;
-    }
-
-    /**
-     *
-     * @param type $tableName
-     * @return type
-     */
-    protected function getTableContraints($tableName)
-    {
-        $rows = $this->db
-                ->from('information_schema.table_constraints')
-                ->where('constraint_schema', $this->dbName)
-                ->where('table_name', $tableName)
-                ->where('constraint_name <> ?', 'PRIMARY')
-                ->fetchAll();
-
-        $result = [];
-        foreach ($rows as $row) {
-            $name = $row['constraint_name'];
-            $result[$name] = $row;
-        }
-        return $result;
-    }
-
-    /**
-     *
-     * @param type $tableName
-     * @return type
-     */
-    protected function getTableCreateSql($tableName)
-    {
-        $pdo = $this->db->getPdo();
-        $sql = sprintf('SHOW CREATE TABLE %s', $this->quoteIdent($tableName));
-        $result = $pdo->query($sql)->fetch();
-        return $result['create table'];
-    }
-
-    /**
-     * Sort array by keys.
-     *
-     * @param array $array
-     * @return bool
-     */
-    protected function ksort(&$array)
-    {
-        foreach ($array as &$value) {
-            if (is_array($value)) {
-                $this->ksort($value);
-            }
-        }
-        return ksort($array);
-    }
-
-    /**
      * Get Db
      *
      * @param array $settings
-     * @return FluentPDO
+     * @return PDO
      */
-    public function getDb($settings)
+    public function getPdo($settings)
     {
         $options = array_replace_recursive($settings['options'], [
             // Enable exceptions
@@ -387,8 +264,7 @@ class MigrationGenertor
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
         $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
-        $fpdo = new FluentPDO($pdo);
-        return $fpdo;
+        return $pdo;
     }
 
     /**
@@ -404,27 +280,6 @@ class MigrationGenertor
             throw new Exception(sprintf('File not found: %s', $this->configFile));
         }
         return $this->read($this->configFile);
-    }
-
-    /**
-     * Escape identifier (column, table) with backtick
-     *
-     * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
-     *
-     * @param string $value
-     * @param string $quote
-     * @return string identifier escaped string
-     */
-    public function quoteIdent($value, $quote = "`")
-    {
-        $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
-        if (strpos($value, '.') !== false) {
-            $values = explode('.', $value);
-            $value = $quote . implode($quote . '.' . $quote, $values) . $quote;
-        } else {
-            $value = $quote . $value . $quote;
-        }
-        return $value;
     }
 
     /**
