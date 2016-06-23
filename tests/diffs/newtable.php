@@ -1,19 +1,19 @@
 <?php return array (
-  0 => 
+  0 =>
   array (
-    'tables' => 
+    'tables' =>
     array (
-      'newtable2' => 
-      array (
-        'table' => 
+      'newtable' =>
+            array (
+        'table' =>
         array (
-          'table_name' => 'newtable2',
-          'engine' => 'InnoDB',
+          'table_name' => 'newtable',
+                    'engine' => 'InnoDB',
           'table_comment' => '',
         ),
-        'columns' => 
+        'columns' =>
         array (
-          'id' => 
+          'id' =>
           array (
             'table_catalog' => 'def',
             'table_schema' => 'test',
@@ -37,12 +37,12 @@
             'column_comment' => '',
           ),
         ),
-        'indexes' => 
+        'indexes' =>
         array (
-          'PRIMARY' => 
+          'PRIMARY' =>
           array (
-            'table' => 'newtable2',
-            'non_unique' => '0',
+            'table' => 'newtable',
+                        'non_unique' => '0',
             'key_name' => 'PRIMARY',
             'seq_in_index' => '1',
             'column_name' => 'id',
@@ -56,13 +56,13 @@
             'index_comment' => '',
           ),
         ),
-        'foreign_keys' => 
+        'foreign_keys' =>
         array (
         ),
       ),
     ),
   ),
-  1 => 
+  1 =>
   array (
   ),
 );

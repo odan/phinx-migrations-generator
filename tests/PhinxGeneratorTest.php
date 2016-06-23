@@ -16,8 +16,20 @@ class GenerateMigrationTest extends \PHPUnit_Framework_TestCase
     public function testGenerate()
     {
         $gen = new PhinxGenerator();
-        $actual = $gen->createMigration(file_get_contents(__DIR__ . '/diffs/newtable.php'));
+        $diff = $this->read(__DIR__ . '/diffs/newtable.php');
+        $actual = $gen->createMigration('MyNewMigration', $diff);
         $expected = file_get_contents(__DIR__ . '/diffs/newtable_expected.php');
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * Read php file
+     *
+     * @param string $filename
+     * @return mixed
+     */
+    public function read($filename)
+    {
+        return require $filename;
     }
 }
