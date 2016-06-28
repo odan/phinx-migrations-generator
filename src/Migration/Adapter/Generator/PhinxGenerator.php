@@ -32,14 +32,14 @@ class PhinxGenerator implements GeneratorInterface
         $output[] = '';
         $output[] = sprintf('class %s extends AbstractMigration', $name);
         $output[] = '{';
-        $output = $this->addCacheMethod($output, $diffs[0], $diffs[1]);
+        $output = $this->addChangeMethod($output, $diffs[0], $diffs[1]);
         $output[] = '}';
         $output[] = '';
         $result = implode($nl, $output);
         return $result;
     }
 
-    public function addCacheMethod($output, $new, $old)
+    public function addChangeMethod($output, $new, $old)
     {
         $output[] = $this->ind . 'public function change()';
         $output[] = $this->ind . '{';
@@ -75,4 +75,5 @@ class PhinxGenerator implements GeneratorInterface
     {
         return str_repeat('    ', $level);
     }
+
 }
