@@ -11,12 +11,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * MigrationGenertor
+ * MigrationGenerator
  */
-class MigrationGenertor
+class MigrationGenerator
 {
 
-      protected $settings = array();
+    protected $settings = array();
 
     /**
      *
@@ -95,13 +95,13 @@ class MigrationGenertor
             return false;
         }
 
-        $migration = $this->generator->createMigration($diffs);
-
-        $name = $this->io->ask('Enter migration name', '');
+        $name = 'Test';
+        //$name = $this->io->ask('Enter migration name', '');
         if (empty($name)) {
             $this->output->writeln('Aborted');
             return false;
         }
+        $migration = $this->generator->createMigration($name, $diffs);
         $this->saveMigrationFile($name, $migration);
 
         // Overwrite schema file

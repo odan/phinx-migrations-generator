@@ -34,7 +34,7 @@ class GenerateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $settings = $this->getSettings($input);
-        $generator = new \Odan\Migration\Generator\MigrationGenertor($settings, $input, $output);
+        $generator = new \Odan\Migration\Generator\MigrationGenerator($settings, $input, $output);
         $generator->generate();
     }
 
@@ -62,4 +62,5 @@ class GenerateCommand extends Command
     {
         return require $filename;
     }
+
 }
