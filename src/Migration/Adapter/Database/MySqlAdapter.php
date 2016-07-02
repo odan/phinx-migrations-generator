@@ -104,9 +104,15 @@ class MySqlAdapter implements DatabaseAdapterInterface
     protected function getTables()
     {
         $result = array();
-        $sql = "SELECT * FROM information_schema.tables
-                    WHERE table_schema=database()
-                    AND table_type = 'BASE TABLE'";
+        $sql = "SELECT *
+            FROM
+                information_schema.tables AS t,
+                information_schema.collation_character_set_applicability AS ccsa
+            WHERE
+                ccsa.collation_name = t.table_collation
+                AND t.table_schema=database()
+                AND t.table_type = 'BASE TABLE'";
+
         $rows = $this->pdo->query($sql)->fetchAll();
         //$rows = $this->db->query('SHOW TABLES')->fetchAll();
         foreach ($rows as $row) {
@@ -115,6 +121,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
                 'engine' => $row['engine'],
                 'table_comment' => $row['table_comment'],
                 'table_collation' => $row['table_collation'],
+                'character_set_name' => $row['character_set_name'],
             ];
         }
         return $result;

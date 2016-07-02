@@ -108,6 +108,12 @@ class PhinxGenerator implements GeneratorInterface
                 if (isset($table['table']['table_comment'])) {
                     $output[] = $this->getAlterTableComment($tableName, $table['table']['table_comment']);
                 }
+                if (isset($table['table']['character_set_name'])) {
+                    $output[] = $this->getAlterTableCharset($tableName, $table['table']['character_set_name']);
+                }
+                if (isset($table['table']['table_collation'])) {
+                    $output[] = $this->getAlterTableCollate($tableName, $table['table']['table_collation']);
+                }
             }
         }
         if (!empty($old['tables'])) {
