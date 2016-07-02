@@ -22,7 +22,7 @@ class MigrationGenerator
      *
      * @var \Odan\Migration\Adapter\Database\MySqlAdapter
      */
-    protected $db;
+    protected $dba;
 
     /**
      *
@@ -70,8 +70,8 @@ class MigrationGenerator
     {
         $this->settings = $settings;
         $this->pdo = $this->getPdo($settings);
-        $this->db = new \Odan\Migration\Adapter\Database\MySqlAdapter($this->pdo, $output);
-        $this->generator = new \Odan\Migration\Adapter\Generator\PhinxGenerator();
+        $this->dba = new \Odan\Migration\Adapter\Database\MySqlAdapter($this->pdo, $output);
+        $this->generator = new \Odan\Migration\Adapter\Generator\PhinxGenerator($this->dba, $output);
         $this->output = $output;
         $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);
@@ -86,7 +86,7 @@ class MigrationGenerator
      */
     public function generate()
     {
-        $schema = $this->db->getSchema();
+        $schema = $this->dba->getSchema();
         $oldSchema = $this->getOldSchema($this->settings);
         $diffs = $this->compareSchema($schema, $oldSchema);
 

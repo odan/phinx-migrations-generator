@@ -17,7 +17,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
      *
      * @var PDO
      */
-    protected $db;
+    protected $pdo;
 
     /**
      *
@@ -33,7 +33,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
 
     public function __construct(PDO $pdo, OutputInterface $output)
     {
-        $this->db = $pdo;
+        $this->pdo = $pdo;
         $this->dbName = $this->getDbName();
         $this->output = $output;
         $this->output->writeln(sprintf('Database: <info>%s</>', $this->dbName));
@@ -78,7 +78,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
      */
     public function getDbName()
     {
-        return $this->db->query('select database()')->fetchColumn();
+        return $this->pdo->query('select database()')->fetchColumn();
     }
 
     /**
@@ -92,7 +92,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
         $sql = "SELECT * FROM information_schema.tables
                     WHERE table_schema=database()
                     AND table_type = 'BASE TABLE'";
-        $rows = $this->db->query($sql)->fetchAll();
+        $rows = $this->pdo->query($sql)->fetchAll();
         //$rows = $this->db->query('SHOW TABLES')->fetchAll();
         foreach ($rows as $row) {
             $result[] = [
@@ -113,8 +113,8 @@ class MySqlAdapter implements DatabaseAdapterInterface
     {
         $sql = sprintf("SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
-                    AND table_name = %s", $this->esc($tableName));
-        $rows = $this->db->query($sql)->fetchAll();
+                    AND table_name = %s", $this->quote($tableName));
+        $rows = $this->pdo->query($sql)->fetchAll();
 
         $result = [];
         foreach ($rows as $row) {
@@ -132,7 +132,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
     protected function getIndexes($tableName)
     {
         $sql = sprintf('SHOW INDEX FROM %s', $this->ident($tableName));
-        $rows = $this->db->query($sql)->fetchAll();
+        $rows = $this->pdo->query($sql)->fetchAll();
         $result = [];
         foreach ($rows as $row) {
             $name = $row['key_name'];
@@ -183,8 +183,8 @@ class MySqlAdapter implements DatabaseAdapterInterface
                 AND cols.TABLE_SCHEMA = DATABASE()
                 AND refs.REFERENCED_TABLE_NAME IS NOT NULL
                 AND cons.CONSTRAINT_TYPE = 'FOREIGN KEY'
-            ;", $this->esc($tableName));
-        $stm = $this->db->query($sql);
+            ;", $this->quote($tableName));
+        $stm = $this->pdo->query($sql);
         $result = $stm->fetchAll();
         return $result;
     }
@@ -197,7 +197,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
     protected function getTableCreateSql($tableName)
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
-        $result = $this->db->query($sql)->fetch();
+        $result = $this->pdo->query($sql)->fetch();
         return $result['create table'];
     }
 
@@ -226,7 +226,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
      * @param string $quote
      * @return string identifier escaped string
      */
-    protected function ident($value, $quote = "`")
+    public function ident($value, $quote = "`")
     {
         $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
         if (strpos($value, '.') !== false) {
@@ -238,11 +238,20 @@ class MySqlAdapter implements DatabaseAdapterInterface
         return $value;
     }
 
-    protected function esc($value)
+    public function esc($value)
     {
         if ($value === null) {
             return 'NULL';
         }
-        return $this->db->quote($value);
+        $value = substr($this->pdo->quote($value), 1, -1);
+        return $value;
+    }
+
+    public function quote($value)
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+        return $this->pdo->quote($value);
     }
 }
