@@ -61,17 +61,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
             $result['tables'][$tableName]['foreign_keys'] = $this->getForeignKeys($tableName);
             //$result['tables'][$tableName]['create_table'] = $this->getTableCreateSql($tableName);
         }
-        //$this->ksort($result);
         return $result;
-    }
-
-    public function createMigration($indent = 2)
-    {
-        $output = array();
-        foreach ($this->getTables() as $table) {
-            $output[] = $this->getTableMigration($table, $indent);
-        }
-        return implode(PHP_EOL, $output) . PHP_EOL;
     }
 
     /**
@@ -101,7 +91,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
      *
      * @return array
      */
-    protected function getTables()
+    public function getTables()
     {
         $result = array();
         $sql = "SELECT *
@@ -132,7 +122,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
      * @param type $tableName
      * @return type
      */
-    protected function getColumns($tableName)
+    public function getColumns($tableName)
     {
         $sql = sprintf("SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
@@ -152,7 +142,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
      * @param type $tableName
      * @return type
      */
-    protected function getIndexes($tableName)
+    public function getIndexes($tableName)
     {
         $sql = sprintf('SHOW INDEX FROM %s', $this->ident($tableName));
         $rows = $this->pdo->query($sql)->fetchAll();
@@ -217,27 +207,11 @@ class MySqlAdapter implements DatabaseAdapterInterface
      * @param type $tableName
      * @return type
      */
-    protected function getTableCreateSql($tableName)
+    public function getTableCreateSql($tableName)
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
         $result = $this->pdo->query($sql)->fetch();
         return $result['create table'];
-    }
-
-    /**
-     * Sort array by keys.
-     *
-     * @param array $array
-     * @return bool
-     */
-    protected function ksort(&$array)
-    {
-        foreach ($array as &$value) {
-            if (is_array($value)) {
-                $this->ksort($value);
-            }
-        }
-        return ksort($array);
     }
 
     /**

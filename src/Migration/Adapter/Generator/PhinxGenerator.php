@@ -6,13 +6,13 @@ use Exception;
 use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
 //use Odan\Migration\Adapter\Generator\GeneratorInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Phinx\Migration\AbstractMigration;
 
 /**
  * PhinxGenerator
  */
 class PhinxGenerator implements GeneratorInterface
 {
-
 
     /**
      * Database adapter
@@ -66,6 +66,7 @@ class PhinxGenerator implements GeneratorInterface
         $output[] = '<?php';
         $output[] = '';
         $output[] = 'use Phinx\Migration\AbstractMigration;';
+        $output[] = 'use Phinx\Db\Adapter\MysqlAdapter;';
         $output[] = '';
         $output[] = sprintf('class %s extends AbstractMigration', $name);
         $output[] = '{';
@@ -88,7 +89,7 @@ class PhinxGenerator implements GeneratorInterface
     public function getTableMigration($output, $new, $old)
     {
         if (!empty($new['database'])) {
-             if (isset($new['database']['default_character_set_name'])) {
+            if (isset($new['database']['default_character_set_name'])) {
                 $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
             }
             if (isset($new['database']['default_collation_name'])) {
@@ -113,6 +114,16 @@ class PhinxGenerator implements GeneratorInterface
                 }
                 if (isset($table['table']['table_collation'])) {
                     $output[] = $this->getAlterTableCollate($tableName, $table['table']['table_collation']);
+                }
+
+                if (!empty($table['columns'])) {
+                    foreach ($table['columns'] as $columnName => $columnData) {
+                        if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
+                            $output[] = $this->getColumnCreate($tableName, $columnName, $columnData);
+                        } else {
+                            $output[] = $this->getColumnUpdate($tableName, $columnName, $columnData);
+                        }
+                    }
                 }
             }
         }
@@ -148,6 +159,7 @@ class PhinxGenerator implements GeneratorInterface
     protected function getCreateTable($table)
     {
         return sprintf("%s\$this->table(\"%s\")->save();", $this->ind2, $table);
+        //return sprintf("%s\$this->table(\"%s\", array('id' => false, 'primary_key' => false))->save();", $this->ind2, $table);
     }
 
     protected function getDropTable($table)
@@ -182,9 +194,184 @@ class PhinxGenerator implements GeneratorInterface
         return sprintf("%s\$this->execute(\"ALTER TABLE %s COMMENT=%s;\");", $this->ind2, $table, $commentSave);
     }
 
-    protected function getAddColumn($table, $column, $dataType)
+    protected function getColumnCreate($table, $columnName, $columnData)
     {
-        return sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', '%s')->save();", $this->ind2, $table, $column, $dataType);
+        $phinxType = $this->getPhinxColumnType($columnData);
+        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData);
+        $result = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', $columnAttributes)->create();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        return $result;
     }
 
+    protected function getColumnUpdate($table, $columnName, $columnData)
+    {
+        $columns = $this->dba->getColumns($table);
+        $columnData = $columns[$columnName];
+
+        $phinxType = $this->getPhinxColumnType($columnData);
+        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData);
+        $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        return $result;
+    }
+
+    protected function getMySQLColumnType($columnData)
+    {
+        $type = $columnData['column_type'];
+        $pattern = '/^[a-z]+/';
+        $match = null;
+        preg_match($pattern, $type, $match);
+        return $match[0];
+    }
+
+    function getPhinxColumnType($columnData)
+    {
+        $type = $this->getMySQLColumnType($columnData);
+        switch ($type) {
+            case 'tinyint':
+            case 'smallint':
+            case 'int':
+            case 'mediumint':
+                return 'integer';
+            case 'timestamp':
+                return 'timestamp';
+            case 'date':
+                return 'date';
+            case 'datetime':
+                return 'datetime';
+            case 'enum':
+                return 'enum';
+            case 'char':
+                return 'char';
+            case 'text':
+            case 'tinytext':
+                return 'text';
+            case 'varchar':
+                return 'string';
+            default:
+                return '[' . $type . ']';
+        }
+    }
+
+    /**
+     *
+     * https://media.readthedocs.org/pdf/phinx/latest/phinx.pdf
+     *
+     * @param type $phinxtype
+     * @param type $columnData
+     * @return type
+     */
+    function getPhinxColumnOptions($phinxtype, $columnData)
+    {
+        $attributes = array();
+
+        // has NULL
+        if ($columnData['is_nullable'] === 'YES') {
+            $attributes[] = '\'null\' => true';
+        } else {
+            $attributes[] = '\'null\' => false';
+        }
+
+        // default value
+        if ($columnData['column_default'] !== null) {
+            $default = is_int($columnData['column_default']) ? $columnData['column_default'] : '\'' . $columnData['column_default'] . '\'';
+            $attributes[] = '\'default\' => ' . $default;
+        }
+
+        // For timestamp columns:
+        // default set default value (use with CURRENT_TIMESTAMP)
+        // on update CURRENT_TIMESTAMP
+        if (strpos($columnData['extra'], 'on update CURRENT_TIMESTAMP') !== false) {
+            $attributes[] = '\'update\' => \'CURRENT_TIMESTAMP\'';
+        }
+        // limit / length
+        $limit = $this->getColumnlength($columnData);
+        if ($limit) {
+            $attributes[] = '\'limit\' => ' . $limit;
+        }
+
+        // For decimal columns
+        if (!empty($columnData['numeric_precision'])) {
+            $attributes[] = '\'precision\' => ' . $columnData['numeric_precision'];
+        }
+        if (!empty($columnData['numeric_scale'])) {
+            $attributes[] = '\'scale\' => ' . $columnData['numeric_scale'];
+        }
+
+        // signed enable or disable the unsigned option (only applies to MySQL)
+        $pattern = '/\(\d+\) unsigned$/';
+        if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+            $attributes[] = '\'signed\' => false';
+        }
+        // enum values
+        if ($phinxtype === 'enum') {
+            $attributes[] = '\'values\' => ' . str_replace('enum', 'array', $columnData['column_type']);
+        }
+
+        // Set a text comment on the column
+        if (!empty($columnData['column_comment'])) {
+            $attributes[] = '\'comment\' => "' . addslashes($columnData['column_comment']) . '"';
+        }
+
+        //For integer and biginteger columns:
+        // identity enable or disable automatic incrementing
+        if ($columnData['extra'] == 'auto_increment') {
+            $attributes[] = '\'identity\' => \'enable\'';
+        }
+
+        // @todo
+        // after: specify the column that a new column should be placed after
+        //
+        //
+
+        // update set an action to be triggered when the row is updated (use with CURRENT_TIMESTAMP)
+        // timezone enable or disable the with time zone option for time and timestamp columns (only applies to Postgres)
+        //
+        // For foreign key definitions:
+        // update set an action to be triggered when the row is updated
+        // delete set an action to be triggered when the row is deleted
+
+        return 'array(' . implode(', ', $attributes) . ')';
+    }
+
+    public function getColumnlength($columnData)
+    {
+        if (!empty($columnData['character_maximum_length'])) {
+           return $columnData['character_maximum_length'];
+        }
+
+        $limit = 0;
+        $pattern = '/\((\d+)\)/';
+        if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+            return $match[1];
+        }
+
+        switch ($this->getMySQLColumnType($columnData)) {
+            case 'tinyint':
+                $limit = 'MysqlAdapter::INT_TINY';
+                break;
+            case 'smallint':
+                $limit = 'MysqlAdapter::INT_SMALL';
+                break;
+            case 'mediumint':
+                $limit = 'MysqlAdapter::INT_MEDIUM';
+                break;
+            case 'bigint':
+                $limit = 'MysqlAdapter::INT_BIG';
+                break;
+            case 'tinytext':
+                $limit = 'MysqlAdapter::TEXT_TINY';
+                break;
+            case 'mediumtext':
+                $limit = 'MysqlAdapter::TEXT_MEDIUM';
+                break;
+            case 'longtext':
+                $limit = 'MysqlAdapter::TEXT_LONG';
+                break;
+            default:
+                $pattern = '/\((\d+)\)/';
+                if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+                    $limit = $match[1];
+                }
+        }
+        return $limit;
+    }
 }
