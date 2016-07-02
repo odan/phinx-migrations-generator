@@ -87,6 +87,15 @@ class PhinxGenerator implements GeneratorInterface
 
     public function getTableMigration($output, $new, $old)
     {
+        if (!empty($new['database'])) {
+             if (isset($new['database']['default_character_set_name'])) {
+                $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
+            }
+            if (isset($new['database']['default_collation_name'])) {
+                $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
+            }
+        }
+
         if (!empty($new['tables'])) {
             foreach ($new['tables'] as $tableName => $table) {
                 if (!isset($old['tables'][$tableName])) {
@@ -112,6 +121,24 @@ class PhinxGenerator implements GeneratorInterface
         return $output;
     }
 
+    protected function getAlterDatabaseCharset($charset, $database = null)
+    {
+        if ($database) {
+            $database = ' ' . $this->dba->ident($database);
+        }
+        $charset = $this->dba->quote($charset);
+        return sprintf("%s\$this->execute(\"ALTER DATABASE%s CHARACTER SET %s;\");", $this->ind2, $database, $charset);
+    }
+
+    protected function getAlterDatabaseCollate($collate, $database = null)
+    {
+        if ($database) {
+            $database = ' ' . $this->dba->ident($database);
+        }
+        $collate = $this->dba->quote($collate);
+        return sprintf("%s\$this->execute(\"ALTER DATABASE%s COLLATE=%s;\");", $this->ind2, $database, $collate);
+    }
+
     protected function getCreateTable($table)
     {
         return sprintf("%s\$this->table(\"%s\")->save();", $this->ind2, $table);
@@ -124,13 +151,29 @@ class PhinxGenerator implements GeneratorInterface
 
     protected function getAlterTableEngine($table, $engine)
     {
-        return sprintf("%s\$this->execute('ALTER TABLE `%s` ENGINE=%s;');", $this->ind2, $table, $engine);
+        $engine = $this->dba->quote($engine);
+        return sprintf("%s\$this->execute(\"ALTER TABLE `%s` ENGINE=%s;\");", $this->ind2, $table, $engine);
+    }
+
+    protected function getAlterTableCharset($table, $charset)
+    {
+        $table = $this->dba->ident($table);
+        $charset = $this->dba->quote($charset);
+        return sprintf("%s\$this->execute(\"ALTER TABLE %s CHARSET=%s;\");", $this->ind2, $table, $charset);
+    }
+
+    protected function getAlterTableCollate($table, $collate)
+    {
+        $table = $this->dba->ident($table);
+        $collate = $this->dba->quote($collate);
+        return sprintf("%s\$this->execute(\"ALTER TABLE %s COLLATE=%s;\");", $this->ind2, $table, $collate);
     }
 
     protected function getAlterTableComment($table, $comment)
     {
-        $commentSave = $this->dba->esc($comment);
-        return sprintf("%s\$this->execute(\"ALTER TABLE `%s` COMMENT='%s';\");", $this->ind2, $table, $commentSave);
+        $table = $this->dba->ident($table);
+        $commentSave = $this->dba->quote($comment);
+        return sprintf("%s\$this->execute(\"ALTER TABLE %s COMMENT=%s;\");", $this->ind2, $table, $commentSave);
     }
 
     protected function getAddColumn($table, $column, $dataType)

@@ -48,6 +48,9 @@ class MySqlAdapter implements DatabaseAdapterInterface
     {
         $this->output->writeln('Load current database schema.');
         $result = array();
+
+        $result['database'] = $this->getDatabaseSchemata($this->dbName);
+
         $tables = $this->getTables();
         foreach ($tables as $table) {
             $tableName = $table['table_name'];
@@ -81,6 +84,18 @@ class MySqlAdapter implements DatabaseAdapterInterface
         return $this->pdo->query('select database()')->fetchColumn();
     }
 
+    public function getDatabaseSchemata($dbName)
+    {
+        $sql = "SELECT
+            default_character_set_name,
+            default_collation_name
+            FROM information_schema.SCHEMATA
+            WHERE schema_name = %s;";
+        $sql = sprintf($sql, $this->quote($dbName));
+        $row = $this->pdo->query($sql)->fetch();
+        return $row;
+    }
+
     /**
      * getTables
      *
@@ -99,6 +114,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
                 'table_name' => $row['table_name'],
                 'engine' => $row['engine'],
                 'table_comment' => $row['table_comment'],
+                'table_collation' => $row['table_collation'],
             ];
         }
         return $result;
