@@ -99,6 +99,9 @@ class PhinxGenerator implements GeneratorInterface
 
         if (!empty($new['tables'])) {
             foreach ($new['tables'] as $tableName => $table) {
+                if ($tableName == 'phinxlog') {
+                    continue;
+                }
                 if (!isset($old['tables'][$tableName])) {
                     // create the table
                     $output[] = $this->getCreateTable($tableName);
@@ -118,6 +121,9 @@ class PhinxGenerator implements GeneratorInterface
 
                 if (!empty($table['columns'])) {
                     foreach ($table['columns'] as $columnName => $columnData) {
+                        if ($columnName == 'id') {
+                            continue;
+                        }
                         if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
                             $output[] = $this->getColumnCreate($tableName, $columnName, $columnData);
                         } else {
@@ -129,6 +135,9 @@ class PhinxGenerator implements GeneratorInterface
         }
         if (!empty($old['tables'])) {
             foreach ($old['tables'] as $tableName => $table) {
+                if ($tableName == 'phinxlog') {
+                    continue;
+                }
                 if (!isset($new['tables'][$tableName])) {
                     $output[] = $this->getDropTable($tableName);
                 }
@@ -198,7 +207,7 @@ class PhinxGenerator implements GeneratorInterface
     {
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData);
-        $result = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', $columnAttributes)->create();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        $result = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
         return $result;
     }
 
@@ -224,6 +233,11 @@ class PhinxGenerator implements GeneratorInterface
 
     function getPhinxColumnType($columnData)
     {
+        $columnType = $columnData['column_type'];
+        if ($columnType == 'tinyint(1)') {
+            return 'boolean';
+        }
+
         $type = $this->getMySQLColumnType($columnData);
         switch ($type) {
             case 'tinyint':
@@ -246,6 +260,8 @@ class PhinxGenerator implements GeneratorInterface
                 return 'text';
             case 'varchar':
                 return 'string';
+            case 'decimal':
+                return 'decimal';
             default:
                 return '[' . $type . ']';
         }
@@ -283,7 +299,7 @@ class PhinxGenerator implements GeneratorInterface
             $attributes[] = '\'update\' => \'CURRENT_TIMESTAMP\'';
         }
         // limit / length
-        $limit = $this->getColumnlength($columnData);
+        $limit = $this->getColumnLimit($columnData);
         if ($limit) {
             $attributes[] = '\'limit\' => ' . $limit;
         }
@@ -332,7 +348,7 @@ class PhinxGenerator implements GeneratorInterface
         return 'array(' . implode(', ', $attributes) . ')';
     }
 
-    public function getColumnlength($columnData)
+    public function getColumnLimit($columnData)
     {
         if (!empty($columnData['character_maximum_length'])) {
            return $columnData['character_maximum_length'];
@@ -344,7 +360,8 @@ class PhinxGenerator implements GeneratorInterface
             return $match[1];
         }
 
-        switch ($this->getMySQLColumnType($columnData)) {
+        $type = $this->getMySQLColumnType($columnData);
+        switch ($type) {
             case 'tinyint':
                 $limit = 'MysqlAdapter::INT_TINY';
                 break;
