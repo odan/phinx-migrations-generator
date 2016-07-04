@@ -217,7 +217,7 @@ class PhinxGenerator implements GeneratorInterface
         $columnData = $columns[$columnName];
 
         $phinxType = $this->getPhinxColumnType($columnData);
-        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData);
+        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
         $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
         return $result;
     }
@@ -273,9 +273,10 @@ class PhinxGenerator implements GeneratorInterface
      *
      * @param type $phinxtype
      * @param type $columnData
+     * @param array $columns Description
      * @return type
      */
-    function getPhinxColumnOptions($phinxtype, $columnData)
+    protected function getPhinxColumnOptions($phinxtype, $columnData, $columns)
     {
         $attributes = array();
 
@@ -333,11 +334,20 @@ class PhinxGenerator implements GeneratorInterface
             $attributes[] = '\'identity\' => \'enable\'';
         }
 
-        // @todo
         // after: specify the column that a new column should be placed after
-        //
-        //
+        $columnName = $columnData['column_name'];
+        $after = null;
+        foreach (array_keys($columns) as $column) {
+            if ($column === $columnName) {
+                break;
+            }
+            $after = $column;
+        }
+        if (!empty($after)) {
+            $attributes[] = sprintf('\'after\' => \'%s\'', $after);
+        }
 
+        // @todo
         // update set an action to be triggered when the row is updated (use with CURRENT_TIMESTAMP)
         // timezone enable or disable the with time zone option for time and timestamp columns (only applies to Postgres)
         //
