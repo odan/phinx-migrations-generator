@@ -320,7 +320,8 @@ class PhinxGenerator implements GeneratorInterface
         }
         // enum values
         if ($phinxtype === 'enum') {
-            $attributes[] = '\'values\' => ' . str_replace('enum', 'array', $columnData['column_type']);
+            //$attributes[] = '\'values\' => ' . str_replace('enum', 'array', $columnData['column_type']);
+            $attributes[] = $this->getOptionEnumValue($columnData);
         }
 
         // Set a text comment on the column
@@ -356,6 +357,22 @@ class PhinxGenerator implements GeneratorInterface
         // delete set an action to be triggered when the row is deleted
 
         return 'array(' . implode(', ', $attributes) . ')';
+    }
+
+    public function getOptionEnumValue($columnData)
+    {
+        $match = null;
+        $pattern = '/enum\((.*)\)/';
+        if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+            $values = str_getcsv($match[1], ',', "'", "\\");
+            foreach ($values as $k => $value) {
+                $values[$k] = "'" . addcslashes($value, "'") . "'";
+            }
+            $valueList = implode(',', array_values($values));
+            $arr = sprintf('array(%s)', $valueList);
+            $result = sprintf('\'values\' => %s', $arr);
+            return $result;
+        }
     }
 
     public function getColumnLimit($columnData)
