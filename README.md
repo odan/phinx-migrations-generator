@@ -50,7 +50,7 @@ username | string | | Database username
 password | string | | Database password
 options | array | | Database options
 schema_file | string | schema.php | Database schema file (schema.php or schema.json)
-
+migration_path | string | | Output directory for migration files
 
 # Usage
 
