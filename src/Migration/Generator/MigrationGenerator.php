@@ -95,8 +95,8 @@ class MigrationGenerator
             return false;
         }
 
-        $name = 'Test';
-        //$name = $this->io->ask('Enter migration name', '');
+        //$name = 'Test';
+        $name = $this->io->ask('Enter migration name', 'Test');
         if (empty($name)) {
             $this->output->writeln('Aborted');
             return false;
