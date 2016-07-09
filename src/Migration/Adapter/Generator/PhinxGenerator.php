@@ -137,6 +137,15 @@ class PhinxGenerator implements GeneratorInterface
                         }
                     }
                 }
+                if (!empty($table['indexes'])) {
+                    foreach ($table['indexes'] as $indexName => $indexData) {
+                        if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
+                            $output[] = $this->getIndexCreate($tableName, $indexName, $indexData);
+                        } else {
+                            $output[] = $this->getIndexRemove($tableName, $indexName, $indexData);
+                        }
+                    }
+                }
             }
         }
         if (!empty($old['tables'])) {
@@ -350,7 +359,7 @@ class PhinxGenerator implements GeneratorInterface
             $attributes[] = '\'comment\' => "' . addslashes($columnData['column_comment']) . '"';
         }
 
-        //For integer and biginteger columns:
+        // For integer and biginteger columns:
         // identity enable or disable automatic incrementing
         if ($columnData['extra'] == 'auto_increment') {
             $attributes[] = '\'identity\' => \'enable\'';
@@ -399,7 +408,7 @@ class PhinxGenerator implements GeneratorInterface
     public function getColumnLimit($columnData)
     {
         if (!empty($columnData['character_maximum_length'])) {
-           return $columnData['character_maximum_length'];
+            return $columnData['character_maximum_length'];
         }
 
         $limit = 0;
@@ -436,5 +445,51 @@ class PhinxGenerator implements GeneratorInterface
                 }
         }
         return $limit;
+    }
+
+    protected function getIndexCreate($table, $indexName, $indexData)
+    {
+        if ($indexName == 'PRIMARY') {
+            return '';
+        }
+        if (isset($indexData['column_name'])) {
+            $indexName = $indexData['column_name'];
+        }
+        $indexOptions = $this->getIndexOptions($indexData);
+
+        $output = [];
+        $output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $table, $indexName);
+        $output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
+        $output[] = sprintf("%s}", $this->ind2);
+        $output[] = sprintf("%s\$this->table(\"%s\")->addIndex('%s', %s)->save();", $this->ind2, $table, $indexName, $indexOptions);
+
+        $result = implode($this->nl, $output);
+        return $result;
+    }
+
+    function getIndexOptions($indexData)
+    {
+        $options = array();
+
+        if (isset($indexData['key_name'])) {
+            $options[] = '\'name\' => "' . $indexData['key_name'] . '"';
+        }
+        if (isset($indexData['non_unique']) && $indexData['non_unique'] == 1) {
+            $options[] = '\'unique\' => false';
+        } else {
+            $options[] = '\'unique\' => true';
+        }
+        // MyISAM only
+        if (isset($indexData['index_type']) && $indexData['index_type'] == 'FULLTEXT') {
+            $options[] = '\'type\' => \'fulltext\'';
+        }
+        $result = 'array(' . implode(', ', $options) . ')';
+        return $result;
+    }
+
+    protected function getIndexRemove($table, $indexName)
+    {
+        $result = sprintf("%s\$this->table(\"%s\")->removeIndexByName('%s');", $this->ind2, $table, $indexName);
+        return $result;
     }
 }
