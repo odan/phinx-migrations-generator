@@ -1,7 +1,7 @@
 {
     "name": "odan/migration",
     "type": "library",
-    "description": "Migration generator",
+    "description": "Migration generator for Phinx",
     "keywords": ["migration", "phinx", "database"],
     "homepage": "http://github.com/odan/migration",
     "license": "MIT",
