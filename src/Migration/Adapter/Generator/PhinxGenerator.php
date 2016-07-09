@@ -403,11 +403,6 @@ class PhinxGenerator implements GeneratorInterface
         }
 
         $limit = 0;
-        #$pattern = '/\((\d+)\)/';
-        # if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
-        #    return $match[1];
-        #}
-
         $type = $this->getMySQLColumnType($columnData);
         switch ($type) {
             case 'int':
