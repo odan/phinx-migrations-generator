@@ -8,6 +8,10 @@ In reality, you should rarely need to write migrations manually, as the migratio
 
 ![Screenshot](https://github.com/odan/migrations/blob/master/docs/images/screenshot01.jpg "Screenshot")
 
+Generated migration
+
+![Screenshot 2](https://github.com/odan/migrations/blob/master/docs/images/screenshot02.jpg "Screenshot 2")
+
 THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 
 # Installation
