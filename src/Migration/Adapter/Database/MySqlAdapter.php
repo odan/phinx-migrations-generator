@@ -198,7 +198,15 @@ class MySqlAdapter implements DatabaseAdapterInterface
                 AND cons.CONSTRAINT_TYPE = 'FOREIGN KEY'
             ;", $this->quote($tableName));
         $stm = $this->pdo->query($sql);
-        $result = $stm->fetchAll();
+        $rows = $stm->fetchAll();
+        if (empty($rows)) {
+            return null;
+        }
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row['constraint_name']] = $row;
+        }
         return $result;
     }
 

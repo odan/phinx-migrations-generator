@@ -28,6 +28,20 @@ class PhinxGenerator implements GeneratorInterface
     protected $output;
 
     /**
+     * Options
+     *
+     * @var array
+     */
+    protected $options = array();
+
+    /**
+     * PSR-2: All PHP files MUST use the Unix LF (linefeed) line ending.
+     *
+     * @var string
+     */
+    protected $nl = "\n";
+
+    /**
      *
      * @var string
      */
@@ -46,20 +60,22 @@ class PhinxGenerator implements GeneratorInterface
     protected $ind3 = '            ';
 
     /**
-     * PSR-2: All PHP files MUST use the Unix LF (linefeed) line ending.
-     * @var string
-     */
-    protected $nl = "\n";
-
-    /**
      *
      * @param \Odan\Migration\Adapter\Database\MySqlAdapter $dba
      * @param \Odan\Migration\Adapter\Generator\OutputInterface $output
      */
-    public function __construct(\Odan\Migration\Adapter\Database\MySqlAdapter $dba, OutputInterface $output)
+    public function __construct(\Odan\Migration\Adapter\Database\MySqlAdapter $dba, OutputInterface $output, $options = array())
     {
         $this->dba = $dba;
         $this->output = $output;
+
+        // Experimental foreign key support.
+        // Currently phinx can't define a contraint name.
+        // https://github.com/robmorgan/phinx/issues/823#issuecomment-231548829
+        $default = [
+            'foreign_keys' => true
+        ];
+        $this->options = array_replace_recursive($default, $options);
     }
 
     /**
@@ -97,6 +113,11 @@ class PhinxGenerator implements GeneratorInterface
 
     public function getTableMigration($output, $new, $old)
     {
+        if (!empty($this->options['foreign_keys'])) {
+            $output[] = $this->getSetUniqueChecks(0);
+            $output[] = $this->getSetForeignKeyCheck(0);
+        }
+
         if (!empty($new['database'])) {
             if (isset($new['database']['default_character_set_name'])) {
                 $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
@@ -148,6 +169,12 @@ class PhinxGenerator implements GeneratorInterface
                 }
             }
         }
+
+        if (!empty($this->options['foreign_keys'])) {
+            $lines = $this->getForeignKeysMigrations($new, $old);
+            $output = $this->appendLines($output, $lines);
+        }
+
         if (!empty($old['tables'])) {
             foreach ($old['tables'] as $tableName => $table) {
                 if ($tableName == 'phinxlog') {
@@ -159,6 +186,59 @@ class PhinxGenerator implements GeneratorInterface
             }
         }
 
+        if (!empty($this->options['foreign_keys'])) {
+            $output[] = $this->getSetForeignKeyCheck(1);
+            $output[] = $this->getSetUniqueChecks(1);
+        }
+
+        return $output;
+    }
+
+    /**
+     * Append lines
+     *
+     * @param array $array1
+     * @param array $array2
+     * @return array
+     */
+    protected function appendLines($array1, $array2)
+    {
+        if (empty($array2)) {
+            return $array1;
+        }
+        foreach ($array2 as $value) {
+            $array1[] = $value;
+        }
+        return $array1;
+    }
+
+    /**
+     *
+     * @param type $new
+     * @param type $old
+     * @return type
+     */
+    protected function getForeignKeysMigrations($new, $old)
+    {
+        if (empty($new['tables'])) {
+            return null;
+        }
+        $output = [];
+        foreach ($new['tables'] as $tableName => $table) {
+            if ($tableName == 'phinxlog') {
+                continue;
+            }
+            if (empty($table['foreign_keys'])) {
+                continue;
+            }
+            foreach ($table['foreign_keys'] as $fkName => $fkData) {
+                if (!isset($old['tables'][$tableName]['foreign_keys'][$fkName])) {
+                    $output[] = $this->getForeignKeyCreate($tableName, $fkName, $fkData);
+                } else {
+                    $output[] = $this->getForeignKeyRemove($tableName, $fkName, $fkData);
+                }
+            }
+        }
         return $output;
     }
 
@@ -491,5 +571,89 @@ class PhinxGenerator implements GeneratorInterface
     {
         $result = sprintf("%s\$this->table(\"%s\")->removeIndexByName('%s');", $this->ind2, $table, $indexName);
         return $result;
+    }
+
+    protected function getForeignKeyCreate($table, $fkName)
+    {
+        $foreignKeys = $this->dba->getForeignKeys($table);
+        $fkData = $foreignKeys[$fkName];
+        $columns = "'" . $fkData['column_name'] . "'";
+        //$tableName = $fkData['referenced_table_name'];
+        $referencedTable = "'" . $fkData['referenced_table_name'] . "'";
+        $referencedColumns = "'" . $fkData['referenced_column_name'] . "'";
+        $options = $this->getForeignKeyOptions($fkData);
+
+        /**
+         * $columns, $referencedTable, $referencedColumns = array('id'), $options = array()
+         *
+         * In $options you can specify on_delete|on_delete = cascade|no_action ..,
+         * on_update, constraint = constraint name.
+         */
+        $output = [];
+        #$output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $table, $indexName);
+        #$output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
+        #$output[] = sprintf("%s}", $this->ind2);
+        $output[] = sprintf("%s\$this->table(\"%s\")->addForeignKey(%s, %s, %s, %s)->save();", $this->ind2, $table, $columns, $referencedTable, $referencedColumns, $options);
+
+        $result = implode($this->nl, $output);
+        return $result;
+    }
+
+    protected function getForeignKeyOptions($fkData)
+    {
+        $options = array();
+        if (isset($fkData['update_rule'])) {
+            $options[] = '\'update\' => "' . $this->getForeignKeyRuleValue($fkData['update_rule']) . '"';
+        }
+        if (isset($fkData['delete_rule'])) {
+            $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['delete_rule']) . '"';
+        }
+        // @todo 'constraint'
+        $result = 'array(' . implode(', ', $options) . ')';
+        return $result;
+    }
+
+    protected function getForeignKeyRuleValue($value)
+    {
+        $value = strtolower($value);
+        if ($value == 'no action') {
+            return 'NO_ACTION';
+        }
+        if ($value == 'cascade') {
+            return 'CASCADE';
+        }
+        if ($value == 'restrict') {
+            return 'RESTRICT';
+        }
+        if ($value == 'set null') {
+            return 'SET_NULL';
+        }
+        return 'NO_ACTION';
+    }
+
+    protected function getForeignKeyRemove($table, $indexName)
+    {
+        $result = sprintf("%s\$this->table(\"%s\")->dropForeignKey('%s');", $this->ind2, $table, $indexName);
+        return $result;
+    }
+
+    /**
+     *
+     * @param int $value
+     * @return type
+     */
+    protected function getSetForeignKeyCheck($value)
+    {
+        return sprintf("%s\$this->execute(\"SET FOREIGN_KEY_CHECKS = %s;\");", $this->ind2, $value);
+    }
+
+    /**
+     *
+     * @param int $value 0 or 1
+     * @return type
+     */
+    protected function getSetUniqueChecks($value)
+    {
+        return sprintf("%s\$this->execute(\"SET UNIQUE_CHECKS = %s;\");", $this->ind2, $value);
     }
 }
