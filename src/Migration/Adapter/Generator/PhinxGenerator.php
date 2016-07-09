@@ -41,6 +41,18 @@ class PhinxGenerator implements GeneratorInterface
 
     /**
      *
+     * @var string
+     */
+    protected $ind3 = '            ';
+
+    /**
+     * PSR-2: All PHP files MUST use the Unix LF (linefeed) line ending.
+     * @var string
+     */
+    protected $nl = "\n";
+
+    /**
+     *
      * @param \Odan\Migration\Adapter\Database\MySqlAdapter $dba
      * @param \Odan\Migration\Adapter\Generator\OutputInterface $output
      */
@@ -59,9 +71,6 @@ class PhinxGenerator implements GeneratorInterface
      */
     public function createMigration($name, $diffs)
     {
-        // PSR-2: All PHP files MUST use the Unix LF (linefeed) line ending.
-        $nl = "\n";
-
         $output = array();
         $output[] = '<?php';
         $output[] = '';
@@ -73,7 +82,7 @@ class PhinxGenerator implements GeneratorInterface
         $output = $this->addChangeMethod($output, $diffs[0], $diffs[1]);
         $output[] = '}';
         $output[] = '';
-        $result = implode($nl, $output);
+        $result = implode($this->nl, $output);
         return $result;
     }
 
@@ -121,9 +130,6 @@ class PhinxGenerator implements GeneratorInterface
 
                 if (!empty($table['columns'])) {
                     foreach ($table['columns'] as $columnName => $columnData) {
-                        if ($columnName == 'id') {
-                            continue;
-                        }
                         if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
                             $output[] = $this->getColumnCreate($tableName, $columnName, $columnData);
                         } else {
@@ -205,9 +211,23 @@ class PhinxGenerator implements GeneratorInterface
 
     protected function getColumnCreate($table, $columnName, $columnData)
     {
+        $columns = $this->dba->getColumns($table);
+        $columnData = $columns[$columnName];
         $phinxType = $this->getPhinxColumnType($columnData);
-        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData);
-        $result = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
+
+        $output = [];
+        if ($columnName == 'id') {
+            $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+            $output[] = $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', %s)->update();", $this->ind3, $table, $columnName, $phinxType, $columnAttributes);
+            $output[] = sprintf("%s} else {", $this->ind2);
+            $output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind3, $table, $columnName, $phinxType, $columnAttributes);
+            $output[] = sprintf("%s}", $this->ind2);
+        } else {
+            $output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        }
+
+        $result = implode($this->nl, $output);
         return $result;
     }
 
@@ -244,6 +264,7 @@ class PhinxGenerator implements GeneratorInterface
             case 'smallint':
             case 'int':
             case 'mediumint':
+            case 'bigint':
                 return 'integer';
             case 'timestamp':
                 return 'timestamp';
@@ -382,13 +403,16 @@ class PhinxGenerator implements GeneratorInterface
         }
 
         $limit = 0;
-        $pattern = '/\((\d+)\)/';
-        if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
-            return $match[1];
-        }
+        #$pattern = '/\((\d+)\)/';
+        # if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+        #    return $match[1];
+        #}
 
         $type = $this->getMySQLColumnType($columnData);
         switch ($type) {
+            case 'int':
+                $limit = 'MysqlAdapter::INT_REGULAR';
+                break;
             case 'tinyint':
                 $limit = 'MysqlAdapter::INT_TINY';
                 break;
