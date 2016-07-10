@@ -101,6 +101,7 @@ class MigrationGenerator
             $this->output->writeln('Aborted');
             return false;
         }
+        $name = $this->createName($name);
         $migration = $this->generator->createMigration($name, $diffs);
         $this->saveMigrationFile($name, $migration);
 
@@ -293,4 +294,14 @@ class MigrationGenerator
         return require $filename;
     }
 
+    /**
+     * Create a class name.
+     *
+     * @param string $name
+     * @return string
+     */
+    protected function createName($name)
+    {
+        return str_replace(' ', '', ucwords($name));
+    }
 }
