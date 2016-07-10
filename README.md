@@ -23,7 +23,7 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Indexes: create, remove
 * Foreign keys (experimental): create, remove
 
-# Not supported
+### Not supported
 
 * MySQL [double] is not supported by phinx https://github.com/robmorgan/phinx/issues/498
 * MySQL [year] is not supported by phinx. https://github.com/robmorgan/phinx/pull/704 | https://github.com/robmorgan/phinx/issues/551
