@@ -73,7 +73,7 @@ class PhinxGenerator implements GeneratorInterface
         // Currently phinx can't define a contraint name.
         // https://github.com/robmorgan/phinx/issues/823#issuecomment-231548829
         $default = [
-            'foreign_keys' => true
+            'foreign_keys' => false
         ];
         $this->options = array_replace_recursive($default, $options);
     }
@@ -340,12 +340,23 @@ class PhinxGenerator implements GeneratorInterface
         return $match[0];
     }
 
+    /**
+     * Map MySql data type to Phinx\Db\Adapter\AdapterInterface::PHINX_TYPE_*
+     *
+     * @param array $columnData
+     * @return string
+     */
     function getPhinxColumnType($columnData)
     {
         $columnType = $columnData['column_type'];
         if ($columnType == 'tinyint(1)') {
             return 'boolean';
         }
+
+        // [double] is not supported by phinx
+        // https://github.com/robmorgan/phinx/issues/498
+        //
+        // [bit ] and [year] is also not supported by phinx.
 
         $type = $this->getMySQLColumnType($columnData);
         switch ($type) {
@@ -361,17 +372,37 @@ class PhinxGenerator implements GeneratorInterface
                 return 'date';
             case 'datetime':
                 return 'datetime';
+            case 'time':
+                return 'time';
             case 'enum':
                 return 'enum';
+            case 'set':
+                return 'set';
             case 'char':
                 return 'char';
             case 'text':
             case 'tinytext':
+            case 'mediumtext':
+            case 'longtext':
                 return 'text';
             case 'varchar':
                 return 'string';
             case 'decimal':
                 return 'decimal';
+            case 'binary':
+                return 'binary';
+            case 'blob':
+            case 'tinyblob':
+            case 'mediumblob':
+            case 'longblob':
+                return 'blob';
+            case 'blob':
+            case 'longblob':
+                return 'blob';
+            case 'float':
+                return 'float';
+            case 'varbinary':
+                return 'varbinary';
             default:
                 return '[' . $type . ']';
         }
@@ -487,10 +518,6 @@ class PhinxGenerator implements GeneratorInterface
 
     public function getColumnLimit($columnData)
     {
-        if (!empty($columnData['character_maximum_length'])) {
-            return $columnData['character_maximum_length'];
-        }
-
         $limit = 0;
         $type = $this->getMySQLColumnType($columnData);
         switch ($type) {
@@ -518,10 +545,26 @@ class PhinxGenerator implements GeneratorInterface
             case 'longtext':
                 $limit = 'MysqlAdapter::TEXT_LONG';
                 break;
+            case 'longblob':
+                $limit = 'MysqlAdapter::BLOB_LONG';
+                break;
+            case 'mediumblob':
+                $limit = 'MysqlAdapter::BLOB_MEDIUM';
+                break;
+            case 'blob':
+                $limit = 'MysqlAdapter::BLOB_REGULAR';
+                break;
+            case 'tinyblob':
+                $limit = 'MysqlAdapter::BLOB_TINY';
+                break;
             default:
-                $pattern = '/\((\d+)\)/';
-                if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
-                    $limit = $match[1];
+                if (!empty($columnData['character_maximum_length'])) {
+                    $limit = $columnData['character_maximum_length'];
+                } else {
+                    $pattern = '/\((\d+)\)/';
+                    if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+                        $limit = $match[1];
+                    }
                 }
         }
         return $limit;
@@ -656,4 +699,5 @@ class PhinxGenerator implements GeneratorInterface
     {
         return sprintf("%s\$this->execute(\"SET UNIQUE_CHECKS = %s;\");", $this->ind2, $value);
     }
+
 }
