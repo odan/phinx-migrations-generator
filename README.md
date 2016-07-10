@@ -14,6 +14,20 @@ Generated migration
 
 THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 
+# Features
+
+* Framework independent
+* Database: character set, collation
+* Tables: create, update, remove, engine, comment, character set, collation
+* Columns: create, update, remove (todo)
+* Indexes: create, remove
+* Foreign keys (experimental): create, remove
+
+# Not supported
+
+* MySQL [double] is not supported by phinx https://github.com/robmorgan/phinx/issues/498
+* MySQL [bit] and [year] is also not supported by phinx.
+
 # Installation
 
 ```
