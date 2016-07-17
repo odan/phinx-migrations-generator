@@ -351,6 +351,13 @@ class PhinxMySqlGenerator
         return sprintf("%s\$this->execute(\"ALTER TABLE %s COLLATE=%s;\");", $this->ind2, $table, $collate);
     }
 
+    /**
+     * Generate alter table comment.
+     *
+     * @param string $table
+     * @param string $comment
+     * @return string
+     */
     protected function getAlterTableComment($table, $comment)
     {
         $table = $this->dba->ident($table);
@@ -358,6 +365,14 @@ class PhinxMySqlGenerator
         return sprintf("%s\$this->execute(\"ALTER TABLE %s COMMENT=%s;\");", $this->ind2, $table, $commentSave);
     }
 
+    /**
+     * Generate column create.
+     *
+     * @param string $table
+     * @param string $columnName
+     * @param string $columnData
+     * @return string
+     */
     protected function getColumnCreate($table, $columnName, $columnData)
     {
         $columns = $this->dba->getColumns($table);
@@ -380,6 +395,14 @@ class PhinxMySqlGenerator
         return $result;
     }
 
+    /**
+     * Generate column update.
+     *
+     * @param string $table
+     * @param string $columnName
+     * @param string $columnData
+     * @return string
+     */
     protected function getColumnUpdate($table, $columnName, $columnData)
     {
         $columns = $this->dba->getColumns($table);
@@ -391,6 +414,12 @@ class PhinxMySqlGenerator
         return $result;
     }
 
+    /**
+     * Get column type.
+     *
+     * @param array $columnData
+     * @return string
+     */
     protected function getMySQLColumnType($columnData)
     {
         $type = $columnData['column_type'];
@@ -469,13 +498,14 @@ class PhinxMySqlGenerator
     }
 
     /**
+     * Generate phinx column options.
      *
      * https://media.readthedocs.org/pdf/phinx/latest/phinx.pdf
      *
-     * @param type $phinxtype
-     * @param type $columnData
-     * @param array $columns Description
-     * @return type
+     * @param string $phinxtype
+     * @param array $columnData
+     * @param array $columns
+     * @return string
      */
     protected function getPhinxColumnOptions($phinxtype, $columnData, $columns)
     {
@@ -560,6 +590,12 @@ class PhinxMySqlGenerator
         return 'array(' . implode(', ', $attributes) . ')';
     }
 
+    /**
+     * Generate option enum values.
+     *
+     * @param array $columnData
+     * @return string
+     */
     public function getOptionEnumValue($columnData)
     {
         $match = null;
@@ -576,6 +612,12 @@ class PhinxMySqlGenerator
         }
     }
 
+    /**
+     * Generate column limit.
+     *
+     * @param array $columnData
+     * @return string
+     */
     public function getColumnLimit($columnData)
     {
         $limit = 0;
@@ -630,6 +672,14 @@ class PhinxMySqlGenerator
         return $limit;
     }
 
+    /**
+     * Generate index create.
+     *
+     * @param string $table
+     * @param string $indexName
+     * @param array $indexData
+     * @return string
+     */
     protected function getIndexCreate($table, $indexName, $indexData)
     {
         if ($indexName == 'PRIMARY') {
@@ -650,6 +700,12 @@ class PhinxMySqlGenerator
         return $result;
     }
 
+    /**
+     * Generate index options.
+     *
+     * @param array $indexData
+     * @return string
+     */
     function getIndexOptions($indexData)
     {
         $options = array();
@@ -670,12 +726,26 @@ class PhinxMySqlGenerator
         return $result;
     }
 
+    /**
+     * Generate index remove.
+     *
+     * @param string $table
+     * @param string $indexName
+     * @return string
+     */
     protected function getIndexRemove($table, $indexName)
     {
         $result = sprintf("%s\$this->table(\"%s\")->removeIndexByName('%s');", $this->ind2, $table, $indexName);
         return $result;
     }
 
+    /**
+     * Generate foreign key create.
+     *
+     * @param string $table
+     * @param string $fkName
+     * @return string
+     */
     protected function getForeignKeyCreate($table, $fkName)
     {
         $foreignKeys = $this->dba->getForeignKeys($table);
@@ -692,6 +762,12 @@ class PhinxMySqlGenerator
         return $result;
     }
 
+    /**
+     * Generate foreign key options.
+     *
+     * @param array $fkData
+     * @return string
+     */
     protected function getForeignKeyOptions($fkData)
     {
         $options = array();
@@ -706,6 +782,12 @@ class PhinxMySqlGenerator
         return $result;
     }
 
+    /**
+     * Generate foreign key rule value.
+     *
+     * @param string $value
+     * @return string
+     */
     protected function getForeignKeyRuleValue($value)
     {
         $value = strtolower($value);
@@ -724,6 +806,13 @@ class PhinxMySqlGenerator
         return 'NO_ACTION';
     }
 
+    /**
+     * Generate foreign key remove.
+     *
+     * @param string $table
+     * @param string $indexName
+     * @return string
+     */
     protected function getForeignKeyRemove($table, $indexName)
     {
         $result = sprintf("%s\$this->table(\"%s\")->dropForeignKey('%s');", $this->ind2, $table, $indexName);
@@ -731,9 +820,10 @@ class PhinxMySqlGenerator
     }
 
     /**
+     * Generate SetForeignKeyCheck.
      *
      * @param int $value
-     * @return type
+     * @return string
      */
     protected function getSetForeignKeyCheck($value)
     {
@@ -741,9 +831,10 @@ class PhinxMySqlGenerator
     }
 
     /**
+     * Generate Set Unique Checks.
      *
      * @param int $value 0 or 1
-     * @return type
+     * @return string
      */
     protected function getSetUniqueChecks($value)
     {

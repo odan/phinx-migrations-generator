@@ -4,8 +4,8 @@ namespace Odan\Migration\Generator;
 
 use Exception;
 use PDO;
-//use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
-//use Odan\Migration\Adapter\Generator\GeneratorInterface;
+use Odan\Migration\Adapter\Database\MySqlAdapter;
+use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -19,48 +19,56 @@ class MigrationGenerator
     protected $settings = array();
 
     /**
+     * Database adapter
      *
-     * @var \Odan\Migration\Adapter\Database\MySqlAdapter
+     * @var MySqlAdapter
      */
     protected $dba;
 
     /**
+     * Generator
      *
-     * @var \Odan\Migration\Adapter\Generator\PhinxGenerator
+     * @var PhinxMySqlGenerator
      */
     protected $generator;
 
     /**
+     * PDO
      *
      * @var PDO
      */
     protected $pdo;
 
     /**
+     * Database name
      *
      * @var string
      */
     protected $dbName;
 
     /**
+     * Console output
      *
      * @var OutputInterface
      */
     protected $output;
 
     /**
+     * Console input
      *
      * @var InputInterface
      */
     protected $input;
 
     /**
+     * Console style
      *
      * @var SymfonyStyle
      */
     protected $io;
 
     /**
+     * Constructor.
      *
      * @param array $settings
      * @param InputInterface $input
@@ -70,8 +78,8 @@ class MigrationGenerator
     {
         $this->settings = $settings;
         $this->pdo = $this->getPdo($settings);
-        $this->dba = new \Odan\Migration\Adapter\Database\MySqlAdapter($this->pdo, $output);
-        $this->generator = new \Odan\Migration\Adapter\Generator\PhinxMySqlGenerator($this->dba, $output);
+        $this->dba = new MySqlAdapter($this->pdo, $output);
+        $this->generator = new PhinxMySqlGenerator($this->dba, $output);
         $this->output = $output;
         $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);
@@ -117,6 +125,12 @@ class MigrationGenerator
         return true;
     }
 
+    /**
+     * Save migration file.
+     *
+     * @param string $name Name of migration
+     * @param string $migration Migration code
+     */
     protected function saveMigrationFile($name, $migration)
     {
         $migrationPath = $this->settings['migration_path'];
@@ -126,6 +140,7 @@ class MigrationGenerator
     }
 
     /**
+     * Get old database schema.
      *
      * @param array $settings
      * @return mixed
@@ -136,10 +151,11 @@ class MigrationGenerator
     }
 
     /**
+     * Compare database schemas.
      *
      * @param array $newSchema
      * @param array $oldSchema
-     * @return array
+     * @return array Difference
      */
     public function compareSchema($newSchema, $oldSchema)
     {
@@ -155,7 +171,7 @@ class MigrationGenerator
     }
 
     /**
-     * Intersect of recursive arrays
+     * Intersect of recursive arrays.
      *
      * @param array $array1
      * @param array $array2
@@ -185,9 +201,10 @@ class MigrationGenerator
     }
 
     /**
+     * Generate schema filename.
      *
      * @param array $settings
-     * @return string
+     * @return string Schema filename
      */
     public function getSchemaFilename($settings)
     {
@@ -200,9 +217,10 @@ class MigrationGenerator
     }
 
     /**
+     * Get schema data.
      *
      * @param array $settings
-     * @return mixed
+     * @return array
      * @throws Exception
      */
     public function getSchemaFileData($settings)
@@ -226,9 +244,10 @@ class MigrationGenerator
     }
 
     /**
+     * Save schema file.
      *
      * @param array $schema
-     * @param type $settings
+     * @param array $settings
      * @throws Exception
      */
     protected function saveSchemaFile($schema, $settings)
@@ -269,10 +288,10 @@ class MigrationGenerator
     }
 
     /**
-     * getSettings
+     * Get settings from config file.
      *
-     * @return mixed
-     * @throws Exception
+     * @return array
+     * @throws Exception If file not exists.
      */
     public function getSettings()
     {
