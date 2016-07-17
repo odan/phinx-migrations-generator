@@ -17,6 +17,7 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 # Features
 
 * Framework independent
+* DBMS: MySQL
 * Database: character set, collation
 * Tables: create, update, remove, engine, comment, character set, collation
 * Columns: create, update, remove (todo)
