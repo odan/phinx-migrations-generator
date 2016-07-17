@@ -172,6 +172,13 @@ class PhinxMySqlGenerator
                         }
                     }
                 }
+
+                if (!empty($old['tables'][$tableName]['columns'])) {
+                    foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
+                        $output[] = $this->getColumnRemove($tableName, $oldColumnName);
+                    }
+                }
+
                 if (!empty($table['indexes'])) {
                     foreach ($table['indexes'] as $indexName => $indexData) {
                         if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
@@ -411,6 +418,19 @@ class PhinxMySqlGenerator
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
         $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        return $result;
+    }
+
+    /**
+     * Generate column remove.
+     *
+     * @param string $table
+     * @param string $columnName
+     * @return string
+     */
+    protected function getColumnRemove($table, $columnName)
+    {
+        $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind2, $table, $columnName);
         return $result;
     }
 
