@@ -2,35 +2,42 @@
 
 namespace Odan\Migration\Adapter\Database;
 
-//use Exception;
 use PDO;
-use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * MySqlAdapter
  */
-class MySqlAdapter implements DatabaseAdapterInterface
+class MySqlAdapter
 {
 
     /**
+     * PDO
      *
      * @var PDO
      */
     protected $pdo;
 
     /**
+     * Console Output Interface
      *
      * @var OutputInterface
      */
     protected $output;
 
     /**
+     * Current database name
      *
      * @var string
      */
     protected $dbName;
 
+    /**
+     * Constructor
+     *
+     * @param PDO $pdo
+     * @param OutputInterface $output
+     */
     public function __construct(PDO $pdo, OutputInterface $output)
     {
         $this->pdo = $pdo;
@@ -40,7 +47,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
     }
 
     /**
-     * getCurrentSchema
+     * Load current database schema.
      *
      * @return array
      */
@@ -74,6 +81,12 @@ class MySqlAdapter implements DatabaseAdapterInterface
         return $this->pdo->query('select database()')->fetchColumn();
     }
 
+    /**
+     * Get database schemata.
+     *
+     * @param string $dbName
+     * @return array
+     */
     public function getDatabaseSchemata($dbName)
     {
         $sql = "SELECT
@@ -87,7 +100,7 @@ class MySqlAdapter implements DatabaseAdapterInterface
     }
 
     /**
-     * getTables
+     * Get all tables.
      *
      * @return array
      */
@@ -104,7 +117,6 @@ class MySqlAdapter implements DatabaseAdapterInterface
                 AND t.table_type = 'BASE TABLE'";
 
         $rows = $this->pdo->query($sql)->fetchAll();
-        //$rows = $this->db->query('SHOW TABLES')->fetchAll();
         foreach ($rows as $row) {
             $result[] = [
                 'table_name' => $row['table_name'],
@@ -118,9 +130,10 @@ class MySqlAdapter implements DatabaseAdapterInterface
     }
 
     /**
+     * Get table columns.
      *
-     * @param type $tableName
-     * @return type
+     * @param string $tableName
+     * @return array
      */
     public function getColumns($tableName)
     {
@@ -138,9 +151,10 @@ class MySqlAdapter implements DatabaseAdapterInterface
     }
 
     /**
+     * Get indexes.
      *
-     * @param type $tableName
-     * @return type
+     * @param string $tableName
+     * @return array
      */
     public function getIndexes($tableName)
     {
@@ -154,22 +168,14 @@ class MySqlAdapter implements DatabaseAdapterInterface
         return $result;
     }
 
+    /**
+     * Get foreign keys.
+     *
+     * @param string $tableName
+     * @return array
+     */
     public function getForeignKeys($tableName)
     {
-        /* $rows = $this->db
-          ->from('information_schema.table_constraints')
-          ->where('constraint_schema', $this->dbName)
-          ->where('table_name', $tableName)
-          ->where('constraint_name <> ?', 'PRIMARY')
-          ->fetchAll();
-
-          $result = [];
-          foreach ($rows as $row) {
-          $name = $row['constraint_name'];
-          $result[$name] = $row;
-          }
-          return $result; */
-
         $sql = sprintf("SELECT
                 cols.TABLE_NAME,
                 cols.COLUMN_NAME,
@@ -211,9 +217,10 @@ class MySqlAdapter implements DatabaseAdapterInterface
     }
 
     /**
+     * Get SQL to create a table.
      *
-     * @param type $tableName
-     * @return type
+     * @param string $tableName
+     * @return string
      */
     public function getTableCreateSql($tableName)
     {
@@ -243,6 +250,12 @@ class MySqlAdapter implements DatabaseAdapterInterface
         return $value;
     }
 
+    /**
+     * Escape value.
+     *
+     * @param string $value
+     * @return string
+     */
     public function esc($value)
     {
         if ($value === null) {
@@ -252,6 +265,12 @@ class MySqlAdapter implements DatabaseAdapterInterface
         return $value;
     }
 
+    /**
+     * Quote value.
+     *
+     * @param string $value
+     * @return string
+     */
     public function quote($value)
     {
         if ($value === null) {

@@ -2,22 +2,19 @@
 
 namespace Odan\Migration\Adapter\Generator;
 
-use Exception;
-use Odan\Migration\Adapter\Database\DatabaseAdapterInterface;
-//use Odan\Migration\Adapter\Generator\GeneratorInterface;
+use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Symfony\Component\Console\Output\OutputInterface;
-use Phinx\Migration\AbstractMigration;
 
 /**
- * PhinxGenerator
+ * PhinxMySqlGenerator
  */
-class PhinxGenerator implements GeneratorInterface
+class PhinxMySqlGenerator
 {
 
     /**
      * Database adapter
      *
-     * @var \Odan\Migration\Adapter\Database\MySqlAdapter
+     * @var MySqlAdapter
      */
     protected $dba;
 
@@ -60,11 +57,12 @@ class PhinxGenerator implements GeneratorInterface
     protected $ind3 = '            ';
 
     /**
+     * Concstructor
      *
-     * @param \Odan\Migration\Adapter\Database\MySqlAdapter $dba
-     * @param \Odan\Migration\Adapter\Generator\OutputInterface $output
+     * @param MySqlAdapter $dba
+     * @param OutputInterface $output
      */
-    public function __construct(\Odan\Migration\Adapter\Database\MySqlAdapter $dba, OutputInterface $output, $options = array())
+    public function __construct(MySqlAdapter $dba, OutputInterface $output, $options = array())
     {
         $this->dba = $dba;
         $this->output = $output;
@@ -81,7 +79,7 @@ class PhinxGenerator implements GeneratorInterface
     /**
      * Create migration
      *
-     * @param string $name Name
+     * @param string $name Name of the migration
      * @param array $diffs
      * @return string PHP code
      */
@@ -102,6 +100,14 @@ class PhinxGenerator implements GeneratorInterface
         return $result;
     }
 
+    /**
+     * Generate code for change function.
+     *
+     * @param array $output Output
+     * @param array $new New schema
+     * @param array $old Old schema
+     * @return array Output
+     */
     public function addChangeMethod($output, $new, $old)
     {
         $output[] = $this->ind . 'public function change()';
@@ -111,6 +117,14 @@ class PhinxGenerator implements GeneratorInterface
         return $output;
     }
 
+    /**
+     * Get table migration.
+     *
+     * @param array $output Output
+     * @param array $new New schema
+     * @param array $old Old schema
+     * @return array Output
+     */
     public function getTableMigration($output, $new, $old)
     {
         if (!empty($this->options['foreign_keys'])) {
@@ -213,10 +227,11 @@ class PhinxGenerator implements GeneratorInterface
     }
 
     /**
+     * Generate foreign keys migrations.
      *
-     * @param type $new
-     * @param type $old
-     * @return type
+     * @param array $new New schema
+     * @param array $old Old schema
+     * @return array Output
      */
     protected function getForeignKeysMigrations($new, $old)
     {
@@ -242,6 +257,13 @@ class PhinxGenerator implements GeneratorInterface
         return $output;
     }
 
+    /**
+     * Generate alter database charset.
+     *
+     * @param string $charset
+     * @param string $database
+     * @return string
+     */
     protected function getAlterDatabaseCharset($charset, $database = null)
     {
         if ($database) {
@@ -251,6 +273,13 @@ class PhinxGenerator implements GeneratorInterface
         return sprintf("%s\$this->execute(\"ALTER DATABASE%s CHARACTER SET %s;\");", $this->ind2, $database, $charset);
     }
 
+    /**
+     * Generate alter database collate.
+     *
+     * @param string $collate
+     * @param string $database
+     * @return string
+     */
     protected function getAlterDatabaseCollate($collate, $database = null)
     {
         if ($database) {
@@ -260,23 +289,47 @@ class PhinxGenerator implements GeneratorInterface
         return sprintf("%s\$this->execute(\"ALTER DATABASE%s COLLATE=%s;\");", $this->ind2, $database, $collate);
     }
 
+    /**
+     * Generate create table.
+     *
+     * @param string $table
+     * @return string
+     */
     protected function getCreateTable($table)
     {
         return sprintf("%s\$this->table(\"%s\")->save();", $this->ind2, $table);
-        //return sprintf("%s\$this->table(\"%s\", array('id' => false, 'primary_key' => false))->save();", $this->ind2, $table);
     }
 
+    /**
+     * Generate drop table.
+     *
+     * @param string $table
+     * @return string
+     */
     protected function getDropTable($table)
     {
         return sprintf("%s\$this->dropTable(\"%s\");", $this->ind2, $table);
     }
 
+    /**
+     * Generate Alter Table Engine.
+     * @param string $table
+     * @param string $engine
+     * @return string
+     */
     protected function getAlterTableEngine($table, $engine)
     {
         $engine = $this->dba->quote($engine);
         return sprintf("%s\$this->execute(\"ALTER TABLE `%s` ENGINE=%s;\");", $this->ind2, $table, $engine);
     }
 
+    /**
+     * Generate Alter Table Charset.
+     *
+     * @param string $table
+     * @param string $charset
+     * @return string
+     */
     protected function getAlterTableCharset($table, $charset)
     {
         $table = $this->dba->ident($table);
@@ -284,6 +337,13 @@ class PhinxGenerator implements GeneratorInterface
         return sprintf("%s\$this->execute(\"ALTER TABLE %s CHARSET=%s;\");", $this->ind2, $table, $charset);
     }
 
+    /**
+     * Generate Alter Table Collate
+     *
+     * @param string $table
+     * @param string $collate
+     * @return string
+     */
     protected function getAlterTableCollate($table, $collate)
     {
         $table = $this->dba->ident($table);
@@ -621,21 +681,11 @@ class PhinxGenerator implements GeneratorInterface
         $foreignKeys = $this->dba->getForeignKeys($table);
         $fkData = $foreignKeys[$fkName];
         $columns = "'" . $fkData['column_name'] . "'";
-        //$tableName = $fkData['referenced_table_name'];
         $referencedTable = "'" . $fkData['referenced_table_name'] . "'";
         $referencedColumns = "'" . $fkData['referenced_column_name'] . "'";
         $options = $this->getForeignKeyOptions($fkData);
 
-        /**
-         * $columns, $referencedTable, $referencedColumns = array('id'), $options = array()
-         *
-         * In $options you can specify on_delete|on_delete = cascade|no_action ..,
-         * on_update, constraint = constraint name.
-         */
         $output = [];
-        #$output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $table, $indexName);
-        #$output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
-        #$output[] = sprintf("%s}", $this->ind2);
         $output[] = sprintf("%s\$this->table(\"%s\")->addForeignKey(%s, %s, %s, %s)->save();", $this->ind2, $table, $columns, $referencedTable, $referencedColumns, $options);
 
         $result = implode($this->nl, $output);

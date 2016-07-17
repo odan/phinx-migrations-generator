@@ -71,7 +71,7 @@ class MigrationGenerator
         $this->settings = $settings;
         $this->pdo = $this->getPdo($settings);
         $this->dba = new \Odan\Migration\Adapter\Database\MySqlAdapter($this->pdo, $output);
-        $this->generator = new \Odan\Migration\Adapter\Generator\PhinxGenerator($this->dba, $output);
+        $this->generator = new \Odan\Migration\Adapter\Generator\PhinxMySqlGenerator($this->dba, $output);
         $this->output = $output;
         $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);
