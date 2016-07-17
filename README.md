@@ -20,7 +20,7 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * DBMS: MySQL
 * Database: character set, collation
 * Tables: create, update, remove, engine, comment, character set, collation
-* Columns: create, update, remove (todo)
+* Columns: create, update, remove
 * Indexes: create, remove
 * Foreign keys (experimental): create, remove
 
