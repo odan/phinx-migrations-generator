@@ -389,7 +389,7 @@ class PhinxMySqlGenerator
 
         $output = [];
         if ($columnName == 'id') {
-            $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+            $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
             $output[] = $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', %s)->update();", $this->ind3, $table, $columnName, $phinxType, $columnAttributes);
             $output[] = sprintf("%s} else {", $this->ind2);
             $output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind3, $table, $columnName, $phinxType, $columnAttributes);
@@ -430,7 +430,11 @@ class PhinxMySqlGenerator
      */
     protected function getColumnRemove($table, $columnName)
     {
-        $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind2, $table, $columnName);
+        $output = [];
+        $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
+        $output[] = $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind3, $table, $columnName);
+        $output[] = sprintf("%s}", $this->ind2);
+        $result = implode($this->nl, $output);
         return $result;
     }
 
