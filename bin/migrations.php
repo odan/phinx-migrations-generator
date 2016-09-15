@@ -1,7 +1,9 @@
 #!/usr/bin/env php
 <?php
 // Debugging: SET XDEBUG_CONFIG=idekey=netbeans-xdebug
-require __DIR__ . '/../vendor/autoload.php';
+if (!(class_exists('Symfony\\Component\\Console\\Application') && class_exists('Odan\\Migration\\Command\\GenerateCommand'))) {
+    require __DIR__ . '/../vendor/autoload.php';
+}
 
 use Odan\Migration\Command\GenerateCommand;
 use Symfony\Component\Console\Application;
