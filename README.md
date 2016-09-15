@@ -24,14 +24,17 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Indexes: create, remove
 * Foreign keys (experimental): create, remove
 
+# Todo
+* Indexes with more then one field (https://github.com/odan/migrations/issues/1)
+
 ### Not supported
 
 * MySQL [double] is not supported by phinx https://github.com/robmorgan/phinx/issues/498
 * MySQL [year] is not supported by phinx. https://github.com/robmorgan/phinx/pull/704 | https://github.com/robmorgan/phinx/issues/551
 * MySQL [bit] is not supported by phinx. https://github.com/robmorgan/phinx/pull/778
 * MySQL enum values with special characters: https://github.com/robmorgan/phinx/issues/887
-* MySQL comments with special characters.
 * Migration of contraint names (currently only auto generated): https://github.com/robmorgan/phinx/issues/823
+* MySQL comments with special characters.
 
 # Installation
 
