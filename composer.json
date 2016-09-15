@@ -18,5 +18,6 @@
             "Odan\\": "src",
             "Odan\\Test\\": "tests"
         }
-    }
+    },
+    "bin": ["bin/phinx-migrations-generator"]
 }
