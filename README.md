@@ -24,7 +24,7 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Indexes: create, remove
 * Foreign keys (experimental): create, remove
 
-# Todo
+## Todo
 * Indexes with more then one field (https://github.com/odan/migrations/issues/1)
 
 ### Not supported
