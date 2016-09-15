@@ -1,8 +1,18 @@
 #!/usr/bin/env php
 <?php
 // Debugging: SET XDEBUG_CONFIG=idekey=netbeans-xdebug
-if (!(class_exists('Symfony\\Component\\Console\\Application') && class_exists('Odan\\Migration\\Command\\GenerateCommand'))) {
-    require __DIR__ . '/../vendor/autoload.php';
+if (!(class_exists('Symfony\\Component\\Console\\Application')
+    && class_exists('Odan\\Migration\\Command\\GenerateCommand'))
+) {
+//    Trying to get main autoload (if is used as package)
+    if (file_exists(__DIR__ . '/../../../autoload.php')) {
+        require __DIR__ . '/../../../autoload.php';
+//    Trying to get local autoload (if is used as project)
+    } elseif (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+        require __DIR__ . '/../vendor/autoload.php';
+    } else {
+        throw new Exception('No autoloader found');
+    }
 }
 
 use Odan\Migration\Command\GenerateCommand;
