@@ -110,7 +110,7 @@ class MigrationGenerator
             return false;
         }
         $name = $this->createName($name);
-        $migration = $this->generator->createMigration($name, $diffs);
+        $migration = $this->generator->createMigration($name, $schema, $oldSchema);
         $this->saveMigrationFile($name, $migration);
 
         // Overwrite schema file
@@ -323,4 +323,5 @@ class MigrationGenerator
     {
         return str_replace(' ', '', ucwords($name));
     }
+
 }

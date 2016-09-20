@@ -162,8 +162,12 @@ class MySqlAdapter
         $rows = $this->pdo->query($sql)->fetchAll();
         $result = [];
         foreach ($rows as $row) {
+            if (isset($row['cardinality'])) {
+                unset($row['cardinality']);
+            }
             $name = $row['key_name'];
-            $result[$name] = $row;
+            $seq = $row['seq_in_index'];
+            $result[$name][$seq] = $row;
         }
         return $result;
     }
@@ -278,4 +282,5 @@ class MySqlAdapter
         }
         return $this->pdo->quote($value);
     }
+
 }

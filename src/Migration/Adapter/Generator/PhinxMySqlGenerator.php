@@ -83,7 +83,7 @@ class PhinxMySqlGenerator
      * @param array $diffs
      * @return string PHP code
      */
-    public function createMigration($name, $diffs)
+    public function createMigration($name, $newSchema, $oldSchema)
     {
         $output = array();
         $output[] = '<?php';
@@ -93,7 +93,7 @@ class PhinxMySqlGenerator
         $output[] = '';
         $output[] = sprintf('class %s extends AbstractMigration', $name);
         $output[] = '{';
-        $output = $this->addChangeMethod($output, $diffs[0], $diffs[1]);
+        $output = $this->addChangeMethod($output, $newSchema, $oldSchema);
         $output[] = '}';
         $output[] = '';
         $result = implode($this->nl, $output);
@@ -133,10 +133,10 @@ class PhinxMySqlGenerator
         }
 
         if (!empty($new['database'])) {
-            if (isset($new['database']['default_character_set_name'])) {
+            if ($this->neq($new, $old, ['database', 'default_character_set_name'])) {
                 $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
             }
-            if (isset($new['database']['default_collation_name'])) {
+            if ($this->neq($new, $old, ['database', 'default_collation_name'])) {
                 $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
             }
         }
@@ -150,41 +150,47 @@ class PhinxMySqlGenerator
                     // create the table
                     $output[] = $this->getCreateTable($tableName);
                 }
-                if (isset($table['table']['engine'])) {
+                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'engine'])) {
                     $output[] = $this->getAlterTableEngine($tableName, $table['table']['engine']);
                 }
-                if (isset($table['table']['table_comment'])) {
+                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_comment'])) {
                     $output[] = $this->getAlterTableComment($tableName, $table['table']['table_comment']);
                 }
-                if (isset($table['table']['character_set_name'])) {
+                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'character_set_name'])) {
                     $output[] = $this->getAlterTableCharset($tableName, $table['table']['character_set_name']);
                 }
-                if (isset($table['table']['table_collation'])) {
+                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_collation'])) {
                     $output[] = $this->getAlterTableCollate($tableName, $table['table']['table_collation']);
                 }
 
                 if (!empty($table['columns'])) {
                     foreach ($table['columns'] as $columnName => $columnData) {
                         if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
-                            $output[] = $this->getColumnCreate($tableName, $columnName, $columnData);
+                            $output[] = $this->getColumnCreate($new, $tableName, $columnName, $columnData);
                         } else {
-                            $output[] = $this->getColumnUpdate($tableName, $columnName, $columnData);
+                            if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
+                                $output[] = $this->getColumnUpdate($new, $tableName, $columnName, $columnData);
+                            }
                         }
                     }
                 }
 
                 if (!empty($old['tables'][$tableName]['columns'])) {
                     foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
-                        $output[] = $this->getColumnRemove($tableName, $oldColumnName);
+                        if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
+                            $output[] = $this->getColumnRemove($tableName, $oldColumnName);
+                        }
                     }
                 }
 
                 if (!empty($table['indexes'])) {
-                    foreach ($table['indexes'] as $indexName => $indexData) {
+                    foreach ($table['indexes'] as $indexName => $indexSequences) {
                         if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
-                            $output[] = $this->getIndexCreate($tableName, $indexName, $indexData);
+                            $output[] = $this->getIndexCreate($new, $tableName, $indexName);
                         } else {
-                            $output[] = $this->getIndexRemove($tableName, $indexName, $indexData);
+                            if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
+                                $output[] = $this->getIndexCreate($new, $tableName, $indexName);
+                            }
                         }
                     }
                 }
@@ -200,6 +206,14 @@ class PhinxMySqlGenerator
             foreach ($old['tables'] as $tableName => $table) {
                 if ($tableName == 'phinxlog') {
                     continue;
+                }
+
+                if (!empty($old['tables'][$tableName]['indexes'])) {
+                    foreach ($old['tables'][$tableName]['indexes'] as $indexName => $indexSequences) {
+                        if (!isset($new['tables'][$tableName]['indexes'][$indexName])) {
+                            $output[] = $this->getIndexRemove($tableName, $indexName);
+                        }
+                    }
                 }
                 if (!isset($new['tables'][$tableName])) {
                     $output[] = $this->getDropTable($tableName);
@@ -375,14 +389,14 @@ class PhinxMySqlGenerator
     /**
      * Generate column create.
      *
+     * @param array $schema
      * @param string $table
      * @param string $columnName
-     * @param string $columnData
      * @return string
      */
-    protected function getColumnCreate($table, $columnName, $columnData)
+    protected function getColumnCreate($schema, $table, $columnName)
     {
-        $columns = $this->dba->getColumns($table);
+        $columns = $schema['tables'][$table]['columns'];
         $columnData = $columns[$columnName];
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
@@ -405,14 +419,14 @@ class PhinxMySqlGenerator
     /**
      * Generate column update.
      *
+     * @param array $schema
      * @param string $table
      * @param string $columnName
-     * @param string $columnData
      * @return string
      */
-    protected function getColumnUpdate($table, $columnName, $columnData)
+    protected function getColumnUpdate($schema, $table, $columnName)
     {
-        $columns = $this->dba->getColumns($table);
+        $columns = $schema['tables'][$table]['columns'];
         $columnData = $columns[$columnName];
 
         $phinxType = $this->getPhinxColumnType($columnData);
@@ -699,28 +713,45 @@ class PhinxMySqlGenerator
     /**
      * Generate index create.
      *
+     * @param array $schema
      * @param string $table
      * @param string $indexName
-     * @param array $indexData
      * @return string
      */
-    protected function getIndexCreate($table, $indexName, $indexData)
+    protected function getIndexCreate($schema, $table, $indexName)
     {
         if ($indexName == 'PRIMARY') {
             return '';
         }
-        if (isset($indexData['column_name'])) {
-            $indexName = $indexData['column_name'];
-        }
-        $indexOptions = $this->getIndexOptions($indexData);
+        $indexes = $schema['tables'][$table]['indexes'];
+        $indexSequences = $indexes[$indexName];
+
+        $indexFields = $this->getIndexFields($indexSequences);
+        $indexOptions = $this->getIndexOptions(array_values($indexSequences)[0]);
 
         $output = [];
         $output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $table, $indexName);
         $output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
         $output[] = sprintf("%s}", $this->ind2);
-        $output[] = sprintf("%s\$this->table(\"%s\")->addIndex('%s', %s)->save();", $this->ind2, $table, $indexName, $indexOptions);
+        $output[] = sprintf("%s\$this->table(\"%s\")->addIndex(%s, %s)->save();", $this->ind2, $table, $indexFields, $indexOptions);
 
         $result = implode($this->nl, $output);
+        return $result;
+    }
+
+    /**
+     * Get index fields.
+     *
+     * @param array $indexSequences
+     * @return string
+     */
+    public function getIndexFields($indexSequences)
+    {
+        $indexFields = array();
+        foreach ($indexSequences as $indexData) {
+            $indexFields[] = $indexData['column_name'];
+        }
+        $result = "array('" . implode("','", $indexFields) . "')";
         return $result;
     }
 
@@ -863,6 +894,52 @@ class PhinxMySqlGenerator
     protected function getSetUniqueChecks($value)
     {
         return sprintf("%s\$this->execute(\"SET UNIQUE_CHECKS = %s;\");", $this->ind2, $value);
+    }
+
+    /**
+     * Compare array
+     *
+     * @param array $arr
+     * @param array $arr2
+     * @param array $keys
+     * @return bool
+     */
+    protected function eq($arr, $arr2, $keys)
+    {
+        $val1 = $this->find($arr, $keys);
+        $val2 = $this->find($arr2, $keys);
+        return $val1 === $val2;
+    }
+
+    /**
+     * Compare array (not)
+     *
+     * @param array $arr
+     * @param array $arr2
+     * @param array $keys
+     * @return bool
+     */
+    protected function neq($arr, $arr2, $key)
+    {
+        return !$this->eq($arr, $arr2, $key);
+    }
+
+    /**
+     * Get array value by keys.
+     *
+     * @param array $array
+     * @param array $parts
+     * @return mixed
+     */
+    protected function find($array, $parts)
+    {
+        foreach ($parts as $part) {
+            if (!array_key_exists($part, $array)) {
+                return null;
+            }
+            $array = $array[$part];
+        }
+        return $array;
     }
 
 }
