@@ -1,6 +1,10 @@
 # Migrations
 Migrations Builder for Phinx.
 
+NOTICE: This project is not maintained anymore (not enough time, family, job etc...).  
+You can fork this repo or use the new integrated phinx migration builder instead.
+https://github.com/robmorgan/phinx/issues/109#issuecomment-255297913
+
 Currently Phinx (a migration library) cannot generate migrations automatically.
 Phinx "only" generates a empty class with up and down functions. You still have to write the migration manually.
 
