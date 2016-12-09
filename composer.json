@@ -19,5 +19,5 @@
             "Odan\\Test\\": "tests"
         }
     },
-    "bin": ["bin/phinx-migrations"]
+    "bin": ["./bin/phinx-migrations"]
 }
