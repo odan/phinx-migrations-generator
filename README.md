@@ -35,20 +35,12 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 # Installation
 
 ```
-git clone https://github.com/odan/phinx-migrations-generator.git
-cd migrations
-composer install --no-dev
-```
-
-# Integration
-
-```
 composer require odan/phinx-migrations-generator
 ```
 
 # Configuration
 
-* Default configuration file: migrations-config.php
+* Default configuration file: phinx-migrations-config.php
 
 Example:
 
@@ -82,13 +74,13 @@ migration_path | string | | Output directory for migration files
 
 ```
 cd bin
-php migrations.php migration:generate
+php phinx-migrations migration:generate
 ```
 
 ## Load custom config file
 
 ```
-php migrations.php migration:generate --config=myconfig.php
+php phinx-migrationsmigration:generate --config=myconfig.php
 ```
 
 ## Alternative projects

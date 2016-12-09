@@ -295,7 +295,6 @@ class MigrationGenerator
      */
     public function getSettings()
     {
-        //$this->configFile = sprintf('%s/%s', getcwd(), 'migrations-config.php');
         if (!file_exists($this->configFile)) {
             throw new Exception(sprintf('File not found: %s', $this->configFile));
         }
