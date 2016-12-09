@@ -1,4 +1,4 @@
-# Phinx m igrations generator
+# Phinx migrations generator
 
 Currently Phinx (a migration library) cannot generate migrations automatically.
 Phinx "only" generates a empty class with up and down functions. You still have to write the migration manually.
