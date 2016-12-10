@@ -1,0 +1,14 @@
+preset: psr2
+
+linting: true
+
+finder:
+  exclude:
+    - "tests"
+  name:
+    - "*.php"
+  path:
+    - "src"
+  not-path:
+    - "build"
+    - "vendor"

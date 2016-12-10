@@ -1,0 +1,29 @@
+checks:
+    php:
+        code_rating: true
+        duplication: true
+tools:
+    php_cs_fixer:
+        enabled: true
+        extensions:
+            - php
+        config: { level: psr2 }
+        filter:
+            paths:
+                - src/
+    php_sim:
+        enabled: true
+        min_mass: 30             # Defaults to 16
+    php_code_sniffer:
+        enabled: true
+        config:
+            standard: PSR2
+        filter:
+            paths:
+                - src/
+
+filter:
+    paths:
+        - src/*
+    excluded_paths:
+        - tests/
