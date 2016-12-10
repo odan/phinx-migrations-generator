@@ -75,14 +75,14 @@ migration_path | string | | Output directory for migration files
 ## Generating migrations
 
 ```
-cd bin
-php phinx-migrations migration:generate
+cd vendor/bin
+phinx-migrations migration:generate
 ```
 
 ## Load custom config file
 
 ```
-php phinx-migrationsmigration:generate --config=myconfig.php
+phinx-migrationsmigration:generate --config=myconfig.php
 ```
 
 # Console Setup
