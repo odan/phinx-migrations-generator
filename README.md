@@ -2,7 +2,7 @@
 
 [![Latest Version](https://img.shields.io/github/release/odan/phinx-migrations-generator.svg?style=flat-square)](https://github.com/loadsys/odan/phinx-migrations-generator/releases)
 [![Crutinizer](https://img.shields.io/scrutinizer/g/odan/phinx-migrations-generator.svg?style=flat-square)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator)
-[![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master&style=flat-square)](https://travis-ci.org/odanphinx-migrations-generator)
+[![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master&style=flat-square)](https://travis-ci.org/odan/phinx-migrations-generator)
 [![codecov](https://codecov.io/gh/odan/phinx-migrations-generator/branch/master/graph/badge.svg?style=flat-square)](https://codecov.io/gh/odan/phinx-migrations-generator)
 [![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg?style=flat-square)](https://packagist.org/packages/odan/phinx-migrations-generator)
 [![Repo Size](https://reposs.herokuapp.com/?path=odan/phinx-migrations-generator&style=flat-square)](https://reposs.herokuapp.com/?path=odan/phinx-migrations-generator)
