@@ -90,7 +90,7 @@ phinx-migrations migration:generate
 ## Load custom config file
 
 ```
-phinx-migrationsmigration:generate --config=myconfig.php
+phinx-migrations migration:generate --config=myconfig.php
 ```
 
 # Console Setup
