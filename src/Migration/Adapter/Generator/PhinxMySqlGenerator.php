@@ -576,55 +576,41 @@ class PhinxMySqlGenerator
         // https://github.com/robmorgan/phinx/issues/498
         //
         // [bit ] and [year] is also not supported by phinx.
+        $map = array(
+            'tinyint' => 'integer',
+            'smallint' => 'integer',
+            'int' => 'integer',
+            'mediumint' => 'integer',
+            'bigint' => 'integer',
+            'timestamp' => 'timestamp',
+            'date' => 'date',
+            'datetime' => 'datetime',
+            'time' => 'time',
+            'enum' => 'enum',
+            'set' => 'set',
+            'char' => 'char',
+            'text' => 'text',
+            'tinytext' => 'text',
+            'mediumtext' => 'text',
+            'longtext' => 'text',
+            'varchar' => 'string',
+            'decimal' => 'decimal',
+            'binary' => 'binary',
+            'blob' => 'blob',
+            'tinyblob' => 'blob',
+            'mediumblob' => 'blob',
+            'longblob' => 'blob',
+            'float' => 'float',
+            'varbinary' => 'varbinary',
+        );
 
         $type = $this->getMySQLColumnType($columnData);
-        switch ($type) {
-            case 'tinyint':
-            case 'smallint':
-            case 'int':
-            case 'mediumint':
-            case 'bigint':
-                return 'integer';
-            case 'timestamp':
-                return 'timestamp';
-            case 'date':
-                return 'date';
-            case 'datetime':
-                return 'datetime';
-            case 'time':
-                return 'time';
-            case 'enum':
-                return 'enum';
-            case 'set':
-                return 'set';
-            case 'char':
-                return 'char';
-            case 'text':
-            case 'tinytext':
-            case 'mediumtext':
-            case 'longtext':
-                return 'text';
-            case 'varchar':
-                return 'string';
-            case 'decimal':
-                return 'decimal';
-            case 'binary':
-                return 'binary';
-            case 'blob':
-            case 'tinyblob':
-            case 'mediumblob':
-            case 'longblob':
-                return 'blob';
-            case 'blob':
-            case 'longblob':
-                return 'blob';
-            case 'float':
-                return 'float';
-            case 'varbinary':
-                return 'varbinary';
-            default:
-                return '[' . $type . ']';
+        if (isset($map[$type])) {
+            $result = $map[$type];
+        } else {
+            $result = '[' . $type . ']';
         }
+        return $result;
     }
 
     /**
