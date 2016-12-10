@@ -133,98 +133,189 @@ class PhinxMySqlGenerator
             $output[] = $this->getSetForeignKeyCheck(0);
         }
 
-        if (!empty($new['database'])) {
-            if ($this->neq($new, $old, ['database', 'default_character_set_name'])) {
-                $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
-            }
-            if ($this->neq($new, $old, ['database', 'default_collation_name'])) {
-                $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
-            }
-        }
-
-        if (!empty($new['tables'])) {
-            foreach ($new['tables'] as $tableName => $table) {
-                if ($tableName == 'phinxlog') {
-                    continue;
-                }
-                if (!isset($old['tables'][$tableName])) {
-                    // create the table
-                    $output[] = $this->getCreateTable($tableName);
-                }
-                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'engine'])) {
-                    $output[] = $this->getAlterTableEngine($tableName, $table['table']['engine']);
-                }
-                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_comment'])) {
-                    $output[] = $this->getAlterTableComment($tableName, $table['table']['table_comment']);
-                }
-                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'character_set_name'])) {
-                    $output[] = $this->getAlterTableCharset($tableName, $table['table']['character_set_name']);
-                }
-                if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_collation'])) {
-                    $output[] = $this->getAlterTableCollate($tableName, $table['table']['table_collation']);
-                }
-
-                if (!empty($table['columns'])) {
-                    foreach ($table['columns'] as $columnName => $columnData) {
-                        if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
-                            $output[] = $this->getColumnCreate($new, $tableName, $columnName, $columnData);
-                        } else {
-                            if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
-                                $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
-                            }
-                        }
-                    }
-                }
-
-                if (!empty($old['tables'][$tableName]['columns'])) {
-                    foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
-                        if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
-                            $output[] = $this->getColumnRemove($tableName, $oldColumnName);
-                        }
-                    }
-                }
-
-                if (!empty($table['indexes'])) {
-                    foreach ($table['indexes'] as $indexName => $indexSequences) {
-                        if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
-                            $output[] = $this->getIndexCreate($new, $tableName, $indexName);
-                        } else {
-                            if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
-                                $output[] = $this->getIndexCreate($new, $tableName, $indexName);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        $output = $this->getTableMigrationNewDatabase($output, $new, $old);
+        $output = $this->getTableMigrationNewTables($output, $new, $old);
 
         if (!empty($this->options['foreign_keys'])) {
             $lines = $this->getForeignKeysMigrations($new, $old);
             $output = $this->appendLines($output, $lines);
         }
 
-        if (!empty($old['tables'])) {
-            foreach ($old['tables'] as $tableName => $table) {
-                if ($tableName == 'phinxlog') {
-                    continue;
-                }
-
-                if (!empty($old['tables'][$tableName]['indexes'])) {
-                    foreach ($old['tables'][$tableName]['indexes'] as $indexName => $indexSequences) {
-                        if (!isset($new['tables'][$tableName]['indexes'][$indexName])) {
-                            $output[] = $this->getIndexRemove($tableName, $indexName);
-                        }
-                    }
-                }
-                if (!isset($new['tables'][$tableName])) {
-                    $output[] = $this->getDropTable($tableName);
-                }
-            }
-        }
+        $output = $this->getTableMigrationOldTables($output, $new, $old);
 
         if (!empty($this->options['foreign_keys'])) {
             $output[] = $this->getSetForeignKeyCheck(1);
             $output[] = $this->getSetUniqueChecks(1);
+        }
+
+        return $output;
+    }
+
+    /**
+     * Get table migration (new database).
+     *
+     * @param array $output
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationNewDatabase($output, $new, $old)
+    {
+        if (empty($new['database'])) {
+            return $output;
+        }
+        if ($this->neq($new, $old, ['database', 'default_character_set_name'])) {
+            $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
+        }
+        if ($this->neq($new, $old, ['database', 'default_collation_name'])) {
+            $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
+        }
+        return $output;
+    }
+
+    /**
+     * Get table migration (new tables).
+     *
+     * @param array $output
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationNewTables($output, $new, $old)
+    {
+        if (empty($new['tables'])) {
+            return $output;
+        }
+        foreach ($new['tables'] as $tableName => $table) {
+            if ($tableName == 'phinxlog') {
+                continue;
+            }
+            if (!isset($old['tables'][$tableName])) {
+                // create the table
+                $output[] = $this->getCreateTable($tableName);
+            }
+            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'engine'])) {
+                $output[] = $this->getAlterTableEngine($tableName, $table['table']['engine']);
+            }
+            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_comment'])) {
+                $output[] = $this->getAlterTableComment($tableName, $table['table']['table_comment']);
+            }
+            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'character_set_name'])) {
+                $output[] = $this->getAlterTableCharset($tableName, $table['table']['character_set_name']);
+            }
+            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_collation'])) {
+                $output[] = $this->getAlterTableCollate($tableName, $table['table']['table_collation']);
+            }
+
+            $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
+
+            $output = $this->getTableMigrationOldTablesColumns($output, $tableName, $new, $old);
+
+            $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
+        }
+        return $output;
+    }
+
+    /**
+     * Get table migration (new table columns).
+     *
+     * @param array $output
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old)
+    {
+        if (empty($table['columns'])) {
+            return $output;
+        }
+        foreach ($table['columns'] as $columnName => $columnData) {
+            if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
+                $output[] = $this->getColumnCreate($new, $tableName, $columnName, $columnData);
+            } else {
+                if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
+                    $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
+                }
+            }
+        }
+        return $output;
+    }
+
+    /**
+     * Get table migration (old table columns).
+     *
+     * @param array $output
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationOldTablesColumns($output, $tableName, $new, $old)
+    {
+        if (empty($old['tables'][$tableName]['columns'])) {
+            return $output;
+        }
+        foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
+            if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
+                $output[] = $this->getColumnRemove($tableName, $oldColumnName);
+            }
+        }
+        return $output;
+    }
+
+    /**
+     * Get table migration (indexes).
+     *
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationIndexes($output, $table, $tableName, $new, $old)
+    {
+        if (empty($table['indexes'])) {
+            return $output;
+        }
+        foreach ($table['indexes'] as $indexName => $indexSequences) {
+            if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
+                $output[] = $this->getIndexCreate($new, $tableName, $indexName);
+            } else {
+                if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
+                    $output[] = $this->getIndexCreate($new, $tableName, $indexName);
+                }
+            }
+        }
+        return $output;
+    }
+
+    /**
+     * Get table migration (old tables).
+     *
+     * @param array $output
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationOldTables($output, $new, $old)
+    {
+        if (empty($old['tables'])) {
+            return $output;
+        }
+        foreach ($old['tables'] as $tableName => $table) {
+            if ($tableName == 'phinxlog') {
+                continue;
+            }
+            if (!empty($old['tables'][$tableName]['indexes'])) {
+                foreach ($old['tables'][$tableName]['indexes'] as $indexName => $indexSequences) {
+                    if (!isset($new['tables'][$tableName]['indexes'][$indexName])) {
+                        $output[] = $this->getIndexRemove($tableName, $indexName);
+                    }
+                }
+            }
+            if (!isset($new['tables'][$tableName])) {
+                $output[] = $this->getDropTable($tableName);
+            }
         }
 
         return $output;
