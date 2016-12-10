@@ -103,14 +103,14 @@ require __DIR__ . '/../vendor/odan/phinx-migrations-generator/bin/phinx-migratio
 ```php
 <?php
 
-// include framework bootrap here
+// include framework bootstrap code here
 // ...
 
-// Get PDO object or create new instance
+// Get PDO object (from framework) or create new instance
 $pdo = new PDO('mysql:host=127.0.0.1;dbname=test', 'username', 'password'),
 
 // Change this path!
-$migrationPath = 'path/to/migrations';
+$migrationPath = '/path/to/migrations';
 $schemaFile = $migrationPath . '/schema.php';
 
 return array(
