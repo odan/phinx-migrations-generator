@@ -361,9 +361,9 @@ class PhinxMySqlGenerator
             }
             foreach ($table['foreign_keys'] as $fkName => $fkData) {
                 if (!isset($old['tables'][$tableName]['foreign_keys'][$fkName])) {
-                    $output[] = $this->getForeignKeyCreate($tableName, $fkName, $fkData);
+                    $output[] = $this->getForeignKeyCreate($tableName, $fkName);
                 } else {
-                    $output[] = $this->getForeignKeyRemove($tableName, $fkName, $fkData);
+                    $output[] = $this->getForeignKeyRemove($tableName, $fkName);
                 }
             }
         }
