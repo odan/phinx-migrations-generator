@@ -85,6 +85,48 @@ php phinx-migrations migration:generate
 php phinx-migrationsmigration:generate --config=myconfig.php
 ```
 
+# Console Setup
+
+* Create a console file: bin/phinx-migrations.php
+
+```php
+<?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Start console
+require __DIR__ . '/../vendor/odan/phinx-migrations-generator/bin/phinx-migrations';
+```
+
+* Create a config file: bin/phinx-migrations-config.php
+
+```php
+<?php
+
+// include framework bootrap here
+// ...
+
+// Get PDO object or create new instance
+$pdo = new PDO('mysql:host=127.0.0.1;dbname=test', 'username', 'password'),
+
+// Change this path!
+$migrationPath = 'path/to/migrations';
+$schemaFile = $migrationPath . '/schema.php';
+
+return array(
+    'pdo' => $pdo,
+    'schema_file' => $schemaFile,
+    'migration_path' => $migrationPath
+);
+```
+
+* Open the console (cmd) and run:
+
+```
+cd bin
+php phinx-migrations.php migration:generate
+```
+
 ## Alternative projects
 
 https://github.com/robmorgan/phinx/issues/109#issuecomment-255297913
