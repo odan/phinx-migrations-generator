@@ -550,31 +550,133 @@ class PhinxMySqlGenerator
     {
         $attributes = array();
 
+        $attributes = $this->getPhinxColumnOptionsNull($attributes, $columnData);
+
+        // default value
+        $attributes = $this->getPhinxColumnOptionsDefault($attributes, $columnData);
+
+        // For timestamp columns:
+        $attributes = $this->getPhinxColumnOptionsTimestamp($attributes, $columnData);
+
+        // limit / length
+        $attributes = $this->getPhinxColumnOptionsLimit($attributes, $columnData);
+
+        // numeric attributes
+        $attributes = $this->getPhinxColumnOptionsNumeric($attributes, $columnData);
+        // enum values
+        if ($phinxtype === 'enum') {
+            $attributes[] = $this->getOptionEnumValue($columnData);
+        }
+
+        $attributes = $this->getPhinxColumnOptionsComment($attributes, $columnData);
+
+        // after: specify the column that a new column should be placed after
+        $attributes = $this->getPhinxColumnOptionsAfter($attributes, $columnData, $columns);
+
+        // @todo
+        // update set an action to be triggered when the row is updated (use with CURRENT_TIMESTAMP)
+        // timezone enable or disable the with time zone option for time and timestamp columns (only applies to Postgres)
+        //
+        // For foreign key definitions:
+        // update set an action to be triggered when the row is updated
+        // delete set an action to be triggered when the row is deleted
+
+        $result = 'array(' . implode(', ', $attributes) . ')';
+        return $result;
+    }
+
+    /**
+     * Generate phinx column options (default value).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsDefault($attributes, $columnData)
+    {
+        if ($columnData['COLUMN_DEFAULT'] !== null) {
+            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '\'' . $columnData['COLUMN_DEFAULT'] . '\'';
+            $attributes[] = '\'default\' => ' . $default;
+        }
+        return $attributes;
+    }
+
+    /**
+     * Generate phinx column options (null).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsNull($attributes, $columnData)
+    {
         // has NULL
         if ($columnData['IS_NULLABLE'] === 'YES') {
             $attributes[] = '\'null\' => true';
         } else {
             $attributes[] = '\'null\' => false';
         }
+        return $attributes;
+    }
 
-        // default value
-        if ($columnData['COLUMN_DEFAULT'] !== null) {
-            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '\'' . $columnData['COLUMN_DEFAULT'] . '\'';
-            $attributes[] = '\'default\' => ' . $default;
-        }
-
-        // For timestamp columns:
+    /**
+     * Generate phinx column options (update).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsTimestamp($attributes, $columnData)
+    {
         // default set default value (use with CURRENT_TIMESTAMP)
         // on update CURRENT_TIMESTAMP
         if (strpos($columnData['EXTRA'], 'on update CURRENT_TIMESTAMP') !== false) {
             $attributes[] = '\'update\' => \'CURRENT_TIMESTAMP\'';
         }
-        // limit / length
+        return $attributes;
+    }
+
+    /**
+     * Generate phinx column options (update).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsLimit($attributes, $columnData)
+    {
         $limit = $this->getColumnLimit($columnData);
         if ($limit) {
             $attributes[] = '\'limit\' => ' . $limit;
         }
+        return $attributes;
+    }
 
+    /**
+     * Generate phinx column options (comment).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsComment($attributes, $columnData)
+    {
+        // Set a text comment on the column
+        if (!empty($columnData['COLUMN_COMMENT'])) {
+            $attributes[] = '\'comment\' => "' . addslashes($columnData['COLUMN_COMMENT']) . '"';
+        }
+        return $attributes;
+    }
+
+    /**
+     * Generate phinx column options (default value).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsNumeric($attributes, $columnData)
+    {
         // For decimal columns
         if (!empty($columnData['NUMERIC_PRECISION'])) {
             $attributes[] = '\'precision\' => ' . $columnData['NUMERIC_PRECISION'];
@@ -589,23 +691,25 @@ class PhinxMySqlGenerator
         if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
             $attributes[] = '\'signed\' => false';
         }
-        // enum values
-        if ($phinxtype === 'enum') {
-            $attributes[] = $this->getOptionEnumValue($columnData);
-        }
-
-        // Set a text comment on the column
-        if (!empty($columnData['COLUMN_COMMENT'])) {
-            $attributes[] = '\'comment\' => "' . addslashes($columnData['COLUMN_COMMENT']) . '"';
-        }
 
         // For integer and biginteger columns:
         // identity enable or disable automatic incrementing
         if ($columnData['EXTRA'] == 'auto_increment') {
             $attributes[] = '\'identity\' => \'enable\'';
         }
+        return $attributes;
+    }
 
-        // after: specify the column that a new column should be placed after
+    /**
+     * Generate phinx column options (after).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @param array $columns
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsAfter($attributes, $columnData, $columns)
+    {
         $columnName = $columnData['COLUMN_NAME'];
         $after = null;
         foreach (array_keys($columns) as $column) {
@@ -617,16 +721,7 @@ class PhinxMySqlGenerator
         if (!empty($after)) {
             $attributes[] = sprintf('\'after\' => \'%s\'', $after);
         }
-
-        // @todo
-        // update set an action to be triggered when the row is updated (use with CURRENT_TIMESTAMP)
-        // timezone enable or disable the with time zone option for time and timestamp columns (only applies to Postgres)
-        //
-        // For foreign key definitions:
-        // update set an action to be triggered when the row is updated
-        // delete set an action to be triggered when the row is deleted
-
-        return 'array(' . implode(', ', $attributes) . ')';
+        return $attributes;
     }
 
     /**
