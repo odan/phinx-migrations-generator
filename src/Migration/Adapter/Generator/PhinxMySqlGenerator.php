@@ -170,7 +170,7 @@ class PhinxMySqlGenerator
                             $output[] = $this->getColumnCreate($new, $tableName, $columnName, $columnData);
                         } else {
                             if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
-                                $output[] = $this->getColumnUpdate($new, $tableName, $columnName, $columnData);
+                                $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
                             }
                         }
                     }
@@ -237,7 +237,7 @@ class PhinxMySqlGenerator
      * @param array $array2
      * @return array
      */
-    protected function appendLines($array1, $array2)
+    protected function appendLines(array $array1 = array(), array $array2 = array())
     {
         if (empty($array2)) {
             return $array1;
@@ -584,13 +584,13 @@ class PhinxMySqlGenerator
         }
 
         // signed enable or disable the unsigned option (only applies to MySQL)
+        $match = null;
         $pattern = '/\(\d+\) unsigned$/';
         if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
             $attributes[] = '\'signed\' => false';
         }
         // enum values
         if ($phinxtype === 'enum') {
-            //$attributes[] = '\'values\' => ' . str_replace('enum', 'array', $columnData['column_type']);
             $attributes[] = $this->getOptionEnumValue($columnData);
         }
 
