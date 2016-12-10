@@ -275,11 +275,14 @@ class MigrationGenerator
      */
     public function getPdo($settings)
     {
+        if (isset($settings['pdo']) && $settings['pdo'] instanceof PDO) {
+            $settings['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $settings['pdo']->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            return $settings['pdo'];
+        }
         $options = array_replace_recursive($settings['options'], [
             // Enable exceptions
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            // Convert column names to lower case.
-            PDO::ATTR_CASE => PDO::CASE_LOWER,
             // Set default fetch mode
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);

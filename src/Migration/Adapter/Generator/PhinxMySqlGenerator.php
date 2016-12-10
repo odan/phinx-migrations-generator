@@ -80,7 +80,8 @@ class PhinxMySqlGenerator
      * Create migration
      *
      * @param string $name Name of the migration
-     * @param array $diffs
+     * @param array $newSchema
+     * @param array $oldSchema
      * @return string PHP code
      */
     public function createMigration($name, $newSchema, $oldSchema)
@@ -403,7 +404,7 @@ class PhinxMySqlGenerator
 
         $output = [];
         if ($columnName == 'id') {
-            $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
+            $output[] = sprintf("%sif (\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
             $output[] = $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', %s)->update();", $this->ind3, $table, $columnName, $phinxType, $columnAttributes);
             $output[] = sprintf("%s} else {", $this->ind2);
             $output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind3, $table, $columnName, $phinxType, $columnAttributes);
@@ -460,7 +461,7 @@ class PhinxMySqlGenerator
      */
     protected function getMySQLColumnType($columnData)
     {
-        $type = $columnData['column_type'];
+        $type = $columnData['COLUMN_TYPE'];
         $pattern = '/^[a-z]+/';
         $match = null;
         preg_match($pattern, $type, $match);
@@ -475,7 +476,7 @@ class PhinxMySqlGenerator
      */
     function getPhinxColumnType($columnData)
     {
-        $columnType = $columnData['column_type'];
+        $columnType = $columnData['COLUMN_TYPE'];
         if ($columnType == 'tinyint(1)') {
             return 'boolean';
         }
@@ -550,22 +551,22 @@ class PhinxMySqlGenerator
         $attributes = array();
 
         // has NULL
-        if ($columnData['is_nullable'] === 'YES') {
+        if ($columnData['IS_NULLABLE'] === 'YES') {
             $attributes[] = '\'null\' => true';
         } else {
             $attributes[] = '\'null\' => false';
         }
 
         // default value
-        if ($columnData['column_default'] !== null) {
-            $default = is_int($columnData['column_default']) ? $columnData['column_default'] : '\'' . $columnData['column_default'] . '\'';
+        if ($columnData['COLUMN_DEFAULT'] !== null) {
+            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '\'' . $columnData['COLUMN_DEFAULT'] . '\'';
             $attributes[] = '\'default\' => ' . $default;
         }
 
         // For timestamp columns:
         // default set default value (use with CURRENT_TIMESTAMP)
         // on update CURRENT_TIMESTAMP
-        if (strpos($columnData['extra'], 'on update CURRENT_TIMESTAMP') !== false) {
+        if (strpos($columnData['EXTRA'], 'on update CURRENT_TIMESTAMP') !== false) {
             $attributes[] = '\'update\' => \'CURRENT_TIMESTAMP\'';
         }
         // limit / length
@@ -575,16 +576,16 @@ class PhinxMySqlGenerator
         }
 
         // For decimal columns
-        if (!empty($columnData['numeric_precision'])) {
-            $attributes[] = '\'precision\' => ' . $columnData['numeric_precision'];
+        if (!empty($columnData['NUMERIC_PRECISION'])) {
+            $attributes[] = '\'precision\' => ' . $columnData['NUMERIC_PRECISION'];
         }
-        if (!empty($columnData['numeric_scale'])) {
-            $attributes[] = '\'scale\' => ' . $columnData['numeric_scale'];
+        if (!empty($columnData['NUMERIC_SCALE'])) {
+            $attributes[] = '\'scale\' => ' . $columnData['NUMERIC_SCALE'];
         }
 
         // signed enable or disable the unsigned option (only applies to MySQL)
         $pattern = '/\(\d+\) unsigned$/';
-        if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
             $attributes[] = '\'signed\' => false';
         }
         // enum values
@@ -594,18 +595,18 @@ class PhinxMySqlGenerator
         }
 
         // Set a text comment on the column
-        if (!empty($columnData['column_comment'])) {
-            $attributes[] = '\'comment\' => "' . addslashes($columnData['column_comment']) . '"';
+        if (!empty($columnData['COLUMN_COMMENT'])) {
+            $attributes[] = '\'comment\' => "' . addslashes($columnData['COLUMN_COMMENT']) . '"';
         }
 
         // For integer and biginteger columns:
         // identity enable or disable automatic incrementing
-        if ($columnData['extra'] == 'auto_increment') {
+        if ($columnData['EXTRA'] == 'auto_increment') {
             $attributes[] = '\'identity\' => \'enable\'';
         }
 
         // after: specify the column that a new column should be placed after
-        $columnName = $columnData['column_name'];
+        $columnName = $columnData['COLUMN_NAME'];
         $after = null;
         foreach (array_keys($columns) as $column) {
             if ($column === $columnName) {
@@ -638,7 +639,7 @@ class PhinxMySqlGenerator
     {
         $match = null;
         $pattern = '/enum\((.*)\)/';
-        if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
             $values = str_getcsv($match[1], ',', "'", "\\");
             foreach ($values as $k => $value) {
                 $values[$k] = "'" . addcslashes($value, "'") . "'";
@@ -698,11 +699,11 @@ class PhinxMySqlGenerator
                 $limit = 'MysqlAdapter::BLOB_TINY';
                 break;
             default:
-                if (!empty($columnData['character_maximum_length'])) {
-                    $limit = $columnData['character_maximum_length'];
+                if (!empty($columnData['CHARACTER_MAXIMUM_LENGTH'])) {
+                    $limit = $columnData['CHARACTER_MAXIMUM_LENGTH'];
                 } else {
                     $pattern = '/\((\d+)\)/';
-                    if (preg_match($pattern, $columnData['column_type'], $match) === 1) {
+                    if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
                         $limit = $match[1];
                     }
                 }
@@ -749,7 +750,7 @@ class PhinxMySqlGenerator
     {
         $indexFields = array();
         foreach ($indexSequences as $indexData) {
-            $indexFields[] = $indexData['column_name'];
+            $indexFields[] = $indexData['Column_name'];
         }
         $result = "array('" . implode("','", $indexFields) . "')";
         return $result;
@@ -765,16 +766,16 @@ class PhinxMySqlGenerator
     {
         $options = array();
 
-        if (isset($indexData['key_name'])) {
-            $options[] = '\'name\' => "' . $indexData['key_name'] . '"';
+        if (isset($indexData['KEY_NAME'])) {
+            $options[] = '\'name\' => "' . $indexData['KEY_NAME'] . '"';
         }
-        if (isset($indexData['non_unique']) && $indexData['non_unique'] == 1) {
+        if (isset($indexData['NON_UNIQUE']) && $indexData['NON_UNIQUE'] == 1) {
             $options[] = '\'unique\' => false';
         } else {
             $options[] = '\'unique\' => true';
         }
         // MyISAM only
-        if (isset($indexData['index_type']) && $indexData['index_type'] == 'FULLTEXT') {
+        if (isset($indexData['INDEX_TYPE']) && $indexData['INDEX_TYPE'] == 'FULLTEXT') {
             $options[] = '\'type\' => \'fulltext\'';
         }
         $result = 'array(' . implode(', ', $options) . ')';
@@ -805,9 +806,9 @@ class PhinxMySqlGenerator
     {
         $foreignKeys = $this->dba->getForeignKeys($table);
         $fkData = $foreignKeys[$fkName];
-        $columns = "'" . $fkData['column_name'] . "'";
-        $referencedTable = "'" . $fkData['referenced_table_name'] . "'";
-        $referencedColumns = "'" . $fkData['referenced_column_name'] . "'";
+        $columns = "'" . $fkData['COLUMN_NAME'] . "'";
+        $referencedTable = "'" . $fkData['REFERENCED_TABLE_NAME'] . "'";
+        $referencedColumns = "'" . $fkData['REFERENCED_COLUMN_NAME'] . "'";
         $options = $this->getForeignKeyOptions($fkData);
 
         $output = [];
@@ -826,11 +827,11 @@ class PhinxMySqlGenerator
     protected function getForeignKeyOptions($fkData)
     {
         $options = array();
-        if (isset($fkData['update_rule'])) {
-            $options[] = '\'update\' => "' . $this->getForeignKeyRuleValue($fkData['update_rule']) . '"';
+        if (isset($fkData['UPDATE_RULE'])) {
+            $options[] = '\'update\' => "' . $this->getForeignKeyRuleValue($fkData['UPDATE_RULE']) . '"';
         }
         if (isset($fkData['delete_rule'])) {
-            $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['delete_rule']) . '"';
+            $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['DELETE_RULE']) . '"';
         }
         // @todo 'constraint'
         $result = 'array(' . implode(', ', $options) . ')';

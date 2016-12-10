@@ -1,68 +1,64 @@
-<?php return array (
-  0 =>
-  array (
+<?php
+
+return array(
     'tables' =>
-    array (
-      'newtable' =>
-            array (
-        'table' =>
-        array (
-          'table_name' => 'newtable',
-                    'engine' => 'InnoDB',
-          'table_comment' => '',
+    array(
+        'newtable' =>
+        array(
+            'table' =>
+            array(
+                'table_name' => 'newtable',
+                'engine' => 'InnoDB',
+                'table_comment' => '',
+            ),
+            'columns' =>
+            array(
+                'id' =>
+                array(
+                    'TABLE_CATALOG' => 'def',
+                    'TABLE_SCHEMA' => 'test',
+                    'TABLE_NAME' => 'newtable2',
+                    'COLUMN_NAME' => 'id',
+                    'ORDINAL_POSITION' => '1',
+                    'COLUMN_DEFAULT' => NULL,
+                    'IS_NULLABLE' => 'NO',
+                    'DATA_TYPE' => 'int',
+                    'CHARACTER_MAXIMUM_LENGTH' => NULL,
+                    'CHARACTER_OCTET_LENGTH' => NULL,
+                    'NUMERIC_PRECISION' => '10',
+                    'NUMERIC_SCALE' => '0',
+                    'DATETIME_PRECISION' => NULL,
+                    'CHARACTER_SET_NAME' => NULL,
+                    'COLLATION_NAME' => NULL,
+                    'COLUMN_TYPE' => 'int(11)',
+                    'COLUMN_KEY' => 'PRI',
+                    'EXTRA' => 'auto_increment',
+                    'PRIVILEGES' => 'select,insert,update,references',
+                    'COLUMN_COMMENT' => '',
+                ),
+            ),
+            'indexes' =>
+            array(
+                'PRIMARY' =>
+                array(
+                    'Table' => 'newtable',
+                    'Non_unique' => '0',
+                    'Key_name' => 'PRIMARY',
+                    'Seq_in_index' => '1',
+                    'Column_name' => 'id',
+                    'Collation' => 'A',
+                    'Cardinality' => '0',
+                    'Sub_part' => NULL,
+                    'Packed' => NULL,
+                    'Null' => '',
+                    'Index_type' => 'BTREE',
+                    'Comment' => '',
+                    'Index_comment' => '',
+                ),
+            ),
+            'foreign_keys' =>
+            array(
+            ),
         ),
-        'columns' =>
-        array (
-          'id' =>
-          array (
-            'table_catalog' => 'def',
-            'table_schema' => 'test',
-            'table_name' => 'newtable2',
-            'column_name' => 'id',
-            'ordinal_position' => '1',
-            'column_default' => NULL,
-            'is_nullable' => 'NO',
-            'data_type' => 'int',
-            'character_maximum_length' => NULL,
-            'character_octet_length' => NULL,
-            'numeric_precision' => '10',
-            'numeric_scale' => '0',
-            'datetime_precision' => NULL,
-            'character_set_name' => NULL,
-            'collation_name' => NULL,
-            'column_type' => 'int(11)',
-            'column_key' => 'PRI',
-            'extra' => 'auto_increment',
-            'privileges' => 'select,insert,update,references',
-            'column_comment' => '',
-          ),
-        ),
-        'indexes' =>
-        array (
-          'PRIMARY' =>
-          array (
-            'table' => 'newtable',
-                        'non_unique' => '0',
-            'key_name' => 'PRIMARY',
-            'seq_in_index' => '1',
-            'column_name' => 'id',
-            'collation' => 'A',
-            'cardinality' => '0',
-            'sub_part' => NULL,
-            'packed' => NULL,
-            'null' => '',
-            'index_type' => 'BTREE',
-            'comment' => '',
-            'index_comment' => '',
-          ),
-        ),
-        'foreign_keys' =>
-        array (
-        ),
-      ),
     ),
-  ),
-  1 =>
-  array (
-  ),
 );

@@ -54,6 +54,7 @@ return array(
     'options' => array(
         PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
     ),
+    //'pdo' => new PDO('mysql:host=127.0.0.1;dbname=test', 'username', 'password'),
     'schema_file' => __DIR__ . '/schema.php',
     'migration_path' => __DIR__
 );
@@ -61,6 +62,7 @@ return array(
 
 Name | Type | Default | Description
 --- | --- | --- | ---
+pdo | PDO | null | PDO object
 dsn | string |  | Data source name (mysql:host=127.0.0.1;dbname=test)
 username | string | | Database username
 password | string | | Database password

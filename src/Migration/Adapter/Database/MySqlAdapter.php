@@ -119,11 +119,11 @@ class MySqlAdapter
         $rows = $this->pdo->query($sql)->fetchAll();
         foreach ($rows as $row) {
             $result[] = [
-                'table_name' => $row['table_name'],
-                'engine' => $row['engine'],
-                'table_comment' => $row['table_comment'],
-                'table_collation' => $row['table_collation'],
-                'character_set_name' => $row['character_set_name'],
+                'table_name' => $row['TABLE_NAME'],
+                'engine' => $row['ENGINE'],
+                'table_comment' => $row['TABLE_COMMENT'],
+                'table_collation' => $row['TABLE_COLLATION'],
+                'character_set_name' => $row['CHARACTER_SET_NAME'],
             ];
         }
         return $result;
@@ -144,7 +144,7 @@ class MySqlAdapter
 
         $result = [];
         foreach ($rows as $row) {
-            $name = $row['column_name'];
+            $name = $row['COLUMN_NAME'];
             $result[$name] = $row;
         }
         return $result;
@@ -162,11 +162,11 @@ class MySqlAdapter
         $rows = $this->pdo->query($sql)->fetchAll();
         $result = [];
         foreach ($rows as $row) {
-            if (isset($row['cardinality'])) {
-                unset($row['cardinality']);
+            if (isset($row['Cardinality'])) {
+                unset($row['Cardinality']);
             }
-            $name = $row['key_name'];
-            $seq = $row['seq_in_index'];
+            $name = $row['Key_name'];
+            $seq = $row['Seq_in_index'];
             $result[$name][$seq] = $row;
         }
         return $result;
@@ -215,7 +215,7 @@ class MySqlAdapter
 
         $result = [];
         foreach ($rows as $row) {
-            $result[$row['constraint_name']] = $row;
+            $result[$row['CONSTRAINT_NAME']] = $row;
         }
         return $result;
     }
@@ -230,7 +230,7 @@ class MySqlAdapter
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
         $result = $this->pdo->query($sql)->fetch();
-        return $result['create table'];
+        return $result['CREATE TABLE'];
     }
 
     /**
