@@ -19,8 +19,7 @@ class GenerateCommand extends Command
     {
         $this->setName('migration:generate')
                 ->setDescription('Generate migration')
-                //->addArgument('config', InputArgument::OPTIONAL, 'Configuration file.', 'phinx-migrations-config.php')
-                // php migrations.php migration:generate --config=myconfig.php
+                // php phinx-migrations.php migration:generate --config=myconfig.php
                 ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Configuration file.', 'phinx-migrations-config.php')
         ;
     }

@@ -66,7 +66,6 @@ class MySqlAdapter
             $result['tables'][$tableName]['columns'] = $this->getColumns($tableName);
             $result['tables'][$tableName]['indexes'] = $this->getIndexes($tableName);
             $result['tables'][$tableName]['foreign_keys'] = $this->getForeignKeys($tableName);
-            //$result['tables'][$tableName]['create_table'] = $this->getTableCreateSql($tableName);
         }
         return $result;
     }

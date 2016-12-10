@@ -255,7 +255,7 @@ class PhinxMySqlGenerator
      * @param array $old Old schema
      * @return array Output
      */
-    protected function getForeignKeysMigrations($new, $old)
+    protected function getForeignKeysMigrations($new = array(), $old = array())
     {
         if (empty($new['tables'])) {
             return null;
@@ -288,7 +288,7 @@ class PhinxMySqlGenerator
      */
     protected function getAlterDatabaseCharset($charset, $database = null)
     {
-        if ($database) {
+        if ($database !== null) {
             $database = ' ' . $this->dba->ident($database);
         }
         $charset = $this->dba->quote($charset);
@@ -920,9 +920,9 @@ class PhinxMySqlGenerator
      * @param array $keys
      * @return bool
      */
-    protected function neq($arr, $arr2, $key)
+    protected function neq($arr, $arr2, $keys)
     {
-        return !$this->eq($arr, $arr2, $key);
+        return !$this->eq($arr, $arr2, $keys);
     }
 
     /**

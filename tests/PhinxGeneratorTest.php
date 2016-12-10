@@ -19,18 +19,14 @@ class GenerateMigrationTest extends \PHPUnit_Framework_TestCase
     public function testGenerate()
     {
         $settings = $this->getSettings();
-        #$input = new \Symfony\Component\Console\Input\ArrayInput([]);
         $output = new NullOutput();
         $pdo = $this->getPdo($settings);
         $dba = new MySqlAdapter($pdo, $output);
         $gen = new PhinxMySqlGenerator($dba, $output);
 
-        #$mig = new \Odan\Migration\Generator\MigrationGenerator($settings, $input, $output);
-        #$oldSchema = $mig->getOldSchema($this->getSettings());
-
         $diff = $this->read(__DIR__ . '/diffs/newtable.php');
         $actual = $gen->createMigration('MyNewMigration', $diff, []);
-        file_put_contents(__DIR__ . '/output.php', $actual);
+
         $expected = file_get_contents(__DIR__ . '/diffs/newtable_expected.php');
         $this->assertEquals($expected, $actual);
     }

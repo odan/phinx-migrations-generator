@@ -103,7 +103,6 @@ class MigrationGenerator
             return false;
         }
 
-        //$name = 'Test';
         $name = $this->io->ask('Enter migration name', 'Test');
         if (empty($name)) {
             $this->output->writeln('Aborted');
@@ -114,9 +113,8 @@ class MigrationGenerator
         $this->saveMigrationFile($name, $migration);
 
         // Overwrite schema file
-        $overwrite = 'y';
         // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
-        //$overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
+        $overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
         if ($overwrite == 'y') {
             $this->saveSchemaFile($schema, $this->settings);
         }
