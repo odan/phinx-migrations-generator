@@ -4,7 +4,6 @@ namespace Odan\Migration\Command;
 
 use Exception;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,9 +16,9 @@ class GenerateCommand extends Command
      */
     protected function configure()
     {
-        $this->setName('migration:generate')
+        $this->setName('generate')
                 ->setDescription('Generate migration')
-                // php phinx-migrations.php migration:generate --config=myconfig.php
+                // php phinx-migrations.php generate --config=myconfig.php
                 ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Configuration file.', 'phinx-migrations-config.php')
         ;
     }

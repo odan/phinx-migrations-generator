@@ -84,13 +84,13 @@ migration_path | string | | Output directory for migration files
 
 ```
 cd vendor/bin
-phinx-migrations migration:generate
+phinx-migrations generate
 ```
 
 ## Load custom config file
 
 ```
-phinx-migrations migration:generate --config=myconfig.php
+phinx-migrations generate --config=myconfig.php
 ```
 
 # Console Setup
@@ -132,7 +132,7 @@ return array(
 
 ```
 cd bin
-php phinx-migrations.php migration:generate
+php phinx-migrations.php generate
 ```
 
 ## Alternative projects
