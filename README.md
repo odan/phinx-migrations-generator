@@ -133,7 +133,7 @@ cd bin
 php phinx-migrations.php generate
 ```
 
-## Alternative projects
+## Similar projects
 
 https://github.com/robmorgan/phinx/issues/109#issuecomment-255297913
 
