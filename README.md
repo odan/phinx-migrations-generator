@@ -101,7 +101,7 @@ phinx-migrations generate --config=myconfig.php
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../vendor/odan/phinx-migrations-generator/bin/phinx-migrations';
+require_once __DIR__ . '/../vendor/odan/phinx-migrations-generator/bin/phinx-migrations';
 ```
 
 * Create a config file: bin/phinx-migrations-config.php
