@@ -1,6 +1,5 @@
 <?php
 
-use PDO;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use Symfony\Component\Console\Output\NullOutput;

@@ -29,15 +29,14 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Tables: create, update, remove, engine, comment, character set, collation
 * Columns: create, update, remove
 * Indexes: create, remove
-* Foreign keys (experimental): create, remove
+* Foreign keys: create, remove
 
 ### Not supported
 
 * MySQL [double] is not supported by phinx https://github.com/robmorgan/phinx/issues/498
-* MySQL [year] is not supported by phinx. https://github.com/robmorgan/phinx/pull/704 | https://github.com/robmorgan/phinx/issues/551
+* MySQL [year] is not supported by phinx. https://github.com/robmorgan/phinx/issues/551 | https://github.com/robmorgan/phinx/pull/704
 * MySQL [bit] is not supported by phinx. https://github.com/robmorgan/phinx/pull/778
 * MySQL enum values with special characters: https://github.com/robmorgan/phinx/issues/887
-* Migration of contraint names (currently only auto generated): https://github.com/robmorgan/phinx/issues/823
 * MySQL comments with special characters.
 
 # Installation
@@ -77,6 +76,7 @@ password | string | | Database password
 options | array | | Database options
 schema_file | string | schema.php | Database schema file (schema.php or schema.json)
 migration_path | string | | Output directory for migration files
+foreign_keys | int | 0 | Generate foreign keys (experimental)
 
 # Usage
 
@@ -101,8 +101,6 @@ phinx-migrations generate --config=myconfig.php
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-
-// Start console
 require __DIR__ . '/../vendor/odan/phinx-migrations-generator/bin/phinx-migrations';
 ```
 

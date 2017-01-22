@@ -68,8 +68,6 @@ class PhinxMySqlGenerator
         $this->output = $output;
 
         // Experimental foreign key support.
-        // Currently phinx can't define a contraint name.
-        // https://github.com/robmorgan/phinx/issues/823#issuecomment-231548829
         $default = [
             'foreign_keys' => false
         ];
@@ -981,7 +979,7 @@ class PhinxMySqlGenerator
         $columns = "'" . $fkData['COLUMN_NAME'] . "'";
         $referencedTable = "'" . $fkData['REFERENCED_TABLE_NAME'] . "'";
         $referencedColumns = "'" . $fkData['REFERENCED_COLUMN_NAME'] . "'";
-        $options = $this->getForeignKeyOptions($fkData);
+        $options = $this->getForeignKeyOptions($fkData, $fkName);
 
         $output = [];
         $output[] = sprintf("%s\$this->table(\"%s\")->addForeignKey(%s, %s, %s, %s)->save();", $this->ind2, $table, $columns, $referencedTable, $referencedColumns, $options);
@@ -994,18 +992,21 @@ class PhinxMySqlGenerator
      * Generate foreign key options.
      *
      * @param array $fkData
+     * @param string $fkName
      * @return string
      */
-    protected function getForeignKeyOptions($fkData)
+    protected function getForeignKeyOptions($fkData, $fkName = null)
     {
         $options = array();
+        if (isset($fkName)) {
+            $options[] = '\'constraint\' => "' . $fkName . '"';
+        }
         if (isset($fkData['UPDATE_RULE'])) {
             $options[] = '\'update\' => "' . $this->getForeignKeyRuleValue($fkData['UPDATE_RULE']) . '"';
         }
         if (isset($fkData['delete_rule'])) {
             $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['DELETE_RULE']) . '"';
         }
-        // @todo 'constraint'
         $result = 'array(' . implode(', ', $options) . ')';
         return $result;
     }
