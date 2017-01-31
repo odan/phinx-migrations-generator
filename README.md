@@ -25,11 +25,12 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 
 * Framework independent
 * DBMS: MySQL
+* Initial schema, schema diff
 * Database: character set, collation
 * Tables: create, update, remove, engine, comment, character set, collation
 * Columns: create, update, remove
 * Indexes: create, remove
-* Foreign keys: create, remove
+* Foreign keys (experimental): create, remove
 
 ### Not supported
 
