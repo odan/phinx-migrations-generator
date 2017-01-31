@@ -12,7 +12,7 @@ before_script:
 
 script:
   - mkdir -p build/logs
-  - phpunit -c phpunit.xml --coverage-clover build/logs/clover.xml
+  - vendor/bin/phpunit -c phpunit.xml --coverage-clover build/logs/clover.xml
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) 
