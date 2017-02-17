@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="webapp" default="noop">
+<project name="phinx-migrations" default="phpunit">
     
     <target name="noop"/>
     <property environment="env"/>
@@ -23,14 +23,6 @@
     <target name="display_windows" if="is_windows" >
         <echo message="OS Family is: Windows" />
     </target>
-        
-    <target name="build-prepare" description="Prepare for build">
-        <delete dir="${basedir}/build/logs"/>
-        <delete dir="${basedir}/build/master"/>
-        <mkdir dir="${basedir}/build"/>
-        <mkdir dir="${basedir}/build/logs"/>
-        <mkdir dir="${basedir}/build/master"/>
-    </target>
     
     <condition property="is_windows">
         <os family="windows"/>
@@ -39,61 +31,14 @@
         <os family="unix" />
     </condition>
      
-    <target name="build-composer" description="Install dependencies with Composer">
-        <tstamp>
-            <format property="thirty.days.ago" pattern="MM/dd/yyyy hh:mm aa" offset="-30" unit="day"/>
-        </tstamp>
-        <delete>
-            <fileset dir="${basedir}/build/master">
-                <include name="composer.phar" />
-                <date datetime="${thirty.days.ago}" when="before"/>
-            </fileset>
-        </delete>
-
-        <get src="https://getcomposer.org/composer.phar" dest="${basedir}/build/master/composer.phar" skipexisting="true"/>
-
-        <exec executable="php" searchpath="true" resolveexecutable="true">
-            <arg value="${basedir}/build/master/composer.phar"/>
-            <arg value="selfupdate"/>
-        </exec>
-    </target>
-    
-      
-    <target name="lint" description="Perform syntax check of sourcecode files">
-        <apply executable="php" failonerror="true">
-            <arg value="-l" />
- 
-            <fileset dir="${basedir}">
-                <include name="**/*.php" />
-                <!-- exclude the tests directory, repeat line below to exclude more -->
-                <exclude name="tests/**" /> 
-                <exclude name="vendor/**" /> 
-                <modified />
-            </fileset>
- 
-            <fileset dir="${basedir}/tests">
-                <include name="**/*.php" />
-                <modified />
-            </fileset>
-        </apply>
-    </target> 
-   
-    <target name="apigen" description="Generate API documentation using ApiGen">
-        <delete dir="${basedir}/build/api"/>
-        <mkdir dir="${basedir}/build/api"/>
-        <exec executable="apigen${ext}" searchpath="true" resolveexecutable="true" failonerror="true">
-            <arg line="generate -s ${basedir}/src -d ${basedir}/build/api --skip-doc-path *.html.php,Local.Example.phps,Local.php" />
-        </exec>
-    </target>
-       
-    <target name="phpunit" depends="build-prepare" description="Run unit tests with PHPUnit">
+    <target name="phpunit" description="Run unit tests with PHPUnit">
         <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit">
             <arg value="--configuration"/>
             <arg path="${basedir}/phpunit.xml"/>
         </exec>
     </target>
     
-    <target name="phpunit-coverage" depends="build-prepare" description="Run unit tests with PHPUnit with coverage">
+    <target name="phpunit-coverage" description="Run unit tests with PHPUnit with coverage">
         <delete dir="${basedir}/build/coverage"/>
         <mkdir dir="${basedir}/build/coverage"/>
         <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit-coverage">
@@ -104,6 +49,25 @@
             <arg value="--coverage-html"/>
             <arg path="${basedir}/build/coverage"/>
         </exec>
+    </target>
+    
+    <target name="php-cs-fixer" description="Code style fixer">
+        <mkdir dir="${basedir}/build"/>
+        <get src="https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.0.0/php-cs-fixer.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
+        <exec executable="php" searchpath="true" resolveexecutable="true">
+            <arg value="${basedir}/build/php-cs-fixer.phar"/>
+            <arg value="fix"/>
+            <arg value="${basedir}/src/"/>
+            <arg value="--rules=@PSR2"/>
+            <arg value="--using-cache=no"/>
+        </exec>   
+        <exec executable="php" searchpath="true" resolveexecutable="true">
+            <arg value="${basedir}/build/php-cs-fixer.phar"/>
+            <arg value="fix"/>
+            <arg value="${basedir}/tests/"/>
+            <arg value="--rules=@PSR2"/>
+            <arg value="--using-cache=no"/>
+        </exec>   
     </target>
     
 </project>
