@@ -281,5 +281,4 @@ class MySqlAdapter
         }
         return $this->pdo->quote($value);
     }
-
 }

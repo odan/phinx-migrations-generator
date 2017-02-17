@@ -563,7 +563,7 @@ class PhinxMySqlGenerator
      * @param array $columnData
      * @return string
      */
-    function getPhinxColumnType($columnData)
+    public function getPhinxColumnType($columnData)
     {
         $columnType = $columnData['COLUMN_TYPE'];
         if ($columnType == 'tinyint(1)') {
@@ -932,7 +932,7 @@ class PhinxMySqlGenerator
      * @param array $indexData
      * @return string
      */
-    function getIndexOptions($indexData)
+    public function getIndexOptions($indexData)
     {
         $options = array();
 
@@ -1115,5 +1115,4 @@ class PhinxMySqlGenerator
         }
         return $array;
     }
-
 }

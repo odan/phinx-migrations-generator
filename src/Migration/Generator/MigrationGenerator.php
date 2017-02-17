@@ -15,7 +15,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class MigrationGenerator
 {
-
     protected $settings = array();
 
     /**
@@ -323,5 +322,4 @@ class MigrationGenerator
     {
         return str_replace(' ', '', ucwords($name));
     }
-
 }

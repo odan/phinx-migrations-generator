@@ -60,5 +60,4 @@ class GenerateCommand extends Command
     {
         return require $filename;
     }
-
 }

@@ -83,5 +83,4 @@ class GenerateMigrationTest extends \PHPUnit_Framework_TestCase
             'migration_path' => __DIR__
         );
     }
-
 }
