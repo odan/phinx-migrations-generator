@@ -10,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class PhinxMySqlGenerator
 {
-
     /**
      * Database adapter
      *
@@ -206,9 +205,7 @@ class PhinxMySqlGenerator
             }
 
             $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
-
             $output = $this->getTableMigrationOldTablesColumns($output, $tableName, $new, $old);
-
             $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
         }
         return $output;
@@ -277,10 +274,10 @@ class PhinxMySqlGenerator
         }
         foreach ($table['indexes'] as $indexName => $indexSequences) {
             if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
-                $output[] = $this->getIndexCreate($new, $tableName, $indexName);
+                $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
             } else {
                 if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
-                    $output[] = $this->getIndexCreate($new, $tableName, $indexName);
+                    $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
                 }
             }
         }
@@ -884,15 +881,16 @@ class PhinxMySqlGenerator
     /**
      * Generate index create.
      *
-     * @param array $schema
-     * @param string $table
-     * @param string $indexName
-     * @return string
+     * @param array $output Output
+     * @param array $schema Schema
+     * @param string $table Tablename
+     * @param string $indexName Index name
+     * @return array Output
      */
-    protected function getIndexCreate($schema, $table, $indexName)
+    protected function getIndexCreate($output, $schema, $table, $indexName)
     {
         if ($indexName == 'PRIMARY') {
-            return '';
+            return $output;
         }
         $indexes = $schema['tables'][$table]['indexes'];
         $indexSequences = $indexes[$indexName];
@@ -900,14 +898,11 @@ class PhinxMySqlGenerator
         $indexFields = $this->getIndexFields($indexSequences);
         $indexOptions = $this->getIndexOptions(array_values($indexSequences)[0]);
 
-        $output = [];
         $output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $table, $indexName);
         $output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
         $output[] = sprintf("%s}", $this->ind2);
         $output[] = sprintf("%s\$this->table(\"%s\")->addIndex(%s, %s)->save();", $this->ind2, $table, $indexFields, $indexOptions);
-
-        $result = implode($this->nl, $output);
-        return $result;
+        return $output;
     }
 
     /**

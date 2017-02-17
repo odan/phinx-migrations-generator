@@ -15,6 +15,5 @@ class MyNewMigration extends AbstractMigration
         } else {
             $this->table("newtable")->addColumn('id', 'integer', array('null' => false, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'identity' => 'enable'))->update();
         }
-
     }
 }

@@ -7,13 +7,58 @@ use Symfony\Component\Console\Output\NullOutput;
 /**
  * @coversDefaultClass \Odan\Migration\Adapter\Generator\PhinxMySqlGenerator
  */
-class GenerateMigrationTest extends \PHPUnit_Framework_TestCase
+class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
 {
 
     /**
      * Test
      *
      * @covers ::createMigration
+     * @covers ::addChangeMethod
+     * @covers ::getTableMigration
+     * @covers ::getTableMigrationNewDatabase
+     * @covers ::getTableMigrationNewTables
+     * @covers ::getTableMigrationNewTablesColumns
+     * @covers ::getTableMigrationOldTablesColumns
+     * @covers ::getTableMigrationIndexes
+     * @covers ::getTableMigrationOldTables
+     * @covers ::appendLines
+     * @covers ::getForeignKeysMigrations
+     * @covers ::getAlterDatabaseCharset
+     * @covers ::getAlterDatabaseCollate
+     * @covers ::getCreateTable
+     * @covers ::getDropTable
+     * @covers ::getAlterTableEngine
+     * @covers ::getAlterTableCharset
+     * @covers ::getAlterTableCollate
+     * @covers ::getAlterTableComment
+     * @covers ::getColumnCreate
+     * @covers ::getColumnUpdate
+     * @covers ::getColumnRemove
+     * @covers ::getMySQLColumnType
+     * @covers ::getPhinxColumnType
+     * @covers ::getPhinxColumnOptions
+     * @covers ::getPhinxColumnOptionsDefault
+     * @covers ::getPhinxColumnOptionsNull
+     * @covers ::getPhinxColumnOptionsTimestamp
+     * @covers ::getPhinxColumnOptionsLimit
+     * @covers ::getPhinxColumnOptionsComment
+     * @covers ::getPhinxColumnOptionsNumeric
+     * @covers ::getPhinxColumnOptionsAfter
+     * @covers ::getOptionEnumValue
+     * @covers ::getColumnLimit
+     * @covers ::getIndexCreate
+     * @covers ::getIndexFields
+     * @covers ::getIndexOptions
+     * @covers ::getIndexRemove
+     * @covers ::getForeignKeyCreate
+     * @covers ::getForeignKeyOptions
+     * @covers ::getForeignKeyRuleValue
+     * @covers ::getForeignKeyRemove
+     * @covers ::getSetForeignKeyCheck
+     * @covers ::getSetUniqueChecks
+     * @covers ::eq
+     * @covers ::neq
      */
     public function testGenerate()
     {
@@ -69,7 +114,8 @@ class GenerateMigrationTest extends \PHPUnit_Framework_TestCase
     public function getSettings()
     {
         return array(
-            'dsn' => 'mysql:host=127.0.0.1;dbname=test',
+            'dsn' => 'mysql:host = 127.0.0.1;
+        dbname = test',
             'username' => 'root',
             'password' => '',
             'options' => array(

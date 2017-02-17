@@ -7,13 +7,15 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @coversDefaultClass \Odan\Migration\Command\GenerateCommand
  */
-class GenerateCommandTest extends \PHPUnit_Framework_TestCase
+class GenerateCommandTest extends \PHPUnit\Framework\TestCase
 {
 
     /**
      * Test
      *
      * @covers ::execute
+     * @covers ::getSettings
+     * @covers ::read
      * @expectedException Exception
      */
     public function testGenerate()
@@ -21,7 +23,7 @@ class GenerateCommandTest extends \PHPUnit_Framework_TestCase
         $application = new Application();
         $application->add(new GenerateCommand());
 
-        $command = $application->find('migration:generate');
+        $command = $application->find('generate');
         $commandTester = new CommandTester($command);
         $commandTester->execute(array('command' => $command->getName()));
 
