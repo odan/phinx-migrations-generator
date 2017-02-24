@@ -653,7 +653,7 @@ class PhinxMySqlGenerator
         // update set an action to be triggered when the row is updated
         // delete set an action to be triggered when the row is deleted
 
-        $result = 'array(' . implode(', ', $attributes) . ')';
+        $result = '[' . implode(', ', $attributes) . ']';
         return $result;
     }
 
@@ -812,7 +812,7 @@ class PhinxMySqlGenerator
                 $values[$k] = "'" . addcslashes($value, "'") . "'";
             }
             $valueList = implode(',', array_values($values));
-            $arr = sprintf('array(%s)', $valueList);
+            $arr = sprintf('[%s]', $valueList);
             $result = sprintf('\'values\' => %s', $arr);
             return $result;
         }
@@ -917,7 +917,7 @@ class PhinxMySqlGenerator
         foreach ($indexSequences as $indexData) {
             $indexFields[] = $indexData['Column_name'];
         }
-        $result = "array('" . implode("','", $indexFields) . "')";
+        $result = "['" . implode("','", $indexFields) . "']";
         return $result;
     }
 
@@ -943,7 +943,7 @@ class PhinxMySqlGenerator
         if (isset($indexData['INDEX_TYPE']) && $indexData['INDEX_TYPE'] == 'FULLTEXT') {
             $options[] = '\'type\' => \'fulltext\'';
         }
-        $result = 'array(' . implode(', ', $options) . ')';
+        $result = '[' . implode(', ', $options) . ']';
         return $result;
     }
 
@@ -1002,7 +1002,7 @@ class PhinxMySqlGenerator
         if (isset($fkData['delete_rule'])) {
             $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['DELETE_RULE']) . '"';
         }
-        $result = 'array(' . implode(', ', $options) . ')';
+        $result = '[' . implode(', ', $options) . ']';
         return $result;
     }
 
