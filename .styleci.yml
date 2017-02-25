@@ -3,12 +3,11 @@ preset: psr2
 linting: true
 
 finder:
-  exclude:
-    - "tests"
   name:
     - "*.php"
   path:
     - "src"
+    - "tests"
   not-path:
     - "build"
     - "vendor"
