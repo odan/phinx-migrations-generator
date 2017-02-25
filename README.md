@@ -1,12 +1,12 @@
 # Phinx migrations generator
 
-[![Latest Version](https://img.shields.io/github/release/odan/phinx-migrations-generator.svg?style=flat-square)](https://github.com/loadsys/odan/phinx-migrations-generator/releases)
-[![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master&style=flat-square)](https://travis-ci.org/odan/phinx-migrations-generator)
-[![Crutinizer](https://img.shields.io/scrutinizer/g/odan/phinx-migrations-generator.svg?style=flat-square)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator)
-[![codecov](https://codecov.io/gh/odan/phinx-migrations-generator/branch/master/graph/badge.svg?style=flat-square)](https://codecov.io/gh/odan/phinx-migrations-generator)
-[![StyleCI](https://styleci.io/repos/61276581/shield?style=flat-square)](https://styleci.io/repos/61276581)
-[![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg?style=flat-square)](https://packagist.org/packages/odan/phinx-migrations-generator)
-[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
+[![Latest Version](https://img.shields.io/github/release/odan/phinx-migrations-generator.svg)](https://github.com/loadsys/odan/phinx-migrations-generator/releases)
+[![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master)](https://travis-ci.org/odan/phinx-migrations-generator)
+[![Crutinizer](https://img.shields.io/scrutinizer/g/odan/phinx-migrations-generator.svg)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator)
+[![codecov](https://codecov.io/gh/odan/phinx-migrations-generator/branch/master/graph/badge.svg)](https://codecov.io/gh/odan/phinx-migrations-generator)
+[![StyleCI](https://styleci.io/repos/61276581/shield?style=flat)](https://styleci.io/repos/61276581)
+[![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg)](https://packagist.org/packages/odan/phinx-migrations-generator)
+[![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
 Currently Phinx (a migration library) cannot generate migrations automatically.
 Phinx "only" generates a empty class with up and down functions. You still have to write the migration manually.
