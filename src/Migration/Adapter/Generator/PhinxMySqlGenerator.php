@@ -224,15 +224,15 @@ class PhinxMySqlGenerator
         if (empty($table['columns'])) {
             return $output;
         }
-        $opened = FALSE;
+        $opened = false;
         foreach ($table['columns'] as $columnName => $columnData) {
             if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
                 if ($columnName == 'id' && $opened) {
                     $output[] = sprintf("%s->update();", $this->ind3);
-                    $opened = FALSE;
+                    $opened = false;
                 }
                 if ($columnName != 'id' && !$opened) {
-                    $opened = TRUE;
+                    $opened = true;
                     $output[] = sprintf("%s\$this->table('%s')", $this->ind2, $tableName);
                 }
                 $output[] =
