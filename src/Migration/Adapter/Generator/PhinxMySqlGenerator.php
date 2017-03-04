@@ -970,16 +970,16 @@ class PhinxMySqlGenerator
     {
         $options = array();
 
-        if (isset($indexData['KEY_NAME'])) {
-            $options[] = '\'name\' => "' . $indexData['KEY_NAME'] . '"';
+        if (isset($indexData['Key_name'])) {
+            $options[] = '\'name\' => "' . $indexData['Key_name'] . '"';
         }
-        if (isset($indexData['NON_UNIQUE']) && $indexData['NON_UNIQUE'] == 1) {
+        if (isset($indexData['Non_unique']) && $indexData['Non_unique'] == 1) {
             $options[] = '\'unique\' => false';
         } else {
             $options[] = '\'unique\' => true';
         }
         // MyISAM only
-        if (isset($indexData['INDEX_TYPE']) && $indexData['INDEX_TYPE'] == 'FULLTEXT') {
+        if (isset($indexData['Index_type']) && $indexData['Index_type'] == 'FULLTEXT') {
             $options[] = '\'type\' => \'fulltext\'';
         }
         $result = '[' . implode(', ', $options) . ']';
