@@ -21,7 +21,7 @@ Generated migration
 
 THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 
-# Features
+## Features
 
 * Framework independent
 * DBMS: MySQL
@@ -40,13 +40,15 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * MySQL enum values with special characters: https://github.com/robmorgan/phinx/issues/887
 * MySQL comments with special characters.
 
-# Installation
+## Install
+
+Via Composer
 
 ```
-composer require odan/phinx-migrations-generator
+$ composer require odan/phinx-migrations-generator
 ```
 
-# Configuration
+## Configuration
 
 * Default configuration file: phinx-migrations-config.php
 
@@ -79,22 +81,22 @@ schema_file | string | schema.php | Database schema file (schema.php or schema.j
 migration_path | string | | Output directory for migration files
 foreign_keys | int | 0 | Generate foreign keys (experimental)
 
-# Usage
+## Usage
 
-## Generating migrations
+### Generating migrations
 
 ```
 cd vendor/bin
 phinx-migrations generate
 ```
 
-## Load custom config file
+### Load custom config file
 
 ```
 phinx-migrations generate --config=myconfig.php
 ```
 
-# Console Setup
+## Console Setup
 
 * Create a console file: bin/phinx-migrations.php
 
@@ -134,7 +136,16 @@ cd bin
 php phinx-migrations.php generate
 ```
 
-## Similar projects
+## Testing
 
-https://github.com/robmorgan/phinx/issues/109#issuecomment-255297913
+``` bash
+$ composer test
+```
 
+## Contributing
+
+Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
+
+## License
+
+The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
