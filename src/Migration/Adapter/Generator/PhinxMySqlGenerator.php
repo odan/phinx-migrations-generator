@@ -224,22 +224,22 @@ class PhinxMySqlGenerator
         if (empty($table['columns'])) {
             return $output;
         }
-		$opened = FALSE;
+        $opened = FALSE;
         foreach ($table['columns'] as $columnName => $columnData) {
             if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
-            	if ($columnName == 'id' && $opened) {
-					$output[] = sprintf("%s->update();", $this->ind3);
-					$opened = FALSE;
-				}
-				if ($columnName != 'id' && !$opened) {
-					$opened = TRUE;
-					$output[] = sprintf("%s\$this->table('%s')", $this->ind2, $tableName);
-				}
+                if ($columnName == 'id' && $opened) {
+                    $output[] = sprintf("%s->update();", $this->ind3);
+                    $opened = FALSE;
+                }
+                if ($columnName != 'id' && !$opened) {
+                    $opened = TRUE;
+                    $output[] = sprintf("%s\$this->table('%s')", $this->ind2, $tableName);
+                }
                 $output[] =
-					$columnName == 'id' ?
-						$this->getColumnCreateId($new, $tableName, $columnName)
-						:
-						$this->getColumnCreateAdd($new, $tableName, $columnName);
+                    $columnName == 'id' ?
+                        $this->getColumnCreateId($new, $tableName, $columnName)
+                        :
+                        $this->getColumnCreateAdd($new, $tableName, $columnName);
             } else {
                 if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
                     $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
@@ -247,8 +247,8 @@ class PhinxMySqlGenerator
             }
         }
         if ($opened) {
-			$output[] = sprintf("%s->update();", $this->ind3);
-		}
+            $output[] = sprintf("%s->update();", $this->ind3);
+        }
         return $output;
     }
 
@@ -505,27 +505,41 @@ class PhinxMySqlGenerator
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
         return [$table, $columnName, $phinxType, $columnAttributes];
     }
-	
-	
-	protected function getColumnCreateAdd($schema, $table, $columnName)
-	{
-		$result = $this->getColumnCreate($schema, $table, $columnName);
-		return sprintf("%s->addColumn('%s', '%s', %s)", $this->ind3, $result[1], $result[2], $result[3]);
+
+    /**
+     * Get addColumn method.
+     *
+     * @param $schema
+     * @param $table
+     * @param $columnName
+     * @return string
+     */
+    protected function getColumnCreateAdd($schema, $table, $columnName)
+    {
+        $result = $this->getColumnCreate($schema, $table, $columnName);
+        return sprintf("%s->addColumn('%s', '%s', %s)", $this->ind3, $result[1], $result[2], $result[3]);
     }
-	
-	
-	protected function getColumnCreateId($schema, $table, $columnName)
-	{
-		$result = $this->getColumnCreate($schema, $table, $columnName);
-		$output = [];
-		$output[] = sprintf("%sif (\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $result[0], $result[1]);
-		$output[] = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', %s)->update();", $this->ind3, $result[0], $result[1], $result[2], $result[3]);
-		$output[] = sprintf("%s} else {", $this->ind2);
-		$output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind3, $result[0], $result[1], $result[2], $result[3]);
-		$output[] = sprintf("%s}", $this->ind2);
-		return implode($this->nl, $output);
+
+    /**
+     * Get primary key column update commands.
+     *
+     * @param $schema
+     * @param $table
+     * @param $columnName
+     * @return string
+     */
+    protected function getColumnCreateId($schema, $table, $columnName)
+    {
+        $result = $this->getColumnCreate($schema, $table, $columnName);
+        $output = [];
+        $output[] = sprintf("%sif (\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $result[0], $result[1]);
+        $output[] = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', %s)->update();", $this->ind3, $result[0], $result[1], $result[2], $result[3]);
+        $output[] = sprintf("%s} else {", $this->ind2);
+        $output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind3, $result[0], $result[1], $result[2], $result[3]);
+        $output[] = sprintf("%s}", $this->ind2);
+        return implode($this->nl, $output);
     }
-    
+
     /**
      * Generate column update.
      *
@@ -636,12 +650,12 @@ class PhinxMySqlGenerator
      *
      * https://media.readthedocs.org/pdf/phinx/latest/phinx.pdf
      *
-     * @param string $phinxtype
+     * @param string $phinxType
      * @param array $columnData
      * @param array $columns
      * @return string
      */
-    protected function getPhinxColumnOptions($phinxtype, $columnData, $columns)
+    protected function getPhinxColumnOptions($phinxType, $columnData, $columns)
     {
         $attributes = array();
 
@@ -658,8 +672,9 @@ class PhinxMySqlGenerator
 
         // numeric attributes
         $attributes = $this->getPhinxColumnOptionsNumeric($attributes, $columnData);
+
         // enum values
-        if ($phinxtype === 'enum') {
+        if ($phinxType === 'enum') {
             $attributes[] = $this->getOptionEnumValue($columnData);
         }
 
@@ -839,6 +854,7 @@ class PhinxMySqlGenerator
             $result = sprintf('\'values\' => %s', $arr);
             return $result;
         }
+        return '';
     }
 
     /**
