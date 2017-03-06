@@ -30,7 +30,7 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Tables: create, update, remove, engine, comment, character set, collation
 * Columns: create, update, remove
 * Indexes: create, remove
-* Foreign keys (experimental): create, remove
+* Foreign keys (experimental): create, remove, constraint name
 
 ### Not supported
 
