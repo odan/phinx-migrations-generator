@@ -607,7 +607,7 @@ class PhinxMySqlGenerator
         // [double] is not supported by phinx
         // https://github.com/robmorgan/phinx/issues/498
         //
-        // [bit ] and [year] is also not supported by phinx.
+        // [bit] is not supported by phinx.
         $map = array(
             'tinyint' => 'integer',
             'smallint' => 'integer',
@@ -617,6 +617,7 @@ class PhinxMySqlGenerator
             'timestamp' => 'timestamp',
             'date' => 'date',
             'datetime' => 'datetime',
+            'year' => 'year',
             'time' => 'time',
             'enum' => 'enum',
             'set' => 'set',

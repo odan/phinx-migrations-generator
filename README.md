@@ -32,13 +32,9 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Indexes: create, remove
 * Foreign keys (experimental): create, remove, constraint name
 
-### Not supported
+### Todo
 
-* MySQL [double] is not supported by phinx https://github.com/robmorgan/phinx/issues/498
-* MySQL [year] is not supported by phinx. https://github.com/robmorgan/phinx/issues/551 | https://github.com/robmorgan/phinx/pull/704
-* MySQL [bit] is not supported by phinx. https://github.com/robmorgan/phinx/pull/778
-* MySQL enum values with special characters: https://github.com/robmorgan/phinx/issues/887
-* MySQL comments with special characters.
+* Add `collation` and `encoding` options for text and char columns https://github.com/robmorgan/phinx/pull/885
 
 ## Install
 
