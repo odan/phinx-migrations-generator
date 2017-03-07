@@ -5,7 +5,6 @@ risky: false
 enabled:
   - no_unused_imports
   - no_useless_else
-  - blank_line_before_return
   - phpdoc_add_missing_param_annotation
   - phpdoc_no_empty_return
   - phpdoc_no_package
