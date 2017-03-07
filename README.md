@@ -32,10 +32,6 @@ THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
 * Indexes: create, remove
 * Foreign keys (experimental): create, remove, constraint name
 
-### Todo
-
-* Add `collation` and `encoding` options for text and char columns https://github.com/robmorgan/phinx/pull/885
-
 ## Install
 
 Via Composer
