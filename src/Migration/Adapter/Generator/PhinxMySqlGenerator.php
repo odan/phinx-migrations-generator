@@ -60,6 +60,7 @@ class PhinxMySqlGenerator
      *
      * @param MySqlAdapter $dba
      * @param OutputInterface $output
+     * @param mixed $options Options
      */
     public function __construct(MySqlAdapter $dba, OutputInterface $output, $options = array())
     {
@@ -214,9 +215,11 @@ class PhinxMySqlGenerator
     /**
      * Get table migration (new table columns).
      *
-     * @param array $output
-     * @param array $new
-     * @param array $old
+     * @param $output
+     * @param $table
+     * @param $tableName
+     * @param $new
+     * @param $old
      * @return array
      */
     protected function getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old)
@@ -256,6 +259,7 @@ class PhinxMySqlGenerator
      * Get table migration (old table columns).
      *
      * @param array $output
+     * @param string $tableName
      * @param array $new
      * @param array $old
      * @return array
