@@ -680,17 +680,20 @@ class PhinxMySqlGenerator
 
         // enum values
         if ($phinxType === 'enum') {
-            $attributes[] = $this->getOptionEnumValue($columnData);
+            $attributes = $this->getOptionEnumValue($attributes, $columnData);
         }
 
-        $attributes = $this->getPhinxColumnOptionsComment($attributes, $columnData);
+        // collation
+        $attributes = $this->getPhinxColumnCollation($attributes, $columnData);
+
+        // encoding
+        $attributes = $this->getPhinxColumnEncoding($attributes, $columnData);
 
         // after: specify the column that a new column should be placed after
         $attributes = $this->getPhinxColumnOptionsAfter($attributes, $columnData, $columns);
 
         // @todo
         // update set an action to be triggered when the row is updated (use with CURRENT_TIMESTAMP)
-        // timezone enable or disable the with time zone option for time and timestamp columns (only applies to Postgres)
         //
         // For foreign key definitions:
         // update set an action to be triggered when the row is updated
@@ -699,6 +702,37 @@ class PhinxMySqlGenerator
         $result = '[' . implode(', ', $attributes) . ']';
         return $result;
     }
+
+    /**
+     * Set collation that differs from table defaults (only applies to MySQL).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnCollation($attributes, $columnData)
+    {
+        if (!empty($columnData['COLLATION_NAME'])) {
+            $attributes[] = '\'collation\' => "' . addslashes($columnData['COLLATION_NAME']) . '"';
+        }
+        return $attributes;
+    }
+
+    /**
+     * Set character set that differs from table defaults *(only applies to MySQL)* (only applies to MySQL).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnEncoding($attributes, $columnData)
+    {
+        if (!empty($columnData['CHARACTER_SET_NAME'])) {
+            $attributes[] = '\'encoding\' => "' . addslashes($columnData['CHARACTER_SET_NAME']) . '"';
+        }
+        return $attributes;
+    }
+
 
     /**
      * Generate phinx column options (default value).
@@ -842,10 +876,11 @@ class PhinxMySqlGenerator
     /**
      * Generate option enum values.
      *
+     * @param array $attributes
      * @param array $columnData
-     * @return string
+     * @return array Attributes
      */
-    public function getOptionEnumValue($columnData)
+    public function getOptionEnumValue($attributes, $columnData)
     {
         $match = null;
         $pattern = '/enum\((.*)\)/';
@@ -856,10 +891,10 @@ class PhinxMySqlGenerator
             }
             $valueList = implode(',', array_values($values));
             $arr = sprintf('[%s]', $valueList);
-            $result = sprintf('\'values\' => %s', $arr);
-            return $result;
+            $attributes[] = sprintf('\'values\' => %s', $arr);
+            return $attributes;
         }
-        return '';
+        return $attributes;
     }
 
     /**
