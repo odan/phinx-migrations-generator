@@ -1,5 +1,19 @@
 preset: psr2
 
+risky: false
+
+enabled:
+  - no_unused_imports
+  - no_useless_else
+  - phpdoc_add_missing_param_annotation
+  - phpdoc_align
+  - phpdoc_no_empty_return
+  - phpdoc_no_package
+  - phpdoc_order
+  - phpdoc_scalar
+  - phpdoc_types
+  - phpdoc_separation
+
 linting: true
 
 finder:
