@@ -40,6 +40,23 @@ Via Composer
 $ composer require odan/phinx-migrations-generator
 ```
 
+## Usage
+
+### Generating migrations
+
+```
+cd vendor/bin
+phinx-migrations generate
+```
+
+### Running migrations
+
+The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
+
+```
+phinx migrate
+```
+
 ## Configuration
 
 * Default configuration file: phinx-migrations-config.php
@@ -74,23 +91,6 @@ options | array | | Database options
 schema_file | string | schema.php | Database schema file (schema.php or schema.json)
 migration_path | string | | Output directory for migration files
 foreign_keys | int | 0 | Generate foreign keys (experimental)
-
-## Usage
-
-### Generating migrations
-
-```
-cd vendor/bin
-phinx-migrations generate
-```
-
-### Running migrations
-
-The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
-
-```
-phinx migrate
-```
 
 ### Load custom config file
 
