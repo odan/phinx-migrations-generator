@@ -84,6 +84,14 @@ cd vendor/bin
 phinx-migrations generate
 ```
 
+### Running migrations
+
+The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
+
+```
+phinx migrate
+```
+
 ### Load custom config file
 
 ```
