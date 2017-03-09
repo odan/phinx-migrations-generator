@@ -53,7 +53,7 @@ cd vendor/bin
 phinx-migrations generate
 ```
 
-By executing the migration generator again, only the difference to the last schema is generated.
+By executing the `generate` command again, only the difference to the last schema is generated.
 
 ### Running migrations
 
