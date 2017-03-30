@@ -19,8 +19,6 @@ Generated migration
 
 ![Screenshot 2](https://github.com/odan/phinx-migrations-generator/blob/master/docs/images/screenshot02.jpg "Screenshot 2")
 
-THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
-
 ## Features
 
 * Framework independent
