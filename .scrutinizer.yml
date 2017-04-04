@@ -27,3 +27,12 @@ filter:
         - src/*
     excluded_paths:
         - tests/
+
+build:
+    tests:
+        override:
+            -
+                command: 'vendor/bin/phpunit --coverage-clover build/logs/clover.xml'
+                coverage:
+                    file: 'build/logs/clover.xml'
+                    format: 'clover'
