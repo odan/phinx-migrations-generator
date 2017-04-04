@@ -87,9 +87,7 @@ class MigrationGenerator
     /**
      * Generate
      *
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return bool Description
+     * @return int Status
      */
     public function generate()
     {
@@ -118,8 +116,9 @@ class MigrationGenerator
             $this->saveSchemaFile($schema, $this->settings);
         }
 
+        $this->output->writeln('');
         $this->output->writeln('Generate migration finished');
-        return true;
+        return 0;
     }
 
     /**
@@ -232,7 +231,7 @@ class MigrationGenerator
         if ($fileExt == 'php') {
             $data = $this->read($schemaFile);
         } elseif ($fileExt == 'json') {
-            $content = file_put_contents($schemaFile);
+            $content = file_get_contents($schemaFile);
             $data = json_decode($content, true);
         } else {
             throw new Exception(sprintf('Invalid schema file extension: %s', $fileExt));
@@ -285,20 +284,6 @@ class MigrationGenerator
         ]);
         $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
         return $pdo;
-    }
-
-    /**
-     * Get settings from config file.
-     *
-     * @return array
-     * @throws Exception If file not exists.
-     */
-    public function getSettings()
-    {
-        if (!file_exists($this->configFile)) {
-            throw new Exception(sprintf('File not found: %s', $this->configFile));
-        }
-        return $this->read($this->configFile);
     }
 
     /**

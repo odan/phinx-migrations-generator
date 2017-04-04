@@ -3,61 +3,107 @@
 namespace Odan\Migration\Command;
 
 use Exception;
-use Symfony\Component\Console\Command\Command;
+use Phinx\Console\Command\AbstractCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Odan\Migration\Generator\MigrationGenerator;
 
-class GenerateCommand extends Command
+class GenerateCommand extends AbstractCommand
 {
 
     /**
-     * configure
+     * Configure
+     *
+     * @return void
      */
     protected function configure()
     {
-        $this->setName('generate')
-                ->setDescription('Generate migration')
-                // php phinx-migrations.php generate --config=myconfig.php
-                ->addOption('config', null, InputOption::VALUE_OPTIONAL, 'Configuration file.', 'phinx-migrations-config.php')
-        ;
+        parent::configure();
+
+        $this->addOption('--environment', '-e', InputOption::VALUE_REQUIRED, 'The target environment.');
+
+        $this->setName('generate');
+        $this->setDescription('Generate a new migration');
+
+        // Allow the migration path to be chosen non-interactively.
+        $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Specify the path in which to generate this migration');
+
+        // @todo: Add option 'name'. The output class name.
+        // @todo: Add option 'overwrite'.
     }
 
     /**
-     * Execute
+     * Generate migration.
      *
      * @param InputInterface $input
      * @param OutputInterface $output
+     * @return integer integer 0 on success, or an error code.
+     *
+     * @throws Exception On Error
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $settings = $this->getSettings($input);
-        $generator = new \Odan\Migration\Generator\MigrationGenerator($settings, $input, $output);
-        $generator->generate();
-    }
+        $this->bootstrap($input, $output);
 
-    /**
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    protected function getSettings(InputInterface $input)
-    {
-        $configFile = $input->getOption('config');
-        if (!file_exists($configFile)) {
-            throw new Exception(sprintf('File not found: %s', $configFile));
+        $environment = $input->getOption('environment');
+
+        if (null === $environment) {
+            $environment = $this->getConfig()->getDefaultEnvironment();
+            $output->writeln('<comment>warning</comment> no environment specified, defaulting to: ' . $environment);
+        } else {
+            $output->writeln('<info>using environment</info> ' . $environment);
         }
-        return $this->read($configFile);
-    }
+        $envOptions = $this->getConfig()->getEnvironment($environment);
+        if (isset($envOptions['adapter']) && $envOptions['adapter'] != 'mysql') {
+            $output->writeln('<error>adapter not supported</error> ' . $envOptions['adapter']);
+            return 1;
+        }
+        if (isset($envOptions['name'])) {
+            $output->writeln('<info>using database</info> ' . $envOptions['name']);
+        } else {
+            $output->writeln('<error>Could not determine database name! Please specify a database name in your config file.</error>');
+            return 1;
+        }
 
-    /**
-     * Get config
-     *
-     * @param string $filename
-     * @return mixed
-     */
-    protected function read($filename)
-    {
-        return require $filename;
+        // Load config and database adapter
+        $manager = $this->getManager();
+        $config = $manager->getConfig();
+
+        $configFilePath = $config->getConfigFilePath();
+        $output->writeln('<info>using config file</info> ' . $configFilePath);
+
+        // First, try the non-interactive option:
+        $migrationsPaths = (array)$input->getOption('path');
+        if (empty($migrationsPaths)) {
+            $migrationsPaths = $config->getMigrationPaths();
+        }
+
+        // No paths? That's a problem.
+        if (empty($migrationsPaths)) {
+            throw new \Exception('No migration paths set in your Phinx configuration file.');
+        }
+
+        $migrationsPath = $migrationsPaths[0];
+        $output->writeln('<info>using migration path</info> ' . $migrationsPath);
+
+        $schemaFile = $migrationsPath . '/schema.php';
+        $output->writeln('<info>using schema file</info> ' . $schemaFile);
+
+        // Gets the database adapter.
+        $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
+        $pdo = $dbAdapter->getConnection();
+
+        $settings = array(
+            'pdo' => $pdo,
+            'schema_file' => $schemaFile,
+            'migration_path' => $migrationsPaths[0],
+            'foreign_keys' => 1,
+            'config_file' => $configFilePath
+        );
+        //var_dump($settings);
+
+        $generator = new MigrationGenerator($settings, $input, $output);
+        return $generator->generate();
     }
 }

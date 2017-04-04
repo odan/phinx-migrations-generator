@@ -14,8 +14,7 @@ if (!(class_exists('Composer\\Autoload\\ClassLoader', false))) {
 }
 
 use Odan\Migration\Command\GenerateCommand;
-use Symfony\Component\Console\Application;
 
-$application = new Application();
+$application = new \Phinx\Console\PhinxApplication();
 $application->add(new GenerateCommand());
 $application->run();
