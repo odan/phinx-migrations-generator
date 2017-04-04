@@ -28,9 +28,6 @@ class GenerateCommand extends AbstractCommand
 
         // Allow the migration path to be chosen non-interactively.
         $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Specify the path in which to generate this migration');
-
-        // @todo: Add option 'name'. The output class name.
-        // @todo: Add option 'overwrite'.
     }
 
     /**

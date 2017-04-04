@@ -69,7 +69,12 @@ $ vendor/bin/phinx migrate
 Parameter | Values | Default | Description
 --- | --- | --- | ---
 --path <path> | string | (from phinx) | Specify the path in which to generate this migration.
---environment or -e | string | (from phinx) | 'The target environment.
+--environment or -e | string | (from phinx) | The target environment.
+
+## Todo
+ 
+* Add option '--name' for the class name.
+* Add option '--overwrite'.
 
 ## Testing
 
