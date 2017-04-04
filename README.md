@@ -19,8 +19,6 @@ Generated migration
 
 ![Screenshot 2](https://github.com/odan/phinx-migrations-generator/blob/master/docs/images/screenshot02.jpg "Screenshot 2")
 
-THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!
-
 ## Features
 
 * Framework independent
@@ -38,6 +36,29 @@ Via Composer
 
 ```
 $ composer require odan/phinx-migrations-generator
+```
+
+## Usage
+
+### Generating migrations
+
+On the first run, an inital schema and a migration class is generated.
+The `schema.php` file contains the previous database schema and is getting compared with the the current schema.
+Based on the difference, a Phinx migration class is generated.
+
+```
+cd vendor/bin
+phinx-migrations generate
+```
+
+By executing the `generate` command again, only the difference to the last schema is generated.
+
+### Running migrations
+
+The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
+
+```
+phinx migrate
 ```
 
 ## Configuration
@@ -74,15 +95,6 @@ options | array | | Database options
 schema_file | string | schema.php | Database schema file (schema.php or schema.json)
 migration_path | string | | Output directory for migration files
 foreign_keys | int | 0 | Generate foreign keys (experimental)
-
-## Usage
-
-### Generating migrations
-
-```
-cd vendor/bin
-phinx-migrations generate
-```
 
 ### Load custom config file
 
