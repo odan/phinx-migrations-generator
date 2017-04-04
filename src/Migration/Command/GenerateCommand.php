@@ -14,8 +14,6 @@ class GenerateCommand extends AbstractCommand
 
     /**
      * Configure
-     *
-     * @return void
      */
     protected function configure()
     {
@@ -35,7 +33,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return integer integer 0 on success, or an error code.
+     * @return int integer 0 on success, or an error code.
      *
      * @throws Exception On Error
      */
