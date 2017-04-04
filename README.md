@@ -57,12 +57,12 @@ By executing the `generate` command again, only the difference to the last schem
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
 
 ```
-$ vendor/bin/phinx migrate
+$ vendor/bin/phinx-migrations migrate
 ```
 
 ## Configuration
 
-* Not required. The phinx-migration-generator uses the configuration of phinx.
+* Not required. The phinx-migrations-generator uses the configuration of phinx.
 
 ## Parameters
 
@@ -73,8 +73,8 @@ Parameter | Values | Default | Description
 
 ## Todo
  
-* Add option '--name' for the class name.
-* Add option '--overwrite'.
+* Add option `--name` for the class name.
+* Add option `--overwrite`.
 
 ## Testing
 
