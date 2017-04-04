@@ -47,8 +47,7 @@ The `schema.php` file contains the previous database schema and is getting compa
 Based on the difference, a Phinx migration class is generated.
 
 ```
-cd vendor/bin
-phinx-migrations generate
+$ vendor/bin/phinx-migrations generate
 ```
 
 By executing the `generate` command again, only the difference to the last schema is generated.
@@ -58,89 +57,19 @@ By executing the `generate` command again, only the difference to the last schem
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
 
 ```
-phinx migrate
+$ vendor/bin/phinx migrate
 ```
 
 ## Configuration
 
-* Default configuration file: phinx-migrations-config.php
+* Not required. The phinx-migration-generator uses the configuration of phinx.
 
-Example:
+## Parameters
 
-```php
-<?php
-
-return array(
-    'dsn' => 'mysql:host=127.0.0.1;dbname=test;charset=utf8mb4',
-    'username' => 'root',
-    'password' => '',
-    'options' => array(
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_PERSISTENT => false,
-        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci',
-    ),
-    //'pdo' => new PDO('mysql:host=127.0.0.1;dbname=test;charset=utf8mb4', 'username', 'password'),
-    'schema_file' => __DIR__ . '/schema.php',
-    'migration_path' => __DIR__
-);
-```
-
-Name | Type | Default | Description
+Parameter | Values | Default | Description
 --- | --- | --- | ---
-pdo | PDO | null | PDO object
-dsn | string |  | Data source name (mysql:host=127.0.0.1;dbname=test)
-username | string | | Database username
-password | string | | Database password
-options | array | | Database options
-schema_file | string | schema.php | Database schema file (schema.php or schema.json)
-migration_path | string | | Output directory for migration files
-foreign_keys | int | 0 | Generate foreign keys (experimental)
-
-### Load custom config file
-
-```
-phinx-migrations generate --config=myconfig.php
-```
-
-## Console Setup
-
-* Create a console file: bin/phinx-migrations.php
-
-```php
-<?php
-
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../vendor/odan/phinx-migrations-generator/bin/phinx-migrations';
-```
-
-* Create a config file: bin/phinx-migrations-config.php
-
-```php
-<?php
-
-// include framework bootstrap code here
-// ...
-
-// Get PDO object (from framework) or create new instance
-$pdo = new PDO('mysql:host=127.0.0.1;dbname=test', 'username', 'password'),
-
-// Change this path!
-$migrationPath = '/path/to/migrations';
-$schemaFile = $migrationPath . '/schema.php';
-
-return array(
-    'pdo' => $pdo,
-    'schema_file' => $schemaFile,
-    'migration_path' => $migrationPath
-);
-```
-
-* Open the console (cmd) and run:
-
-```
-cd bin
-php phinx-migrations.php generate
-```
+--path <path> | string | (from phinx) | Specify the path in which to generate this migration.
+--environment or -e | string | (from phinx) | 'The target environment.
 
 ## Testing
 
