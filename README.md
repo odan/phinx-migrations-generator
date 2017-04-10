@@ -62,7 +62,38 @@ $ vendor/bin/phinx-migrations migrate
 
 ## Configuration
 
-* Not required. The phinx-migrations-generator uses the configuration of phinx.
+The phinx-migrations-generator uses the configuration of phinx.
+
+### Example configuration
+
+Filename: config/phix.php
+
+```php
+<?php
+
+// Framework bootstrap code here
+require_once __DIR__ . '/bootstrap.php';
+
+// Get PDO object
+$pdo new PDO('mysql:host=127.0.0.1;dbname=test;charset=utf8', 'username', 'password'),
+
+// Get migration path for phinx classes
+$migrationPath = __DIR__ . '/../resources/migrations';
+
+return array(
+    'paths' => [
+        'migrations' => $migrationPath
+    ],
+    'environments' => [
+        'default_database' => "local",
+        'local' => [
+            // Database name
+            'name' => $pdo->query('select database()')->fetchColumn(),
+            'connection' => $pdo
+        ]
+    ]
+);
+```
 
 ## Parameters
 
