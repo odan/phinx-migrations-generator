@@ -46,8 +46,14 @@ On the first run, an inital schema and a migration class is generated.
 The `schema.php` file contains the previous database schema and is getting compared with the the current schema.
 Based on the difference, a Phinx migration class is generated.
 
+Linux
 ```
 $ vendor/bin/phinx-migrations generate
+```
+
+Windows
+```
+call vendor/bin/phinx-migrations.bat generate
 ```
 
 By executing the `generate` command again, only the difference to the last schema is generated.
@@ -56,8 +62,16 @@ By executing the `generate` command again, only the difference to the last schem
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
 
+Linux
 ```
-$ vendor/bin/phinx-migrations migrate
+$ cd config/
+$ ../vendor/bin/phinx migrate
+```
+
+Windows
+```
+cd config/
+call ../vendor/bin/phinx.bat generate
 ```
 
 ## Configuration
@@ -66,7 +80,7 @@ The phinx-migrations-generator uses the configuration of phinx.
 
 ### Example configuration
 
-Filename: config/phix.php
+Filename: config/phinx.php
 
 ```php
 <?php
@@ -95,6 +109,27 @@ return array(
 );
 ```
 
+## Ant task
+
+Example
+
+```xml
+<condition property="script_ext" value=".bat" else="">
+    <os family="windows"/>
+</condition>
+
+<target name="migrations" description="Generate database migrations">
+    <input message="Migration name" addproperty="migrationName"/>
+    <exec executable="${basedir}/vendor/bin/phinx-migrations${script_ext}" dir="${basedir}/config">
+        <arg line="generate --name ${migrationName} --overwrite"/>
+    </exec> 
+</target>
+```
+
+```bash
+$ ant migrations
+```
+
 ## Parameters
 
 Parameter | Values | Default | Description
@@ -109,7 +144,7 @@ Parameter | Values | Default | Description
 
 ## Testing
 
-``` bash
+```bash
 $ composer test
 ```
 
