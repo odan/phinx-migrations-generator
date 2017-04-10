@@ -118,7 +118,7 @@ return array(
 
 ## Ant task
 
-Example
+Example ant target for build.xml:
 
 ```xml
 <condition property="script_ext" value=".bat" else="">
