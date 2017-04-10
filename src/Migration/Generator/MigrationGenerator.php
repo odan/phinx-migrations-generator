@@ -6,6 +6,7 @@ use Exception;
 use PDO;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
+use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -101,7 +102,7 @@ class MigrationGenerator
         }
 
         if (empty($this->settings['name'])) {
-            $name = $this->io->ask('Enter migration name', 'Test');
+            $name = $this->io->ask('Enter migration name', '');
         } else {
             $name = $this->settings['name'];
         }
@@ -109,9 +110,36 @@ class MigrationGenerator
             $this->output->writeln('Aborted');
             return false;
         }
-        $name = $this->createName($name);
-        $migration = $this->generator->createMigration($name, $schema, $oldSchema);
-        $this->saveMigrationFile($name, $migration);
+        $path = $this->settings['migration_path'];
+        $className = $this->createClassName($name);
+
+        if (!Util::isValidPhinxClassName($className)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The migration class name "%s" is invalid. Please use CamelCase format.',
+                $className
+            ));
+        }
+
+        if (!Util::isUniqueMigrationClassName($className, $path)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The migration class name "%s" already exists',
+                $className
+            ));
+        }
+
+        // Compute the file path
+        $fileName = Util::mapClassNameToFileName($className);
+        $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
+
+        if (is_file($filePath)) {
+            throw new \InvalidArgumentException(sprintf(
+                'The file "%s" already exists',
+                $filePath
+            ));
+        }
+
+        $migration = $this->generator->createMigration($className, $schema, $oldSchema);
+        $this->saveMigrationFile($filePath, $migration);
 
         // Overwrite schema file
         // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
@@ -125,21 +153,20 @@ class MigrationGenerator
         }
         $this->output->writeln('');
         $this->output->writeln('Generate migration finished');
+
         return 0;
     }
 
     /**
      * Save migration file.
      *
-     * @param string $name Name of migration
+     * @param string $filePath Name of migration file
      * @param string $migration Migration code
      */
-    protected function saveMigrationFile($name, $migration)
+    protected function saveMigrationFile($filePath, $migration)
     {
-        $migrationPath = $this->settings['migration_path'];
-        $migrationFile = sprintf('%s/%s_%s.php', $migrationPath, date('YmdHis'), $name);
-        $this->output->writeln(sprintf('Generate migration file: %s', $migrationFile));
-        file_put_contents($migrationFile, $migration);
+        $this->output->writeln(sprintf('Generate migration file: %s', $filePath));
+        file_put_contents($filePath, $migration);
     }
 
     /**
@@ -307,11 +334,12 @@ class MigrationGenerator
     /**
      * Create a class name.
      *
-     * @param string $name
-     * @return string
+     * @param string $name Name
+     * @return string Class name
      */
-    protected function createName($name)
+    protected function createClassName($name)
     {
-        return str_replace(' ', '', ucwords($name));
+        $result = str_replace('_', ' ', $name);
+        return str_replace(' ', '', ucwords($result));
     }
 }

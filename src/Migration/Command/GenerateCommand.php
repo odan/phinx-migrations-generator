@@ -77,16 +77,17 @@ class GenerateCommand extends AbstractCommand
         if (empty($migrationsPaths)) {
             $migrationsPaths = $config->getMigrationPaths();
         }
-
         // No paths? That's a problem.
         if (empty($migrationsPaths)) {
             throw new \Exception('No migration paths set in your Phinx configuration file.');
         }
 
         $migrationsPath = $migrationsPaths[0];
+        $this->verifyMigrationDirectory($migrationsPath);
+
         $output->writeln('<info>using migration path</info> ' . $migrationsPath);
 
-        $schemaFile = $migrationsPath . '/schema.php';
+        $schemaFile = $migrationsPath . DIRECTORY_SEPARATOR . 'schema.php';
         $output->writeln('<info>using schema file</info> ' . $schemaFile);
 
         // Gets the database adapter.
