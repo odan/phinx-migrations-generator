@@ -62,6 +62,8 @@ By executing the `generate` command again, only the difference to the last schem
 
 Parameter | Values | Default | Description
 --- | --- | --- | ---
+--name | string | | The class name.
+--overwrite | bool |  | Overwrite schema.php file.
 --path <path> | string | (from phinx) | Specify the path in which to generate this migration.
 --environment or -e | string | (from phinx) | The target environment.
 
@@ -143,11 +145,6 @@ Example ant target for build.xml:
 ```bash
 $ ant migrations
 ```
-
-## Todo
- 
-* Add option `--name` for the class name.
-* Add option `--overwrite`.
 
 ## Testing
 
