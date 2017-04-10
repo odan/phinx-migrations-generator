@@ -13,9 +13,57 @@ Phinx "only" generates a empty class with up and down functions. You still have 
 
 In reality, you should rarely need to write migrations manually, as the migrations library "should" generate migration classes automatically by comparing your schema mapping information (i.e. what your database should look like) with your actual current database structure.
 
-Generated migration
+## Features
 
-File: 20170410194428_init.php
+* Framework independent
+* DBMS: MySQL
+* Initial schema, schema diff
+* Database: character set, collation
+* Tables: create, update, remove, engine, comment, character set, collation
+* Columns: create, update, remove
+* Indexes: create, remove
+* Foreign keys (experimental): create, remove, constraint name
+
+## Install
+
+Via Composer
+
+```
+$ composer require odan/phinx-migrations-generator
+```
+
+## Usage
+
+### Generating migrations
+
+On the first run, an inital schema and a migration class is generated.
+The `schema.php` file contains the previous database schema and is getting compared with the the current schema.
+Based on the difference, a Phinx migration class is generated.
+
+Linux
+```
+$ vendor/bin/phinx-migrations generate
+```
+
+Windows
+```
+call vendor/bin/phinx-migrations.bat generate
+```
+
+By executing the `generate` command again, only the difference to the last schema is generated.
+
+## Parameters
+
+Parameter | Values | Default | Description
+--- | --- | --- | ---
+--name | string | | The class name.
+--overwrite | bool |  | Overwrite schema.php file.
+--path <path> | string | (from phinx) | Specify the path in which to generate this migration.
+--environment or -e | string | (from phinx) | The target environment.
+
+### Generated migration (example)
+
+Filename: `20170410194428_init.php`
 
 ```php
 <?php
@@ -76,53 +124,6 @@ class Init extends AbstractMigration
 }
 ```
 
-## Features
-
-* Framework independent
-* DBMS: MySQL
-* Initial schema, schema diff
-* Database: character set, collation
-* Tables: create, update, remove, engine, comment, character set, collation
-* Columns: create, update, remove
-* Indexes: create, remove
-* Foreign keys (experimental): create, remove, constraint name
-
-## Install
-
-Via Composer
-
-```
-$ composer require odan/phinx-migrations-generator
-```
-
-## Usage
-
-### Generating migrations
-
-On the first run, an inital schema and a migration class is generated.
-The `schema.php` file contains the previous database schema and is getting compared with the the current schema.
-Based on the difference, a Phinx migration class is generated.
-
-Linux
-```
-$ vendor/bin/phinx-migrations generate
-```
-
-Windows
-```
-call vendor/bin/phinx-migrations.bat generate
-```
-
-By executing the `generate` command again, only the difference to the last schema is generated.
-
-## Parameters
-
-Parameter | Values | Default | Description
---- | --- | --- | ---
---name | string | | The class name.
---overwrite | bool |  | Overwrite schema.php file.
---path <path> | string | (from phinx) | Specify the path in which to generate this migration.
---environment or -e | string | (from phinx) | The target environment.
 
 ### Running migrations
 
