@@ -78,7 +78,7 @@ $ ../vendor/bin/phinx migrate
 Windows
 ```
 cd config
-call ../vendor/bin/phinx.bat generate
+call ../vendor/bin/phinx.bat migrate
 ```
 
 ## Configuration
