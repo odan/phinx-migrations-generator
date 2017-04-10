@@ -100,7 +100,11 @@ class MigrationGenerator
             return false;
         }
 
-        $name = $this->io->ask('Enter migration name', 'Test');
+        if (empty($this->settings['name'])) {
+            $name = $this->io->ask('Enter migration name', 'Test');
+        } else {
+            $name = $this->settings['name'];
+        }
         if (empty($name)) {
             $this->output->writeln('Aborted');
             return false;
@@ -111,11 +115,14 @@ class MigrationGenerator
 
         // Overwrite schema file
         // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
-        $overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
+        if (!empty($this->settings['overwrite'])) {
+            $overwrite = 'y';
+        } else {
+            $overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
+        }
         if ($overwrite == 'y') {
             $this->saveSchemaFile($schema, $this->settings);
         }
-
         $this->output->writeln('');
         $this->output->writeln('Generate migration finished');
         return 0;

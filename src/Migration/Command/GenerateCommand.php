@@ -19,13 +19,17 @@ class GenerateCommand extends AbstractCommand
     {
         parent::configure();
 
-        $this->addOption('--environment', '-e', InputOption::VALUE_REQUIRED, 'The target environment.');
+        $this->addOption('environment', 'e', InputOption::VALUE_REQUIRED, 'The target environment.');
 
         $this->setName('generate');
         $this->setDescription('Generate a new migration');
 
         // Allow the migration path to be chosen non-interactively.
         $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Specify the path in which to generate this migration');
+
+        $this->addOption('name', null, InputOption::VALUE_REQUIRED, 'Specify the name of the migration for this migration');
+
+        $this->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite schema.php file');
     }
 
     /**
@@ -89,12 +93,17 @@ class GenerateCommand extends AbstractCommand
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
         $pdo = $dbAdapter->getConnection();
 
+        $name = $input->getOption('name');
+        $overwrite = $input->getOption('overwrite');
+
         $settings = array(
             'pdo' => $pdo,
             'schema_file' => $schemaFile,
             'migration_path' => $migrationsPaths[0],
             'foreign_keys' => 1,
-            'config_file' => $configFilePath
+            'config_file' => $configFilePath,
+            'name' => $name,
+            'overwrite' => $overwrite
         );
         //var_dump($settings);
 
