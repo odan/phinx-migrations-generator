@@ -13,11 +13,68 @@ Phinx "only" generates a empty class with up and down functions. You still have 
 
 In reality, you should rarely need to write migrations manually, as the migrations library "should" generate migration classes automatically by comparing your schema mapping information (i.e. what your database should look like) with your actual current database structure.
 
-![Screenshot](https://github.com/odan/phinx-migrations-generator/blob/master/docs/images/screenshot01.jpg "Screenshot")
-
 Generated migration
 
-![Screenshot 2](https://github.com/odan/phinx-migrations-generator/blob/master/docs/images/screenshot02.jpg "Screenshot 2")
+File: 20170410194428_init.php
+
+```php
+<?php
+
+use Phinx\Migration\AbstractMigration;
+use Phinx\Db\Adapter\MysqlAdapter;
+
+class Init extends AbstractMigration
+{
+    public function change()
+    {
+        $this->execute("ALTER DATABASE CHARACTER SET 'utf8';");
+        $this->execute("ALTER DATABASE COLLATE='utf8_unicode_ci';");
+        
+        $this->table("users")->save();
+        $this->execute("ALTER TABLE `users` ENGINE='InnoDB';");
+        $this->execute("ALTER TABLE `users` COMMENT='Users Table';");
+        $this->execute("ALTER TABLE `users` CHARSET='utf8';");
+        $this->execute("ALTER TABLE `users` COLLATE='utf8_unicode_ci';");
+        if ($this->table('users')->hasColumn('id')) {
+            $this->table("users")->changeColumn('id', 'integer', ['null' => false, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'identity' => 'enable'])->update();
+        } else {
+            $this->table("users")->addColumn('id', 'integer', ['null' => false, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'identity' => 'enable'])->update();
+        }
+        $this->table('users')
+            ->addColumn('username', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'id'])
+            ->addColumn('password', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'username'])
+            ->addColumn('email', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'password'])
+            ->addColumn('first_name', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'email'])
+            ->addColumn('last_name', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'first_name'])
+            ->addColumn('role', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'last_name'])
+            ->addColumn('locale', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'role'])
+            ->addColumn('disabled', 'boolean', ['null' => false, 'default' => '0', 'limit' => MysqlAdapter::INT_TINY, 'precision' => 3, 'after' => 'locale'])
+            ->addColumn('created', 'datetime', ['null' => true, 'after' => 'disabled'])
+            ->addColumn('created_user_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'after' => 'created'])
+            ->addColumn('updated', 'datetime', ['null' => true, 'after' => 'created_user_id'])
+            ->addColumn('updated_user_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'after' => 'updated'])
+            ->addColumn('deleted', 'datetime', ['null' => true, 'after' => 'updated_user_id'])
+            ->addColumn('deleted_user_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'after' => 'deleted'])
+            ->update();
+        if($this->table('users')->hasIndex('username')) {
+            $this->table("users")->removeIndexByName('username');
+        }
+        $this->table("users")->addIndex(['username'], ['name' => "username", 'unique' => true])->save();
+        if($this->table('users')->hasIndex('created_user_id')) {
+            $this->table("users")->removeIndexByName('created_user_id');
+        }
+        $this->table("users")->addIndex(['created_user_id'], ['name' => "created_user_id", 'unique' => false])->save();
+        if($this->table('users')->hasIndex('updated_user_id')) {
+            $this->table("users")->removeIndexByName('updated_user_id');
+        }
+        $this->table("users")->addIndex(['updated_user_id'], ['name' => "updated_user_id", 'unique' => false])->save();
+        if($this->table('users')->hasIndex('deleted_user_id')) {
+            $this->table("users")->removeIndexByName('deleted_user_id');
+        }
+        $this->table("users")->addIndex(['deleted_user_id'], ['name' => "deleted_user_id", 'unique' => false])->save();
+    }
+}
+```
 
 ## Features
 
