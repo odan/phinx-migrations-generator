@@ -74,6 +74,13 @@ cd config/
 call ../vendor/bin/phinx.bat generate
 ```
 
+## Parameters
+
+Parameter | Values | Default | Description
+--- | --- | --- | ---
+--path <path> | string | (from phinx) | Specify the path in which to generate this migration.
+--environment or -e | string | (from phinx) | The target environment.
+
 ## Configuration
 
 The phinx-migrations-generator uses the configuration of phinx.
@@ -119,7 +126,7 @@ Example
 </condition>
 
 <target name="migrations" description="Generate database migrations">
-    <input message="Migration name" addproperty="migrationName"/>
+    <input message="Enter migration name" addproperty="migrationName"/>
     <exec executable="${basedir}/vendor/bin/phinx-migrations${script_ext}" dir="${basedir}/config">
         <arg line="generate --name ${migrationName} --overwrite"/>
     </exec> 
@@ -129,13 +136,6 @@ Example
 ```bash
 $ ant migrations
 ```
-
-## Parameters
-
-Parameter | Values | Default | Description
---- | --- | --- | ---
---path <path> | string | (from phinx) | Specify the path in which to generate this migration.
---environment or -e | string | (from phinx) | The target environment.
 
 ## Todo
  
