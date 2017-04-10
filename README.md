@@ -58,6 +58,13 @@ call vendor/bin/phinx-migrations.bat generate
 
 By executing the `generate` command again, only the difference to the last schema is generated.
 
+## Parameters
+
+Parameter | Values | Default | Description
+--- | --- | --- | ---
+--path <path> | string | (from phinx) | Specify the path in which to generate this migration.
+--environment or -e | string | (from phinx) | The target environment.
+
 ### Running migrations
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
@@ -73,13 +80,6 @@ Windows
 cd config/
 call ../vendor/bin/phinx.bat generate
 ```
-
-## Parameters
-
-Parameter | Values | Default | Description
---- | --- | --- | ---
---path <path> | string | (from phinx) | Specify the path in which to generate this migration.
---environment or -e | string | (from phinx) | The target environment.
 
 ## Configuration
 
