@@ -77,7 +77,7 @@ $ ../vendor/bin/phinx migrate
 
 Windows
 ```
-cd config/
+cd config
 call ../vendor/bin/phinx.bat generate
 ```
 
@@ -96,7 +96,7 @@ Filename: config/phinx.php
 require_once __DIR__ . '/bootstrap.php';
 
 // Get PDO object
-$pdo new PDO('mysql:host=127.0.0.1;dbname=test;charset=utf8', 'username', 'password'),
+$pdo = new PDO('mysql:host=127.0.0.1;dbname=test;charset=utf8', 'username', 'password'),
 
 // Get migration path for phinx classes
 $migrationPath = __DIR__ . '/../resources/migrations';
