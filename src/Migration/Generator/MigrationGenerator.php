@@ -6,6 +6,8 @@ use Exception;
 use PDO;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
+use Phinx\Migration\Manager;
+use Phinx\Migration\Manager\Environment;
 use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -141,6 +143,11 @@ class MigrationGenerator
         $migration = $this->generator->createMigration($className, $schema, $oldSchema);
         $this->saveMigrationFile($filePath, $migration);
 
+        // Mark migration as as completed
+        if (!empty($this->settings['mark_migration'])) {
+            $this->markMigration($className, $fileName);
+        }
+
         // Overwrite schema file
         // http://symfony.com/blog/new-in-symfony-2-8-console-style-guide
         if (!empty($this->settings['overwrite'])) {
@@ -155,6 +162,58 @@ class MigrationGenerator
         $this->output->writeln('Generate migration finished');
 
         return 0;
+    }
+
+    /**
+     * Mark migration as completed.
+     *
+     * @param string $migrationName migrationName
+     * @param string $fileName fileName
+     */
+    protected function markMigration($migrationName, $fileName)
+    {
+        $this->output->writeln('Mark migration');
+
+        /* @var $adapter \Phinx\Db\Adapter\AdapterInterface */
+        $adapter = $this->settings['adapter'];
+
+        /* @var $manager Manager */
+        $manager =  $this->settings['manager'];
+
+        $envName = $this->settings['environment'];
+
+        /* @var $env Environment */
+        $env = $manager->getEnvironment($envName);
+        $schemaTableName = $env->getSchemaTableName();
+
+        /* @var $pdo \PDO */
+        $pdo = $this->settings['adapter'];
+
+        // Get version from filename prefix
+        $version = explode('_', $fileName)[0];
+
+        // Record it in the database
+        $time = time();
+        $startTime = date('Y-m-d H:i:s', $time);
+        $endTime = date('Y-m-d H:i:s', $time);
+        $breakpoint = 0;
+
+        $sql = sprintf(
+            "INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ('%s', '%s', '%s', '%s', %s);",
+            $schemaTableName,
+            $adapter->quoteColumnName('version'),
+            $adapter->quoteColumnName('migration_name'),
+            $adapter->quoteColumnName('start_time'),
+            $adapter->quoteColumnName('end_time'),
+            $adapter->quoteColumnName('breakpoint'),
+            $version,
+            substr($migrationName, 0, 100),
+            $startTime,
+            $endTime,
+            $breakpoint
+        );
+
+        $pdo->query($sql);
     }
 
     /**

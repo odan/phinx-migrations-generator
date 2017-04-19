@@ -99,12 +99,16 @@ class GenerateCommand extends AbstractCommand
 
         $settings = array(
             'pdo' => $pdo,
+            'manager' => $manager,
+            'environment' => $environment,
+            'adapter' => $dbAdapter,
             'schema_file' => $schemaFile,
             'migration_path' => $migrationsPaths[0],
             'foreign_keys' => 1,
             'config_file' => $configFilePath,
             'name' => $name,
-            'overwrite' => $overwrite
+            'overwrite' => $overwrite,
+            'mark_migration' => true
         );
         //var_dump($settings);
 
