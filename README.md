@@ -192,7 +192,7 @@ Example ant target for build.xml:
     <os family="windows"/>
 </condition>
 
-<target name="migrations" description="Generate database migrations">
+<target name="generate-migration" description="Generate a new database migration">
     <input message="Enter migration name" addproperty="migrationName"/>
     <exec executable="${basedir}/vendor/bin/phinx-migrations${script_ext}" dir="${basedir}/config">
         <arg line="generate --name ${migrationName} --overwrite"/>
