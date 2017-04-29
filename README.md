@@ -1,5 +1,7 @@
 # Phinx migrations generator
 
+*The missing part*
+
 [![Latest Version](https://img.shields.io/github/release/odan/phinx-migrations-generator.svg)](https://github.com/loadsys/odan/phinx-migrations-generator/releases)
 [![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master)](https://travis-ci.org/odan/phinx-migrations-generator)
 [![Crutinizer](https://img.shields.io/scrutinizer/g/odan/phinx-migrations-generator.svg)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator)
