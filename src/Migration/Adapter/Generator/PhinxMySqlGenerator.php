@@ -56,7 +56,7 @@ class PhinxMySqlGenerator
     protected $ind3 = '            ';
 
     /**
-     * Concstructor
+     * Constructor
      *
      * @param MySqlAdapter $dba
      * @param OutputInterface $output
@@ -499,7 +499,7 @@ class PhinxMySqlGenerator
      * @param array $schema
      * @param string $table
      * @param string $columnName
-     * @return string
+     * @return array
      */
     protected function getColumnCreate($schema, $table, $columnName)
     {

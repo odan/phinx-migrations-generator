@@ -97,8 +97,7 @@ class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
         $options = array_replace_recursive($settings['options'], [
             // Enable exceptions
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            // Convert column names to lower case.
-            PDO::ATTR_CASE => PDO::CASE_LOWER,
+            PDO::ATTR_PERSISTENT => false,
             // Set default fetch mode
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]);
@@ -114,12 +113,11 @@ class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
     public function getSettings()
     {
         return array(
-            'dsn' => 'mysql:host = 127.0.0.1;
-        dbname = test',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=test',
             'username' => 'root',
             'password' => '',
             'options' => array(
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
                 // Enable exceptions
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 // Set default fetch mode

@@ -43,7 +43,7 @@ class MySqlAdapter
         $this->pdo = $pdo;
         $this->dbName = $this->getDbName();
         $this->output = $output;
-        $this->output->writeln(sprintf('Database: <info>%s</>', $this->dbName));
+        $this->output->writeln(sprintf('Database: <info>%s</info>', $this->dbName));
     }
 
     /**
@@ -61,7 +61,7 @@ class MySqlAdapter
         $tables = $this->getTables();
         foreach ($tables as $table) {
             $tableName = $table['table_name'];
-            $this->output->writeln(sprintf('Table: <info>%s</>', $tableName));
+            $this->output->writeln(sprintf('Table: <info>%s</info>', $tableName));
             $result['tables'][$tableName]['table'] = $table;
             $result['tables'][$tableName]['columns'] = $this->getColumns($tableName);
             $result['tables'][$tableName]['indexes'] = $this->getIndexes($tableName);
