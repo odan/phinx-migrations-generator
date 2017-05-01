@@ -102,10 +102,10 @@ class PhinxMySqlGenerator
     /**
      * Generate code for change function.
      *
-     * @param array $output Output
+     * @param string[] $output Output
      * @param array $new New schema
      * @param array $old Old schema
-     * @return array Output
+     * @return string[] Output
      */
     public function addChangeMethod($output, $new, $old)
     {
@@ -119,7 +119,7 @@ class PhinxMySqlGenerator
     /**
      * Get table migration.
      *
-     * @param array $output Output
+     * @param string[] $output Output
      * @param array $new New schema
      * @param array $old Old schema
      * @return array Output
@@ -499,7 +499,7 @@ class PhinxMySqlGenerator
      * @param array $schema
      * @param string $table
      * @param string $columnName
-     * @return array
+     * @return string[]
      */
     protected function getColumnCreate($schema, $table, $columnName)
     {
@@ -755,7 +755,7 @@ class PhinxMySqlGenerator
      *
      * @param array $attributes
      * @param array $columnData
-     * @return array Attributes
+     * @return string[] Attributes
      */
     protected function getPhinxColumnOptionsNull($attributes, $columnData)
     {
@@ -960,7 +960,7 @@ class PhinxMySqlGenerator
     /**
      * Generate index create.
      *
-     * @param array $output Output
+     * @param string[] $output Output
      * @param array $schema Schema
      * @param string $table Tablename
      * @param string $indexName Index name
