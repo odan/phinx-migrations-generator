@@ -29,6 +29,16 @@ filter:
         - tests/
 
 build:
+    environment:
+        php: 7.1.1
+        mysql: 5.7
+        postgresql: false
+        mongodb: false
+        elasticsearch: false
+        redis: false
+        memcached: false
+        neo4j: false
+        rabbitmq: false
     tests:
         override:
             -
