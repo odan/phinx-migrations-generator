@@ -14,7 +14,6 @@ class GenerateCommandTest extends \PHPUnit\Framework\TestCase
      * Test
      *
      * @covers ::execute
-     * @covers ::getSettings
      * @covers ::read
      * @expectedException Exception
      */
