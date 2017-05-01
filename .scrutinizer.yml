@@ -31,7 +31,7 @@ filter:
 build:
     environment:
         php: 7.1.1
-        mysql: 5.7
+        mysql: true
         postgresql: false
         mongodb: false
         elasticsearch: false
