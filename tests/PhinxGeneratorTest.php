@@ -70,6 +70,7 @@ class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
 
         $diff = $this->read(__DIR__ . '/diffs/newtable.php');
         $actual = $gen->createMigration('MyNewMigration', $diff, []);
+        //file_put_contents(__DIR__ . '/diffs/actual.php', $actual);
 
         $expected = file_get_contents(__DIR__ . '/diffs/newtable_expected.php');
         $this->assertEquals($expected, $actual);

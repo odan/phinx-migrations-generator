@@ -4,6 +4,7 @@ namespace Odan\Migration\Adapter\Generator;
 
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Symfony\Component\Console\Output\OutputInterface;
+use Phinx\Db\Adapter\AdapterInterface;
 
 /**
  * PhinxMySqlGenerator
@@ -188,21 +189,11 @@ class PhinxMySqlGenerator
             if ($tableName == 'phinxlog') {
                 continue;
             }
+
             if (!isset($old['tables'][$tableName])) {
                 // create the table
-                $output[] = $this->getCreateTable($tableName);
-            }
-            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'engine'])) {
-                $output[] = $this->getAlterTableEngine($tableName, $table['table']['engine']);
-            }
-            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_comment'])) {
-                $output[] = $this->getAlterTableComment($tableName, $table['table']['table_comment']);
-            }
-            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'character_set_name'])) {
-                $output[] = $this->getAlterTableCharset($tableName, $table['table']['character_set_name']);
-            }
-            if ($this->neq($new, $old, ['tables', $tableName, 'table', 'table_collation'])) {
-                $output[] = $this->getAlterTableCollate($tableName, $table['table']['table_collation']);
+                $table['has_table_variable'] = true;
+                $output = $this->getCreateTable($output, $table, $tableName);
             }
 
             $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
@@ -227,17 +218,18 @@ class PhinxMySqlGenerator
         if (empty($table['columns'])) {
             return $output;
         }
+        $hasTableVariable = !empty($table['has_table_variable']);
         $opened = false;
+
         foreach ($table['columns'] as $columnName => $columnData) {
             if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
-                if ($columnName == 'id' && $opened) {
-                    $output[] = sprintf("%s->update();", $this->ind3);
-                    $opened = false;
+                $opened = true;
+
+                if (!$hasTableVariable) {
+                    $output[] = sprintf("%s\$table = \$this->table(\"%s\");", $this->ind2, $tableName);
+                    $hasTableVariable = true;
                 }
-                if ($columnName != 'id' && !$opened) {
-                    $opened = true;
-                    $output[] = sprintf("%s\$this->table('%s')", $this->ind2, $tableName);
-                }
+
                 $output[] =
                     $columnName == 'id' ?
                         $this->getColumnCreateId($new, $tableName, $columnName)
@@ -250,7 +242,7 @@ class PhinxMySqlGenerator
             }
         }
         if ($opened) {
-            $output[] = sprintf("%s->update();", $this->ind3);
+            $output[] = sprintf("%s\$table->save();", $this->ind2);
         }
         return $output;
     }
@@ -420,12 +412,177 @@ class PhinxMySqlGenerator
     /**
      * Generate create table.
      *
-     * @param string $table
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @return array
+     */
+    protected function getCreateTable($output, $table, $tableName)
+    {
+        $output[] = $this->getTableVariable($table, $tableName);
+
+        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
+        if (empty($alternatePrimaryKeys)) {
+            $output[] = sprintf("%s\$table->save();", $this->ind2);
+        }
+
+        return $output;
+    }
+
+    /**
+     * Generate create table variable.
+     *
+     * @param array $table
+     * @param string $tableName
      * @return string
      */
-    protected function getCreateTable($table)
+    protected function getTableVariable($table, $tableName)
     {
-        return sprintf("%s\$this->table(\"%s\")->save();", $this->ind2, $table);
+        $options = $this->getTableOptions($table);
+        $result = sprintf("%s\$table = \$this->table(\"%s\", %s);", $this->ind2, $tableName, $options);
+        return $result;
+    }
+
+    /**
+     * Get table options.
+     *
+     * @param $table
+     * @return string
+     */
+    protected function getTableOptions($table)
+    {
+        $attributes = [];
+
+        $attributes = $this->getPhinxTablePrimaryKey($attributes, $table);
+
+        // collation
+        $attributes = $this->getPhinxTableEngine($attributes, $table);
+
+        // encoding
+        $attributes = $this->getPhinxTableEncoding($attributes, $table);
+
+        // collation
+        $attributes = $this->getPhinxTableCollation($attributes, $table);
+
+        // comment
+        $attributes = $this->getPhinxTableComment($attributes, $table);
+
+        $result = '[' . implode(', ', $attributes) . ']';
+        return $result;
+    }
+
+    /**
+     * Define table id value
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTablePrimaryKey($attributes, $table)
+    {
+        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
+        if (!empty($alternatePrimaryKeys)) {
+            $attributes[] = "'id' => false";
+            $valueString = '[' . implode(', ', $alternatePrimaryKeys) . ']';
+            $attributes[] = "'primary_key' => " . $valueString;
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Collect alternate primary keys
+     *
+     * @param array $table
+     * @return array|null
+     */
+    protected function getAlternatePrimaryKeys($table)
+    {
+        $alternatePrimaryKey = false;
+        $primaryKeys = [];
+        foreach ($table['columns'] as $column) {
+            $columnName = $column['COLUMN_NAME'];
+            $columnKey = $column['COLUMN_KEY'];
+            if ($columnKey !== 'PRI') {
+                continue;
+            }
+            if ($columnName != 'id') {
+                $alternatePrimaryKey = true;
+            }
+            $primaryKeys[] = '"' . $columnName . '"';
+        }
+        if ($alternatePrimaryKey) {
+            return $primaryKeys;
+        }
+        return null;
+    }
+
+    /**
+     * Define table engine (defaults to InnoDB)
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableEngine($attributes, $table)
+    {
+        if (!empty($table['table']['engine'])) {
+            $attributes[] = '\'engine\' => "' . addslashes($table['table']['engine']) . '"';
+        } else {
+            $attributes[] = '\'engine\' => "InnoDB"';
+        }
+        return $attributes;
+    }
+
+    /**
+     * Define table character set (defaults to utf8)
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableEncoding($attributes, $table)
+    {
+        if (!empty($table['table']['character_set_name'])) {
+            $attributes[] = '\'encoding\' => "' . addslashes($table['table']['character_set_name']) . '"';
+        } else {
+            $attributes[] = '\'encoding\' => "utf8"';
+        }
+        return $attributes;
+    }
+
+    /**
+     * Define table collation (defaults to `utf8_general_ci`)
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableCollation($attributes, $table)
+    {
+        if (!empty($table['table']['table_collation'])) {
+            $attributes[] = '\'collation\' => "' . addslashes($table['table']['table_collation']) . '"';
+        } else {
+            $attributes[] = '\'collation\' => "utf8_general_ci"';
+        }
+        return $attributes;
+    }
+
+    /**
+     * Set a text comment on the table.
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableComment($attributes, $table)
+    {
+        if (!empty($table['table']['table_comment'])) {
+            $attributes[] = '\'comment\' => "' . addslashes($table['table']['table_comment']) . '"';
+        } else {
+            $attributes[] = '\'comment\' => ""';
+        }
+        return $attributes;
     }
 
     /**
@@ -521,7 +678,7 @@ class PhinxMySqlGenerator
     protected function getColumnCreateAdd($schema, $table, $columnName)
     {
         $result = $this->getColumnCreate($schema, $table, $columnName);
-        return sprintf("%s->addColumn('%s', '%s', %s)", $this->ind3, $result[1], $result[2], $result[3]);
+        return sprintf("%s\$table->addColumn('%s', '%s', %s);", $this->ind2, $result[1], $result[2], $result[3]);
     }
 
     /**
@@ -683,11 +840,14 @@ class PhinxMySqlGenerator
             $attributes = $this->getOptionEnumValue($attributes, $columnData);
         }
 
-        // collation
-        $attributes = $this->getPhinxColumnCollation($attributes, $columnData);
+        // Collation
+        $attributes = $this->getPhinxColumnCollation($phinxType, $attributes, $columnData);
 
-        // encoding
-        $attributes = $this->getPhinxColumnEncoding($attributes, $columnData);
+        // Encoding
+        $attributes = $this->getPhinxColumnEncoding($phinxType, $attributes, $columnData);
+
+        // Comment
+        $attributes = $this->getPhinxColumnOptionsComment($attributes, $columnData);
 
         // after: specify the column that a new column should be placed after
         $attributes = $this->getPhinxColumnOptionsAfter($attributes, $columnData, $columns);
@@ -706,12 +866,22 @@ class PhinxMySqlGenerator
     /**
      * Set collation that differs from table defaults (only applies to MySQL).
      *
+     * @param string $phinxType
      * @param array $attributes
      * @param array $columnData
      * @return array Attributes
      */
-    protected function getPhinxColumnCollation($attributes, $columnData)
+    protected function getPhinxColumnCollation($phinxType, $attributes, $columnData)
     {
+        $allowedTypes = array(
+            AdapterInterface::PHINX_TYPE_CHAR,
+            AdapterInterface::PHINX_TYPE_STRING,
+            AdapterInterface::PHINX_TYPE_TEXT,
+        );
+        if (!in_array($phinxType, $allowedTypes)) {
+            return $attributes;
+        }
+
         if (!empty($columnData['COLLATION_NAME'])) {
             $attributes[] = '\'collation\' => "' . addslashes($columnData['COLLATION_NAME']) . '"';
         }
@@ -721,12 +891,22 @@ class PhinxMySqlGenerator
     /**
      * Set character set that differs from table defaults *(only applies to MySQL)* (only applies to MySQL).
      *
+     * @param string $phinxType
      * @param array $attributes
      * @param array $columnData
      * @return array Attributes
      */
-    protected function getPhinxColumnEncoding($attributes, $columnData)
+    protected function getPhinxColumnEncoding($phinxType, $attributes, $columnData)
     {
+        $allowedTypes = array(
+            AdapterInterface::PHINX_TYPE_CHAR,
+            AdapterInterface::PHINX_TYPE_STRING,
+            AdapterInterface::PHINX_TYPE_TEXT,
+        );
+        if (!in_array($phinxType, $allowedTypes)) {
+            return $attributes;
+        }
+
         if (!empty($columnData['CHARACTER_SET_NAME'])) {
             $attributes[] = '\'encoding\' => "' . addslashes($columnData['CHARACTER_SET_NAME']) . '"';
         }
