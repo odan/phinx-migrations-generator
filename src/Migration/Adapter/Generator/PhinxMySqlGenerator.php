@@ -1198,6 +1198,13 @@ class PhinxMySqlGenerator
         } else {
             $options[] = '\'unique\' => true';
         }
+        /*
+         * Number of characters for nonbinary string types (CHAR, VARCHAR, TEXT)
+         * and number of bytes for binary string types (BINARY, VARBINARY, BLOB)
+         */
+        if (isset($indexData['Sub_part'])) {
+            $options[] = '\'limit\' => ' . $indexData['Sub_part'];
+        }
         // MyISAM only
         if (isset($indexData['Index_type']) && $indexData['Index_type'] == 'FULLTEXT') {
             $options[] = '\'type\' => \'fulltext\'';
