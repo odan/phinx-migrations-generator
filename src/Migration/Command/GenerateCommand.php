@@ -3,11 +3,14 @@
 namespace Odan\Migration\Command;
 
 use Exception;
+use Odan\Migration\Generator\MigrationGenerator;
+use PDO;
 use Phinx\Console\Command\AbstractCommand;
+use Phinx\Db\Adapter\PdoAdapter;
+use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Odan\Migration\Generator\MigrationGenerator;
 
 class GenerateCommand extends AbstractCommand
 {
@@ -92,7 +95,8 @@ class GenerateCommand extends AbstractCommand
 
         // Gets the database adapter.
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
-        $pdo = $dbAdapter->getConnection();
+
+        $pdo = $this->getPdo($manager, $environment);
 
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
@@ -110,9 +114,37 @@ class GenerateCommand extends AbstractCommand
             'overwrite' => $overwrite,
             'mark_migration' => true
         );
-        //var_dump($settings);
 
         $generator = new MigrationGenerator($settings, $input, $output);
         return $generator->generate();
+    }
+
+    /**
+     * Get PDO instance.
+     *
+     * @param Manager $manager Manager
+     * @param string $environment Environment name
+     * @return PDO PDO object
+     * @throws Exception On error
+     */
+    protected function getPdo(Manager $manager, $environment)
+    {
+        // Gets the database adapter.
+        $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
+
+        if ($dbAdapter instanceof PdoAdapter) {
+            $pdo = $dbAdapter->getConnection();
+        } else {
+            $dbAdapter->connect();
+            $pdo = $dbAdapter->getAdapter()->getConnection();
+        }
+        if (!$pdo) {
+            $pdo = $dbAdapter->getOption('connection');
+        }
+        if (!$pdo instanceof PDO) {
+            throw new Exception('No PDO database connection found.');
+        }
+
+        return $pdo;
     }
 }
