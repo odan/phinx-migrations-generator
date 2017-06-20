@@ -98,6 +98,8 @@ class GenerateCommand extends AbstractCommand
 
         $pdo = $this->getPdo($manager, $environment);
 
+        $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
+
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
 
@@ -108,7 +110,7 @@ class GenerateCommand extends AbstractCommand
             'adapter' => $dbAdapter,
             'schema_file' => $schemaFile,
             'migration_path' => $migrationsPaths[0],
-            'foreign_keys' => 0,
+            'foreign_keys' => $foreignKeys,
             'config_file' => $configFilePath,
             'name' => $name,
             'overwrite' => $overwrite,

@@ -125,6 +125,7 @@ class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
             ),
             'schema_file' => __DIR__ . '/schema.php',
+            'foreign_keys' => false,
             'migration_path' => __DIR__
         );
     }
