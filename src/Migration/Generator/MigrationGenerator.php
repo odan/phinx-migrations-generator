@@ -81,7 +81,7 @@ class MigrationGenerator
         $this->settings = $settings;
         $this->pdo = $this->getPdo($settings);
         $this->dba = new MySqlAdapter($this->pdo, $output);
-        $this->generator = new PhinxMySqlGenerator($this->dba, $output);
+        $this->generator = new PhinxMySqlGenerator($this->dba, $output, $settings);
         $this->output = $output;
         $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);

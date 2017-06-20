@@ -108,7 +108,7 @@ class GenerateCommand extends AbstractCommand
             'adapter' => $dbAdapter,
             'schema_file' => $schemaFile,
             'migration_path' => $migrationsPaths[0],
-            'foreign_keys' => 1,
+            'foreign_keys' => 0,
             'config_file' => $configFilePath,
             'name' => $name,
             'overwrite' => $overwrite,
