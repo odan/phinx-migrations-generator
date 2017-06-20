@@ -3,8 +3,8 @@
 namespace Odan\Migration\Adapter\Generator;
 
 use Odan\Migration\Adapter\Database\MySqlAdapter;
-use Symfony\Component\Console\Output\OutputInterface;
 use Phinx\Db\Adapter\AdapterInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * PhinxMySqlGenerator
@@ -219,6 +219,7 @@ class PhinxMySqlGenerator
             return $output;
         }
         $hasTableVariable = !empty($table['has_table_variable']);
+        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
         $opened = false;
 
         foreach ($table['columns'] as $columnName => $columnData) {
@@ -230,11 +231,15 @@ class PhinxMySqlGenerator
                     $hasTableVariable = true;
                 }
 
-                $output[] =
-                    $columnName == 'id' ?
-                        $this->getColumnCreateId($new, $tableName, $columnName)
-                        :
-                        $this->getColumnCreateAdd($new, $tableName, $columnName);
+                if ($columnName == 'id') {
+                    $output[] = $this->getColumnCreateId($new, $tableName, $columnName);
+                } else {
+                    if (!empty($alternatePrimaryKeys)) {
+                        $output[] = $this->getColumnCreateAddNoUpdate($new, $tableName, $columnName);
+                    } else {
+                        $output[] = $this->getColumnCreateAdd($new, $tableName, $columnName);
+                    }
+                }
             } else {
                 if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
                     $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
@@ -309,6 +314,7 @@ class PhinxMySqlGenerator
         if (empty($old['tables'])) {
             return $output;
         }
+
         foreach ($old['tables'] as $tableName => $table) {
             if ($tableName == 'phinxlog') {
                 continue;
@@ -320,9 +326,20 @@ class PhinxMySqlGenerator
                     }
                 }
             }
+
             if (!isset($new['tables'][$tableName])) {
                 $output[] = $this->getDropTable($tableName);
+                continue;
             }
+
+            // Detect changes for existing tables (like engine, character set, collation, ...)
+            $oldTable = $old['tables'][$tableName]['table'];
+            $newTable = $new['tables'][$tableName]['table'];
+            if ($oldTable != $newTable) {
+                $output = $this->getUpdateTable($output, $new['tables'][$tableName], $tableName);
+            }
+
+            // @todo Detect changes on primary keys
         }
 
         return $output;
@@ -415,17 +432,32 @@ class PhinxMySqlGenerator
      * @param array $output
      * @param array $table
      * @param string $tableName
+     * @param bool $forceSave (false)
      * @return array
      */
-    protected function getCreateTable($output, $table, $tableName)
+    protected function getCreateTable($output, $table, $tableName, $forceSave = false)
     {
         $output[] = $this->getTableVariable($table, $tableName);
 
         $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
-        if (empty($alternatePrimaryKeys)) {
+        if (empty($alternatePrimaryKeys) || $forceSave) {
             $output[] = sprintf("%s\$table->save();", $this->ind2);
         }
 
+        return $output;
+    }
+
+    /**
+     * Generate update table.
+     *
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @return array
+     */
+    protected function getUpdateTable($output, $table, $tableName)
+    {
+        $output = $this->getCreateTable($output, $table, $tableName, true);
         return $output;
     }
 
@@ -678,8 +710,23 @@ class PhinxMySqlGenerator
     protected function getColumnCreateAdd($schema, $table, $columnName)
     {
         $result = $this->getColumnCreate($schema, $table, $columnName);
-        return sprintf("%s\$table->addColumn('%s', '%s', %s)->update();;", $this->ind2, $result[1], $result[2], $result[3]);
+        return sprintf("%s\$table->addColumn('%s', '%s', %s)->update();", $this->ind2, $result[1], $result[2], $result[3]);
     }
+
+    /**
+     * Get addColumn method.
+     *
+     * @param $schema
+     * @param $table
+     * @param $columnName
+     * @return string
+     */
+    protected function getColumnCreateAddNoUpdate($schema, $table, $columnName)
+    {
+        $result = $this->getColumnCreate($schema, $table, $columnName);
+        return sprintf("%s\$table->addColumn('%s', '%s', %s);", $this->ind2, $result[1], $result[2], $result[3]);
+    }
+
 
     /**
      * Get primary key column update commands.
