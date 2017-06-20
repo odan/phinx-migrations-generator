@@ -147,6 +147,12 @@ call ../vendor/bin/phinx.bat migrate
 
 The phinx-migrations-generator uses the configuration of phinx.
 
+## Migration configuration
+
+Parameter | Values | Default | Description
+--- | --- | --- | ---
+foreign_keys | bool | false | Experimental foreign key support.
+
 ### Example configuration
 
 Filename: config/phinx.php
@@ -174,6 +180,7 @@ return array(
     'paths' => [
         'migrations' => $migrationPath
     ],
+    'foreign_keys' => false,
     'environments' => [
         'default_database' => "local",
         'local' => [
