@@ -1,6 +1,6 @@
 # Phinx migrations generator
 
-*The missing part*
+Generate a migration by comparing your current database to your mapping information.
 
 [![Latest Version](https://img.shields.io/github/release/odan/phinx-migrations-generator.svg)](https://github.com/odan/phinx-migrations-generator/releases)
 [![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master)](https://travis-ci.org/odan/phinx-migrations-generator)
