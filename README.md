@@ -18,7 +18,7 @@ In reality, you should rarely need to write migrations manually, as the migratio
 ## Features
 
 * Framework independent
-* DBMS: MySQL
+* DBMS: MySQL (only)
 * Initial schema, schema diff
 * Database: character set, collation
 * Tables: create, update, remove, engine, comment, character set, collation
