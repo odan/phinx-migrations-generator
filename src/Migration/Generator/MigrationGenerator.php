@@ -3,9 +3,9 @@
 namespace Odan\Migration\Generator;
 
 use Exception;
-use PDO;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
+use PDO;
 use Phinx\Migration\Manager;
 use Phinx\Migration\Manager\Environment;
 use Phinx\Util\Util;
@@ -18,6 +18,11 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  */
 class MigrationGenerator
 {
+    /**
+     * Settings
+     *
+     * @var array
+     */
     protected $settings = array();
 
     /**
@@ -178,7 +183,7 @@ class MigrationGenerator
         $adapter = $this->settings['adapter'];
 
         /* @var $manager Manager */
-        $manager =  $this->settings['manager'];
+        $manager = $this->settings['manager'];
 
         $envName = $this->settings['environment'];
 

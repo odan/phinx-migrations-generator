@@ -68,9 +68,11 @@ class PhinxMySqlGenerator
         $this->dba = $dba;
         $this->output = $output;
 
-        // Experimental foreign key support.
         $default = [
-            'foreign_keys' => false
+            // Experimental foreign key support.
+            'foreign_keys' => false,
+            // Default migration table name
+            'default_migration_table' => 'phinxlog'
         ];
         $this->options = array_replace_recursive($default, $options);
     }
@@ -186,7 +188,7 @@ class PhinxMySqlGenerator
             return $output;
         }
         foreach ($new['tables'] as $tableName => $table) {
-            if ($tableName == 'phinxlog') {
+            if ($tableName == $this->options['default_migration_table']) {
                 continue;
             }
 
@@ -316,7 +318,7 @@ class PhinxMySqlGenerator
         }
 
         foreach ($old['tables'] as $tableName => $table) {
-            if ($tableName == 'phinxlog') {
+            if ($tableName == $this->options['default_migration_table']) {
                 continue;
             }
             if (!empty($old['tables'][$tableName]['indexes'])) {
@@ -377,7 +379,7 @@ class PhinxMySqlGenerator
         }
         $output = [];
         foreach ($new['tables'] as $tableName => $table) {
-            if ($tableName == 'phinxlog') {
+            if ($tableName == $this->options['default_migration_table']) {
                 continue;
             }
             if (empty($table['foreign_keys'])) {

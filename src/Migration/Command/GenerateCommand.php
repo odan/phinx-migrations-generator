@@ -100,6 +100,8 @@ class GenerateCommand extends AbstractCommand
 
         $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
 
+        $defaultMigrationTable = $config->offsetExists('default_migration_table') ? $config->offsetGet('default_migration_table') : 'phinxlog';
+
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
 
@@ -114,7 +116,8 @@ class GenerateCommand extends AbstractCommand
             'config_file' => $configFilePath,
             'name' => $name,
             'overwrite' => $overwrite,
-            'mark_migration' => true
+            'mark_migration' => true,
+            'default_migration_table' => $defaultMigrationTable
         );
 
         $generator = new MigrationGenerator($settings, $input, $output);
