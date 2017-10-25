@@ -100,7 +100,7 @@ class GenerateCommand extends AbstractCommand
 
         $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
 
-        $defaultMigrationTable = $config->offsetExists('default_migration_table') ? $config->offsetGet('default_migration_table') : 'phinxlog';
+        $defaultMigrationTable = isset($envOptions['default_migration_table']) ? $envOptions['default_migration_table'] : 'phinxlog';
 
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
