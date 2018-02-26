@@ -814,50 +814,27 @@ class PhinxMySqlGenerator
             return 'boolean';
         }
 
-        // [double] is not supported by phinx
-        // https://github.com/robmorgan/phinx/issues/498
-        //
-        // [bit] is not supported by phinx.
         $map = array(
             'tinyint' => 'integer',
             'smallint' => 'integer',
             'int' => 'integer',
             'mediumint' => 'integer',
             'bigint' => 'integer',
-            'timestamp' => 'timestamp',
-            'date' => 'date',
-            'datetime' => 'datetime',
-            'year' => 'year',
-            'time' => 'time',
-            'enum' => 'enum',
-            'set' => 'set',
-            'char' => 'char',
-            'text' => 'text',
             'tinytext' => 'text',
             'mediumtext' => 'text',
             'longtext' => 'text',
             'varchar' => 'string',
-            'decimal' => 'decimal',
-            'binary' => 'binary',
-            'blob' => 'blob',
             'tinyblob' => 'blob',
             'mediumblob' => 'blob',
             'longblob' => 'blob',
-            'float' => 'float',
-            'varbinary' => 'varbinary',
-            'geometry' => 'geometry',
-            'point' => 'point',
-            'linestring' => 'linestring',
-            'polygon' => 'polygon',
         );
 
         $type = $this->getMySQLColumnType($columnData);
         if (isset($map[$type])) {
-            $result = $map[$type];
-        } else {
-            $result = '[' . $type . ']';
+            $type = $map[$type];
         }
-        return $result;
+
+        return $type;
     }
 
     /**
