@@ -352,7 +352,7 @@ class PhinxMySqlGenerator
     /**
      * Get table options.
      *
-     * @param $table
+     * @param array $table
      * @return string
      */
     protected function getTableOptions($table)
@@ -500,11 +500,11 @@ class PhinxMySqlGenerator
     /**
      * Get table migration (new table columns).
      *
-     * @param $output
-     * @param $table
-     * @param $tableName
-     * @param $new
-     * @param $old
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @param array $new
+     * @param array $old
      * @return array
      */
     protected function getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old)
@@ -550,9 +550,9 @@ class PhinxMySqlGenerator
     /**
      * Get primary key column update commands.
      *
-     * @param $schema
-     * @param $table
-     * @param $columnName
+     * @param array $schema
+     * @param string $table
+     * @param string $columnName
      * @return string
      */
     protected function getColumnCreateId($schema, $table, $columnName)
@@ -983,9 +983,9 @@ class PhinxMySqlGenerator
     /**
      * Get addColumn method.
      *
-     * @param $schema
-     * @param $table
-     * @param $columnName
+     * @param array $schema
+     * @param string $table
+     * @param string $columnName
      * @return string
      */
     protected function getColumnCreateAddNoUpdate($schema, $table, $columnName)
@@ -998,9 +998,9 @@ class PhinxMySqlGenerator
     /**
      * Get addColumn method.
      *
-     * @param $schema
-     * @param $table
-     * @param $columnName
+     * @param array $schema
+     * @param string $table
+     * @param string $columnName
      * @return string
      */
     protected function getColumnCreateAdd($schema, $table, $columnName)
@@ -1202,7 +1202,7 @@ class PhinxMySqlGenerator
     protected function getForeignKeysMigrations($new = array(), $old = array())
     {
         if (empty($new['tables'])) {
-            return null;
+            return [];
         }
         $output = [];
         foreach ($new['tables'] as $tableName => $table) {

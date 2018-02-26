@@ -103,7 +103,7 @@ class MySqlAdapter
     /**
      * Quote value.
      *
-     * @param string $value
+     * @param string|null $value
      * @return string
      */
     public function quote($value)
@@ -217,7 +217,7 @@ class MySqlAdapter
      * Get foreign keys.
      *
      * @param string $tableName
-     * @return array
+     * @return array|null
      */
     public function getForeignKeys($tableName)
     {
@@ -279,7 +279,7 @@ class MySqlAdapter
     /**
      * Escape value.
      *
-     * @param string $value
+     * @param string|null $value
      * @return string
      */
     public function esc($value)

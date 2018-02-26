@@ -6,6 +6,7 @@ use Exception;
 use Odan\Migration\Generator\MigrationGenerator;
 use PDO;
 use Phinx\Console\Command\AbstractCommand;
+use Phinx\Db\Adapter\AdapterWrapper;
 use Phinx\Db\Adapter\PdoAdapter;
 use Phinx\Migration\Manager;
 use Symfony\Component\Console\Input\InputInterface;
@@ -137,7 +138,7 @@ class GenerateCommand extends AbstractCommand
      */
     protected function getPdo(Manager $manager, $environment)
     {
-        // Gets the database adapter.
+        /* @var AdapterWrapper $dbAdapter */
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
 
         if ($dbAdapter instanceof PdoAdapter) {
