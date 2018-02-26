@@ -6,10 +6,13 @@ enabled:
   - no_unused_imports
   - no_useless_else
   - phpdoc_add_missing_param_annotation
-  - phpdoc_no_empty_return
   - phpdoc_no_package
   - phpdoc_scalar
   - phpdoc_types
+  - php_unit_strict
+  - alpha_ordered_imports
+  - include
+  - concat_with_spaces
 
 linting: true
 
