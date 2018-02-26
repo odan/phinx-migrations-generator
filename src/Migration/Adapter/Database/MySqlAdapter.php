@@ -47,6 +47,16 @@ class MySqlAdapter
     }
 
     /**
+     * Get current database name
+     *
+     * @return string
+     */
+    public function getDbName()
+    {
+        return $this->pdo->query('select database()')->fetchColumn();
+    }
+
+    /**
      * Load current database schema.
      *
      * @return array
@@ -67,17 +77,8 @@ class MySqlAdapter
             $result['tables'][$tableName]['indexes'] = $this->getIndexes($tableName);
             $result['tables'][$tableName]['foreign_keys'] = $this->getForeignKeys($tableName);
         }
-        return $result;
-    }
 
-    /**
-     * Get current database name
-     *
-     * @return string
-     */
-    public function getDbName()
-    {
-        return $this->pdo->query('select database()')->fetchColumn();
+        return $result;
     }
 
     /**
@@ -95,7 +96,23 @@ class MySqlAdapter
             WHERE schema_name = %s;";
         $sql = sprintf($sql, $this->quote($dbName));
         $row = $this->pdo->query($sql)->fetch();
+
         return $row;
+    }
+
+    /**
+     * Quote value.
+     *
+     * @param string $value
+     * @return string
+     */
+    public function quote($value)
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        return $this->pdo->quote($value);
     }
 
     /**
@@ -125,6 +142,7 @@ class MySqlAdapter
                 'character_set_name' => $row['CHARACTER_SET_NAME'],
             ];
         }
+
         return $result;
     }
 
@@ -146,6 +164,7 @@ class MySqlAdapter
             $name = $row['COLUMN_NAME'];
             $result[$name] = $row;
         }
+
         return $result;
     }
 
@@ -168,7 +187,30 @@ class MySqlAdapter
             $seq = $row['Seq_in_index'];
             $result[$name][$seq] = $row;
         }
+
         return $result;
+    }
+
+    /**
+     * Escape identifier (column, table) with backtick
+     *
+     * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
+     *
+     * @param string $value
+     * @param string $quote
+     * @return string identifier escaped string
+     */
+    public function ident($value, $quote = "`")
+    {
+        $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
+        if (strpos($value, '.') !== false) {
+            $values = explode('.', $value);
+            $value = $quote . implode($quote . '.' . $quote, $values) . $quote;
+        } else {
+            $value = $quote . $value . $quote;
+        }
+
+        return $value;
     }
 
     /**
@@ -187,7 +229,7 @@ class MySqlAdapter
                 refs.REFERENCED_COLUMN_NAME,
                 cRefs.UPDATE_RULE,
                 cRefs.DELETE_RULE
-            FROM INFORMATION_SCHEMA.COLUMNS as cols
+            FROM INFORMATION_SCHEMA.COLUMNS AS cols
             LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS refs
                 ON refs.TABLE_SCHEMA=cols.TABLE_SCHEMA
                 AND refs.REFERENCED_TABLE_SCHEMA=cols.TABLE_SCHEMA
@@ -216,6 +258,7 @@ class MySqlAdapter
         foreach ($rows as $row) {
             $result[$row['CONSTRAINT_NAME']] = $row;
         }
+
         return $result;
     }
 
@@ -229,28 +272,8 @@ class MySqlAdapter
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
         $result = $this->pdo->query($sql)->fetch();
-        return $result['CREATE TABLE'];
-    }
 
-    /**
-     * Escape identifier (column, table) with backtick
-     *
-     * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
-     *
-     * @param string $value
-     * @param string $quote
-     * @return string identifier escaped string
-     */
-    public function ident($value, $quote = "`")
-    {
-        $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
-        if (strpos($value, '.') !== false) {
-            $values = explode('.', $value);
-            $value = $quote . implode($quote . '.' . $quote, $values) . $quote;
-        } else {
-            $value = $quote . $value . $quote;
-        }
-        return $value;
+        return $result['CREATE TABLE'];
     }
 
     /**
@@ -265,20 +288,7 @@ class MySqlAdapter
             return 'NULL';
         }
         $value = substr($this->pdo->quote($value), 1, -1);
-        return $value;
-    }
 
-    /**
-     * Quote value.
-     *
-     * @param string $value
-     * @return string
-     */
-    public function quote($value)
-    {
-        if ($value === null) {
-            return 'NULL';
-        }
-        return $this->pdo->quote($value);
+        return $value;
     }
 }

@@ -99,6 +99,7 @@ class PhinxMySqlGenerator
         $output[] = '}';
         $output[] = '';
         $result = implode($this->nl, $output);
+
         return $result;
     }
 
@@ -116,6 +117,7 @@ class PhinxMySqlGenerator
         $output[] = $this->ind . '{';
         $output = $this->getTableMigration($output, $new, $old);
         $output[] = $this->ind . '}';
+
         return $output;
     }
 
@@ -153,6 +155,28 @@ class PhinxMySqlGenerator
     }
 
     /**
+     * Generate Set Unique Checks.
+     *
+     * @param int $value 0 or 1
+     * @return string
+     */
+    protected function getSetUniqueChecks($value)
+    {
+        return sprintf("%s\$this->execute(\"SET UNIQUE_CHECKS = %s;\");", $this->ind2, $value);
+    }
+
+    /**
+     * Generate SetForeignKeyCheck.
+     *
+     * @param int $value
+     * @return string
+     */
+    protected function getSetForeignKeyCheck($value)
+    {
+        return sprintf("%s\$this->execute(\"SET FOREIGN_KEY_CHECKS = %s;\");", $this->ind2, $value);
+    }
+
+    /**
      * Get table migration (new database).
      *
      * @param array $output
@@ -171,7 +195,90 @@ class PhinxMySqlGenerator
         if ($this->neq($new, $old, ['database', 'default_collation_name'])) {
             $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
         }
+
         return $output;
+    }
+
+    /**
+     * Compare array (not)
+     *
+     * @param array $arr
+     * @param array $arr2
+     * @param array $keys
+     * @return bool
+     */
+    protected function neq($arr, $arr2, $keys)
+    {
+        return !$this->eq($arr, $arr2, $keys);
+    }
+
+    /**
+     * Compare array
+     *
+     * @param array $arr
+     * @param array $arr2
+     * @param array $keys
+     * @return bool
+     */
+    protected function eq($arr, $arr2, $keys)
+    {
+        $val1 = $this->find($arr, $keys);
+        $val2 = $this->find($arr2, $keys);
+
+        return $val1 === $val2;
+    }
+
+    /**
+     * Get array value by keys.
+     *
+     * @param array $array
+     * @param array $parts
+     * @return mixed
+     */
+    protected function find($array, $parts)
+    {
+        foreach ($parts as $part) {
+            if (!array_key_exists($part, $array)) {
+                return null;
+            }
+            $array = $array[$part];
+        }
+
+        return $array;
+    }
+
+    /**
+     * Generate alter database charset.
+     *
+     * @param string $charset
+     * @param string $database
+     * @return string
+     */
+    protected function getAlterDatabaseCharset($charset, $database = null)
+    {
+        if ($database !== null) {
+            $database = ' ' . $this->dba->ident($database);
+        }
+        $charset = $this->dba->quote($charset);
+
+        return sprintf("%s\$this->execute(\"ALTER DATABASE%s CHARACTER SET %s;\");", $this->ind2, $database, $charset);
+    }
+
+    /**
+     * Generate alter database collate.
+     *
+     * @param string $collate
+     * @param string $database
+     * @return string
+     */
+    protected function getAlterDatabaseCollate($collate, $database = null)
+    {
+        if ($database) {
+            $database = ' ' . $this->dba->ident($database);
+        }
+        $collate = $this->dba->quote($collate);
+
+        return sprintf("%s\$this->execute(\"ALTER DATABASE%s COLLATE=%s;\");", $this->ind2, $database, $collate);
     }
 
     /**
@@ -202,7 +309,192 @@ class PhinxMySqlGenerator
             $output = $this->getTableMigrationOldTablesColumns($output, $tableName, $new, $old);
             $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
         }
+
         return $output;
+    }
+
+    /**
+     * Generate create table.
+     *
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @param bool $forceSave (false)
+     * @return array
+     */
+    protected function getCreateTable($output, $table, $tableName, $forceSave = false)
+    {
+        $output[] = $this->getTableVariable($table, $tableName);
+
+        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
+        if (empty($alternatePrimaryKeys) || $forceSave) {
+            $output[] = sprintf("%s\$table->save();", $this->ind2);
+        }
+
+        return $output;
+    }
+
+    /**
+     * Generate create table variable.
+     *
+     * @param array $table
+     * @param string $tableName
+     * @return string
+     */
+    protected function getTableVariable($table, $tableName)
+    {
+        $options = $this->getTableOptions($table);
+        $result = sprintf("%s\$table = \$this->table(\"%s\", %s);", $this->ind2, $tableName, $options);
+
+        return $result;
+    }
+
+    /**
+     * Get table options.
+     *
+     * @param $table
+     * @return string
+     */
+    protected function getTableOptions($table)
+    {
+        $attributes = [];
+
+        $attributes = $this->getPhinxTablePrimaryKey($attributes, $table);
+
+        // collation
+        $attributes = $this->getPhinxTableEngine($attributes, $table);
+
+        // encoding
+        $attributes = $this->getPhinxTableEncoding($attributes, $table);
+
+        // collation
+        $attributes = $this->getPhinxTableCollation($attributes, $table);
+
+        // comment
+        $attributes = $this->getPhinxTableComment($attributes, $table);
+
+        $result = '[' . implode(', ', $attributes) . ']';
+
+        return $result;
+    }
+
+    /**
+     * Define table id value
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTablePrimaryKey($attributes, $table)
+    {
+        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
+        if (!empty($alternatePrimaryKeys)) {
+            $attributes[] = "'id' => false";
+            $valueString = '[' . implode(', ', $alternatePrimaryKeys) . ']';
+            $attributes[] = "'primary_key' => " . $valueString;
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Collect alternate primary keys
+     *
+     * @param array $table
+     * @return array|null
+     */
+    protected function getAlternatePrimaryKeys($table)
+    {
+        $alternatePrimaryKey = false;
+        $primaryKeys = [];
+        foreach ($table['columns'] as $column) {
+            $columnName = $column['COLUMN_NAME'];
+            $columnKey = $column['COLUMN_KEY'];
+            if ($columnKey !== 'PRI') {
+                continue;
+            }
+            if ($columnName != 'id') {
+                $alternatePrimaryKey = true;
+            }
+            $primaryKeys[] = '"' . $columnName . '"';
+        }
+        if ($alternatePrimaryKey) {
+            return $primaryKeys;
+        }
+
+        return null;
+    }
+
+    /**
+     * Define table engine (defaults to InnoDB)
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableEngine($attributes, $table)
+    {
+        if (!empty($table['table']['engine'])) {
+            $attributes[] = '\'engine\' => "' . addslashes($table['table']['engine']) . '"';
+        } else {
+            $attributes[] = '\'engine\' => "InnoDB"';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Define table character set (defaults to utf8)
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableEncoding($attributes, $table)
+    {
+        if (!empty($table['table']['character_set_name'])) {
+            $attributes[] = '\'encoding\' => "' . addslashes($table['table']['character_set_name']) . '"';
+        } else {
+            $attributes[] = '\'encoding\' => "utf8"';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Define table collation (defaults to `utf8_general_ci`)
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableCollation($attributes, $table)
+    {
+        if (!empty($table['table']['table_collation'])) {
+            $attributes[] = '\'collation\' => "' . addslashes($table['table']['table_collation']) . '"';
+        } else {
+            $attributes[] = '\'collation\' => "utf8_general_ci"';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Set a text comment on the table.
+     *
+     * @param array $attributes
+     * @param array $table
+     * @return array Attributes
+     */
+    protected function getPhinxTableComment($attributes, $table)
+    {
+        if (!empty($table['table']['table_comment'])) {
+            $attributes[] = '\'comment\' => "' . addslashes($table['table']['table_comment']) . '"';
+        } else {
+            $attributes[] = '\'comment\' => ""';
+        }
+
+        return $attributes;
     }
 
     /**
@@ -251,484 +543,9 @@ class PhinxMySqlGenerator
         if ($opened) {
             $output[] = sprintf("%s\$table->save();", $this->ind2);
         }
-        return $output;
-    }
-
-    /**
-     * Get table migration (old table columns).
-     *
-     * @param array $output
-     * @param string $tableName
-     * @param array $new
-     * @param array $old
-     * @return array
-     */
-    protected function getTableMigrationOldTablesColumns($output, $tableName, $new, $old)
-    {
-        if (empty($old['tables'][$tableName]['columns'])) {
-            return $output;
-        }
-        foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
-            if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
-                $output[] = $this->getColumnRemove($tableName, $oldColumnName);
-            }
-        }
-        return $output;
-    }
-
-    /**
-     * Get table migration (indexes).
-     *
-     * @param array $output
-     * @param array $table
-     * @param string $tableName
-     * @param array $new
-     * @param array $old
-     * @return array
-     */
-    protected function getTableMigrationIndexes($output, $table, $tableName, $new, $old)
-    {
-        if (empty($table['indexes'])) {
-            return $output;
-        }
-        foreach ($table['indexes'] as $indexName => $indexSequences) {
-            if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
-                $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
-            } else {
-                if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
-                    $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
-                }
-            }
-        }
-        return $output;
-    }
-
-    /**
-     * Get table migration (old tables).
-     *
-     * @param array $output
-     * @param array $new
-     * @param array $old
-     * @return array
-     */
-    protected function getTableMigrationOldTables($output, $new, $old)
-    {
-        if (empty($old['tables'])) {
-            return $output;
-        }
-
-        foreach ($old['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
-                continue;
-            }
-            if (!empty($old['tables'][$tableName]['indexes'])) {
-                foreach ($old['tables'][$tableName]['indexes'] as $indexName => $indexSequences) {
-                    if (!isset($new['tables'][$tableName]['indexes'][$indexName])) {
-                        $output[] = $this->getIndexRemove($tableName, $indexName);
-                    }
-                }
-            }
-
-            if (!isset($new['tables'][$tableName])) {
-                $output[] = $this->getDropTable($tableName);
-                continue;
-            }
-
-            // Detect changes for existing tables (like engine, character set, collation, ...)
-            $oldTable = $old['tables'][$tableName]['table'];
-            $newTable = $new['tables'][$tableName]['table'];
-            if ($oldTable != $newTable) {
-                $output = $this->getUpdateTable($output, $new['tables'][$tableName], $tableName);
-            }
-
-            // @todo Detect changes on primary keys
-        }
 
         return $output;
     }
-
-    /**
-     * Append lines
-     *
-     * @param array $array1
-     * @param array $array2
-     * @return array
-     */
-    protected function appendLines(array $array1 = array(), array $array2 = array())
-    {
-        if (empty($array2)) {
-            return $array1;
-        }
-        foreach ($array2 as $value) {
-            $array1[] = $value;
-        }
-        return $array1;
-    }
-
-    /**
-     * Generate foreign keys migrations.
-     *
-     * @param array $new New schema
-     * @param array $old Old schema
-     * @return array Output
-     */
-    protected function getForeignKeysMigrations($new = array(), $old = array())
-    {
-        if (empty($new['tables'])) {
-            return null;
-        }
-        $output = [];
-        foreach ($new['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
-                continue;
-            }
-            if (empty($table['foreign_keys'])) {
-                continue;
-            }
-            foreach ($table['foreign_keys'] as $fkName => $fkData) {
-                if (!isset($old['tables'][$tableName]['foreign_keys'][$fkName])) {
-                    $output[] = $this->getForeignKeyCreate($tableName, $fkName);
-                } else {
-                    $output[] = $this->getForeignKeyRemove($tableName, $fkName);
-                }
-            }
-        }
-        return $output;
-    }
-
-    /**
-     * Generate alter database charset.
-     *
-     * @param string $charset
-     * @param string $database
-     * @return string
-     */
-    protected function getAlterDatabaseCharset($charset, $database = null)
-    {
-        if ($database !== null) {
-            $database = ' ' . $this->dba->ident($database);
-        }
-        $charset = $this->dba->quote($charset);
-        return sprintf("%s\$this->execute(\"ALTER DATABASE%s CHARACTER SET %s;\");", $this->ind2, $database, $charset);
-    }
-
-    /**
-     * Generate alter database collate.
-     *
-     * @param string $collate
-     * @param string $database
-     * @return string
-     */
-    protected function getAlterDatabaseCollate($collate, $database = null)
-    {
-        if ($database) {
-            $database = ' ' . $this->dba->ident($database);
-        }
-        $collate = $this->dba->quote($collate);
-        return sprintf("%s\$this->execute(\"ALTER DATABASE%s COLLATE=%s;\");", $this->ind2, $database, $collate);
-    }
-
-    /**
-     * Generate create table.
-     *
-     * @param array $output
-     * @param array $table
-     * @param string $tableName
-     * @param bool $forceSave (false)
-     * @return array
-     */
-    protected function getCreateTable($output, $table, $tableName, $forceSave = false)
-    {
-        $output[] = $this->getTableVariable($table, $tableName);
-
-        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
-        if (empty($alternatePrimaryKeys) || $forceSave) {
-            $output[] = sprintf("%s\$table->save();", $this->ind2);
-        }
-
-        return $output;
-    }
-
-    /**
-     * Generate update table.
-     *
-     * @param array $output
-     * @param array $table
-     * @param string $tableName
-     * @return array
-     */
-    protected function getUpdateTable($output, $table, $tableName)
-    {
-        $output = $this->getCreateTable($output, $table, $tableName, true);
-        return $output;
-    }
-
-    /**
-     * Generate create table variable.
-     *
-     * @param array $table
-     * @param string $tableName
-     * @return string
-     */
-    protected function getTableVariable($table, $tableName)
-    {
-        $options = $this->getTableOptions($table);
-        $result = sprintf("%s\$table = \$this->table(\"%s\", %s);", $this->ind2, $tableName, $options);
-        return $result;
-    }
-
-    /**
-     * Get table options.
-     *
-     * @param $table
-     * @return string
-     */
-    protected function getTableOptions($table)
-    {
-        $attributes = [];
-
-        $attributes = $this->getPhinxTablePrimaryKey($attributes, $table);
-
-        // collation
-        $attributes = $this->getPhinxTableEngine($attributes, $table);
-
-        // encoding
-        $attributes = $this->getPhinxTableEncoding($attributes, $table);
-
-        // collation
-        $attributes = $this->getPhinxTableCollation($attributes, $table);
-
-        // comment
-        $attributes = $this->getPhinxTableComment($attributes, $table);
-
-        $result = '[' . implode(', ', $attributes) . ']';
-        return $result;
-    }
-
-    /**
-     * Define table id value
-     *
-     * @param array $attributes
-     * @param array $table
-     * @return array Attributes
-     */
-    protected function getPhinxTablePrimaryKey($attributes, $table)
-    {
-        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
-        if (!empty($alternatePrimaryKeys)) {
-            $attributes[] = "'id' => false";
-            $valueString = '[' . implode(', ', $alternatePrimaryKeys) . ']';
-            $attributes[] = "'primary_key' => " . $valueString;
-        }
-
-        return $attributes;
-    }
-
-    /**
-     * Collect alternate primary keys
-     *
-     * @param array $table
-     * @return array|null
-     */
-    protected function getAlternatePrimaryKeys($table)
-    {
-        $alternatePrimaryKey = false;
-        $primaryKeys = [];
-        foreach ($table['columns'] as $column) {
-            $columnName = $column['COLUMN_NAME'];
-            $columnKey = $column['COLUMN_KEY'];
-            if ($columnKey !== 'PRI') {
-                continue;
-            }
-            if ($columnName != 'id') {
-                $alternatePrimaryKey = true;
-            }
-            $primaryKeys[] = '"' . $columnName . '"';
-        }
-        if ($alternatePrimaryKey) {
-            return $primaryKeys;
-        }
-        return null;
-    }
-
-    /**
-     * Define table engine (defaults to InnoDB)
-     *
-     * @param array $attributes
-     * @param array $table
-     * @return array Attributes
-     */
-    protected function getPhinxTableEngine($attributes, $table)
-    {
-        if (!empty($table['table']['engine'])) {
-            $attributes[] = '\'engine\' => "' . addslashes($table['table']['engine']) . '"';
-        } else {
-            $attributes[] = '\'engine\' => "InnoDB"';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Define table character set (defaults to utf8)
-     *
-     * @param array $attributes
-     * @param array $table
-     * @return array Attributes
-     */
-    protected function getPhinxTableEncoding($attributes, $table)
-    {
-        if (!empty($table['table']['character_set_name'])) {
-            $attributes[] = '\'encoding\' => "' . addslashes($table['table']['character_set_name']) . '"';
-        } else {
-            $attributes[] = '\'encoding\' => "utf8"';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Define table collation (defaults to `utf8_general_ci`)
-     *
-     * @param array $attributes
-     * @param array $table
-     * @return array Attributes
-     */
-    protected function getPhinxTableCollation($attributes, $table)
-    {
-        if (!empty($table['table']['table_collation'])) {
-            $attributes[] = '\'collation\' => "' . addslashes($table['table']['table_collation']) . '"';
-        } else {
-            $attributes[] = '\'collation\' => "utf8_general_ci"';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Set a text comment on the table.
-     *
-     * @param array $attributes
-     * @param array $table
-     * @return array Attributes
-     */
-    protected function getPhinxTableComment($attributes, $table)
-    {
-        if (!empty($table['table']['table_comment'])) {
-            $attributes[] = '\'comment\' => "' . addslashes($table['table']['table_comment']) . '"';
-        } else {
-            $attributes[] = '\'comment\' => ""';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Generate drop table.
-     *
-     * @param string $table
-     * @return string
-     */
-    protected function getDropTable($table)
-    {
-        return sprintf("%s\$this->dropTable(\"%s\");", $this->ind2, $table);
-    }
-
-    /**
-     * Generate Alter Table Engine.
-     * @param string $table
-     * @param string $engine
-     * @return string
-     */
-    protected function getAlterTableEngine($table, $engine)
-    {
-        $engine = $this->dba->quote($engine);
-        return sprintf("%s\$this->execute(\"ALTER TABLE `%s` ENGINE=%s;\");", $this->ind2, $table, $engine);
-    }
-
-    /**
-     * Generate Alter Table Charset.
-     *
-     * @param string $table
-     * @param string $charset
-     * @return string
-     */
-    protected function getAlterTableCharset($table, $charset)
-    {
-        $table = $this->dba->ident($table);
-        $charset = $this->dba->quote($charset);
-        return sprintf("%s\$this->execute(\"ALTER TABLE %s CHARSET=%s;\");", $this->ind2, $table, $charset);
-    }
-
-    /**
-     * Generate Alter Table Collate
-     *
-     * @param string $table
-     * @param string $collate
-     * @return string
-     */
-    protected function getAlterTableCollate($table, $collate)
-    {
-        $table = $this->dba->ident($table);
-        $collate = $this->dba->quote($collate);
-        return sprintf("%s\$this->execute(\"ALTER TABLE %s COLLATE=%s;\");", $this->ind2, $table, $collate);
-    }
-
-    /**
-     * Generate alter table comment.
-     *
-     * @param string $table
-     * @param string $comment
-     * @return string
-     */
-    protected function getAlterTableComment($table, $comment)
-    {
-        $table = $this->dba->ident($table);
-        $commentSave = $this->dba->quote($comment);
-        return sprintf("%s\$this->execute(\"ALTER TABLE %s COMMENT=%s;\");", $this->ind2, $table, $commentSave);
-    }
-
-    /**
-     * Generate column create.
-     *
-     * @param array $schema
-     * @param string $table
-     * @param string $columnName
-     * @return string[]
-     */
-    protected function getColumnCreate($schema, $table, $columnName)
-    {
-        $columns = $schema['tables'][$table]['columns'];
-        $columnData = $columns[$columnName];
-        $phinxType = $this->getPhinxColumnType($columnData);
-        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
-        return [$table, $columnName, $phinxType, $columnAttributes];
-    }
-
-    /**
-     * Get addColumn method.
-     *
-     * @param $schema
-     * @param $table
-     * @param $columnName
-     * @return string
-     */
-    protected function getColumnCreateAdd($schema, $table, $columnName)
-    {
-        $result = $this->getColumnCreate($schema, $table, $columnName);
-        return sprintf("%s\$table->addColumn('%s', '%s', %s)->update();", $this->ind2, $result[1], $result[2], $result[3]);
-    }
-
-    /**
-     * Get addColumn method.
-     *
-     * @param $schema
-     * @param $table
-     * @param $columnName
-     * @return string
-     */
-    protected function getColumnCreateAddNoUpdate($schema, $table, $columnName)
-    {
-        $result = $this->getColumnCreate($schema, $table, $columnName);
-        return sprintf("%s\$table->addColumn('%s', '%s', %s);", $this->ind2, $result[1], $result[2], $result[3]);
-    }
-
 
     /**
      * Get primary key column update commands.
@@ -747,58 +564,26 @@ class PhinxMySqlGenerator
         $output[] = sprintf("%s} else {", $this->ind2);
         $output[] = sprintf("%s\$this->table(\"%s\")->addColumn('%s', '%s', %s)->update();", $this->ind3, $result[0], $result[1], $result[2], $result[3]);
         $output[] = sprintf("%s}", $this->ind2);
+
         return implode($this->nl, $output);
     }
 
     /**
-     * Generate column update.
+     * Generate column create.
      *
      * @param array $schema
      * @param string $table
      * @param string $columnName
-     * @return string
+     * @return string[]
      */
-    protected function getColumnUpdate($schema, $table, $columnName)
+    protected function getColumnCreate($schema, $table, $columnName)
     {
         $columns = $schema['tables'][$table]['columns'];
         $columnData = $columns[$columnName];
-
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
-        $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
-        return $result;
-    }
 
-    /**
-     * Generate column remove.
-     *
-     * @param string $table
-     * @param string $columnName
-     * @return string
-     */
-    protected function getColumnRemove($table, $columnName)
-    {
-        $output = [];
-        $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
-        $output[] = $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind3, $table, $columnName);
-        $output[] = sprintf("%s}", $this->ind2);
-        $result = implode($this->nl, $output);
-        return $result;
-    }
-
-    /**
-     * Get column type.
-     *
-     * @param array $columnData
-     * @return string
-     */
-    protected function getMySQLColumnType($columnData)
-    {
-        $type = $columnData['COLUMN_TYPE'];
-        $pattern = '/^[a-z]+/';
-        $match = null;
-        preg_match($pattern, $type, $match);
-        return $match[0];
+        return [$table, $columnName, $phinxType, $columnAttributes];
     }
 
     /**
@@ -835,6 +620,22 @@ class PhinxMySqlGenerator
         }
 
         return $type;
+    }
+
+    /**
+     * Get column type.
+     *
+     * @param array $columnData
+     * @return string
+     */
+    protected function getMySQLColumnType($columnData)
+    {
+        $type = $columnData['COLUMN_TYPE'];
+        $pattern = '/^[a-z]+/';
+        $match = null;
+        preg_match($pattern, $type, $match);
+
+        return $match[0];
     }
 
     /**
@@ -890,74 +691,8 @@ class PhinxMySqlGenerator
         // delete set an action to be triggered when the row is deleted
 
         $result = '[' . implode(', ', $attributes) . ']';
+
         return $result;
-    }
-
-    /**
-     * Set collation that differs from table defaults (only applies to MySQL).
-     *
-     * @param string $phinxType
-     * @param array $attributes
-     * @param array $columnData
-     * @return array Attributes
-     */
-    protected function getPhinxColumnCollation($phinxType, $attributes, $columnData)
-    {
-        $allowedTypes = array(
-            AdapterInterface::PHINX_TYPE_CHAR,
-            AdapterInterface::PHINX_TYPE_STRING,
-            AdapterInterface::PHINX_TYPE_TEXT,
-        );
-        if (!in_array($phinxType, $allowedTypes)) {
-            return $attributes;
-        }
-
-        if (!empty($columnData['COLLATION_NAME'])) {
-            $attributes[] = '\'collation\' => "' . addslashes($columnData['COLLATION_NAME']) . '"';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Set character set that differs from table defaults *(only applies to MySQL)* (only applies to MySQL).
-     *
-     * @param string $phinxType
-     * @param array $attributes
-     * @param array $columnData
-     * @return array Attributes
-     */
-    protected function getPhinxColumnEncoding($phinxType, $attributes, $columnData)
-    {
-        $allowedTypes = array(
-            AdapterInterface::PHINX_TYPE_CHAR,
-            AdapterInterface::PHINX_TYPE_STRING,
-            AdapterInterface::PHINX_TYPE_TEXT,
-        );
-        if (!in_array($phinxType, $allowedTypes)) {
-            return $attributes;
-        }
-
-        if (!empty($columnData['CHARACTER_SET_NAME'])) {
-            $attributes[] = '\'encoding\' => "' . addslashes($columnData['CHARACTER_SET_NAME']) . '"';
-        }
-        return $attributes;
-    }
-
-
-    /**
-     * Generate phinx column options (default value).
-     *
-     * @param array $attributes
-     * @param array $columnData
-     * @return array Attributes
-     */
-    protected function getPhinxColumnOptionsDefault($attributes, $columnData)
-    {
-        if ($columnData['COLUMN_DEFAULT'] !== null) {
-            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '\'' . $columnData['COLUMN_DEFAULT'] . '\'';
-            $attributes[] = '\'default\' => ' . $default;
-        }
-        return $attributes;
     }
 
     /**
@@ -975,6 +710,24 @@ class PhinxMySqlGenerator
         } else {
             $attributes[] = '\'null\' => false';
         }
+
+        return $attributes;
+    }
+
+    /**
+     * Generate phinx column options (default value).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsDefault($attributes, $columnData)
+    {
+        if ($columnData['COLUMN_DEFAULT'] !== null) {
+            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '\'' . $columnData['COLUMN_DEFAULT'] . '\'';
+            $attributes[] = '\'default\' => ' . $default;
+        }
+
         return $attributes;
     }
 
@@ -992,6 +745,7 @@ class PhinxMySqlGenerator
         if (strpos($columnData['EXTRA'], 'on update CURRENT_TIMESTAMP') !== false) {
             $attributes[] = '\'update\' => \'CURRENT_TIMESTAMP\'';
         }
+
         return $attributes;
     }
 
@@ -1008,102 +762,7 @@ class PhinxMySqlGenerator
         if ($limit) {
             $attributes[] = '\'limit\' => ' . $limit;
         }
-        return $attributes;
-    }
 
-    /**
-     * Generate phinx column options (comment).
-     *
-     * @param array $attributes
-     * @param array $columnData
-     * @return array Attributes
-     */
-    protected function getPhinxColumnOptionsComment($attributes, $columnData)
-    {
-        // Set a text comment on the column
-        if (!empty($columnData['COLUMN_COMMENT'])) {
-            $attributes[] = '\'comment\' => "' . addslashes($columnData['COLUMN_COMMENT']) . '"';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Generate phinx column options (default value).
-     *
-     * @param array $attributes
-     * @param array $columnData
-     * @return array Attributes
-     */
-    protected function getPhinxColumnOptionsNumeric($attributes, $columnData)
-    {
-        // For decimal columns
-        if (!empty($columnData['NUMERIC_PRECISION'])) {
-            $attributes[] = '\'precision\' => ' . $columnData['NUMERIC_PRECISION'];
-        }
-        if (!empty($columnData['NUMERIC_SCALE'])) {
-            $attributes[] = '\'scale\' => ' . $columnData['NUMERIC_SCALE'];
-        }
-
-        // signed enable or disable the unsigned option (only applies to MySQL)
-        $match = null;
-        $pattern = '/\(\d+\) unsigned$/';
-        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-            $attributes[] = '\'signed\' => false';
-        }
-
-        // For integer and biginteger columns:
-        // identity enable or disable automatic incrementing
-        if ($columnData['EXTRA'] == 'auto_increment') {
-            $attributes[] = '\'identity\' => \'enable\'';
-        }
-        return $attributes;
-    }
-
-    /**
-     * Generate phinx column options (after).
-     *
-     * @param array $attributes
-     * @param array $columnData
-     * @param array $columns
-     * @return array Attributes
-     */
-    protected function getPhinxColumnOptionsAfter($attributes, $columnData, $columns)
-    {
-        $columnName = $columnData['COLUMN_NAME'];
-        $after = null;
-        foreach (array_keys($columns) as $column) {
-            if ($column === $columnName) {
-                break;
-            }
-            $after = $column;
-        }
-        if (!empty($after)) {
-            $attributes[] = sprintf('\'after\' => \'%s\'', $after);
-        }
-        return $attributes;
-    }
-
-    /**
-     * Generate option enum values.
-     *
-     * @param array $attributes
-     * @param array $columnData
-     * @return array Attributes
-     */
-    public function getOptionEnumValue($attributes, $columnData)
-    {
-        $match = null;
-        $pattern = '/enum\((.*)\)/';
-        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-            $values = str_getcsv($match[1], ',', "'", "\\");
-            foreach ($values as $k => $value) {
-                $values[$k] = "'" . addcslashes($value, "'") . "'";
-            }
-            $valueList = implode(',', array_values($values));
-            $arr = sprintf('[%s]', $valueList);
-            $attributes[] = sprintf('\'values\' => %s', $arr);
-            return $attributes;
-        }
         return $attributes;
     }
 
@@ -1164,7 +823,280 @@ class PhinxMySqlGenerator
                     }
                 }
         }
+
         return $limit;
+    }
+
+    /**
+     * Generate phinx column options (default value).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsNumeric($attributes, $columnData)
+    {
+        // For decimal columns
+        if (!empty($columnData['NUMERIC_PRECISION'])) {
+            $attributes[] = '\'precision\' => ' . $columnData['NUMERIC_PRECISION'];
+        }
+        if (!empty($columnData['NUMERIC_SCALE'])) {
+            $attributes[] = '\'scale\' => ' . $columnData['NUMERIC_SCALE'];
+        }
+
+        // signed enable or disable the unsigned option (only applies to MySQL)
+        $match = null;
+        $pattern = '/\(\d+\) unsigned$/';
+        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
+            $attributes[] = '\'signed\' => false';
+        }
+
+        // For integer and biginteger columns:
+        // identity enable or disable automatic incrementing
+        if ($columnData['EXTRA'] == 'auto_increment') {
+            $attributes[] = '\'identity\' => \'enable\'';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Generate option enum values.
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    public function getOptionEnumValue($attributes, $columnData)
+    {
+        $match = null;
+        $pattern = '/enum\((.*)\)/';
+        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
+            $values = str_getcsv($match[1], ',', "'", "\\");
+            foreach ($values as $k => $value) {
+                $values[$k] = "'" . addcslashes($value, "'") . "'";
+            }
+            $valueList = implode(',', array_values($values));
+            $arr = sprintf('[%s]', $valueList);
+            $attributes[] = sprintf('\'values\' => %s', $arr);
+
+            return $attributes;
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Set collation that differs from table defaults (only applies to MySQL).
+     *
+     * @param string $phinxType
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnCollation($phinxType, $attributes, $columnData)
+    {
+        $allowedTypes = array(
+            AdapterInterface::PHINX_TYPE_CHAR,
+            AdapterInterface::PHINX_TYPE_STRING,
+            AdapterInterface::PHINX_TYPE_TEXT,
+        );
+        if (!in_array($phinxType, $allowedTypes)) {
+            return $attributes;
+        }
+
+        if (!empty($columnData['COLLATION_NAME'])) {
+            $attributes[] = '\'collation\' => "' . addslashes($columnData['COLLATION_NAME']) . '"';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Set character set that differs from table defaults *(only applies to MySQL)* (only applies to MySQL).
+     *
+     * @param string $phinxType
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnEncoding($phinxType, $attributes, $columnData)
+    {
+        $allowedTypes = array(
+            AdapterInterface::PHINX_TYPE_CHAR,
+            AdapterInterface::PHINX_TYPE_STRING,
+            AdapterInterface::PHINX_TYPE_TEXT,
+        );
+        if (!in_array($phinxType, $allowedTypes)) {
+            return $attributes;
+        }
+
+        if (!empty($columnData['CHARACTER_SET_NAME'])) {
+            $attributes[] = '\'encoding\' => "' . addslashes($columnData['CHARACTER_SET_NAME']) . '"';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Generate phinx column options (comment).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsComment($attributes, $columnData)
+    {
+        // Set a text comment on the column
+        if (!empty($columnData['COLUMN_COMMENT'])) {
+            $attributes[] = '\'comment\' => "' . addslashes($columnData['COLUMN_COMMENT']) . '"';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Generate phinx column options (after).
+     *
+     * @param array $attributes
+     * @param array $columnData
+     * @param array $columns
+     * @return array Attributes
+     */
+    protected function getPhinxColumnOptionsAfter($attributes, $columnData, $columns)
+    {
+        $columnName = $columnData['COLUMN_NAME'];
+        $after = null;
+        foreach (array_keys($columns) as $column) {
+            if ($column === $columnName) {
+                break;
+            }
+            $after = $column;
+        }
+        if (!empty($after)) {
+            $attributes[] = sprintf('\'after\' => \'%s\'', $after);
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Get addColumn method.
+     *
+     * @param $schema
+     * @param $table
+     * @param $columnName
+     * @return string
+     */
+    protected function getColumnCreateAddNoUpdate($schema, $table, $columnName)
+    {
+        $result = $this->getColumnCreate($schema, $table, $columnName);
+
+        return sprintf("%s\$table->addColumn('%s', '%s', %s);", $this->ind2, $result[1], $result[2], $result[3]);
+    }
+
+    /**
+     * Get addColumn method.
+     *
+     * @param $schema
+     * @param $table
+     * @param $columnName
+     * @return string
+     */
+    protected function getColumnCreateAdd($schema, $table, $columnName)
+    {
+        $result = $this->getColumnCreate($schema, $table, $columnName);
+
+        return sprintf("%s\$table->addColumn('%s', '%s', %s)->update();", $this->ind2, $result[1], $result[2], $result[3]);
+    }
+
+    /**
+     * Generate column update.
+     *
+     * @param array $schema
+     * @param string $table
+     * @param string $columnName
+     * @return string
+     */
+    protected function getColumnUpdate($schema, $table, $columnName)
+    {
+        $columns = $schema['tables'][$table]['columns'];
+        $columnData = $columns[$columnName];
+
+        $phinxType = $this->getPhinxColumnType($columnData);
+        $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
+        $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+
+        return $result;
+    }
+
+    /**
+     * Get table migration (old table columns).
+     *
+     * @param array $output
+     * @param string $tableName
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationOldTablesColumns($output, $tableName, $new, $old)
+    {
+        if (empty($old['tables'][$tableName]['columns'])) {
+            return $output;
+        }
+        foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
+            if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
+                $output[] = $this->getColumnRemove($tableName, $oldColumnName);
+            }
+        }
+
+        return $output;
+    }
+
+    /**
+     * Generate column remove.
+     *
+     * @param string $table
+     * @param string $columnName
+     * @return string
+     */
+    protected function getColumnRemove($table, $columnName)
+    {
+        $output = [];
+        $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
+        $output[] = $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind3, $table, $columnName);
+        $output[] = sprintf("%s}", $this->ind2);
+        $result = implode($this->nl, $output);
+
+        return $result;
+    }
+
+    /**
+     * Get table migration (indexes).
+     *
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationIndexes($output, $table, $tableName, $new, $old)
+    {
+        if (empty($table['indexes'])) {
+            return $output;
+        }
+        foreach ($table['indexes'] as $indexName => $indexSequences) {
+            if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
+                $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
+            } else {
+                if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
+                    $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
+                }
+            }
+        }
+
+        return $output;
     }
 
     /**
@@ -1191,6 +1123,7 @@ class PhinxMySqlGenerator
         $output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
         $output[] = sprintf("%s}", $this->ind2);
         $output[] = sprintf("%s\$this->table(\"%s\")->addIndex(%s, %s)->save();", $this->ind2, $table, $indexFields, $indexOptions);
+
         return $output;
     }
 
@@ -1207,6 +1140,7 @@ class PhinxMySqlGenerator
             $indexFields[] = $indexData['Column_name'];
         }
         $result = "['" . implode("','", $indexFields) . "']";
+
         return $result;
     }
 
@@ -1240,6 +1174,7 @@ class PhinxMySqlGenerator
             $options[] = '\'type\' => \'fulltext\'';
         }
         $result = '[' . implode(', ', $options) . ']';
+
         return $result;
     }
 
@@ -1253,7 +1188,40 @@ class PhinxMySqlGenerator
     protected function getIndexRemove($table, $indexName)
     {
         $result = sprintf("%s\$this->table(\"%s\")->removeIndexByName('%s');", $this->ind2, $table, $indexName);
+
         return $result;
+    }
+
+    /**
+     * Generate foreign keys migrations.
+     *
+     * @param array $new New schema
+     * @param array $old Old schema
+     * @return array Output
+     */
+    protected function getForeignKeysMigrations($new = array(), $old = array())
+    {
+        if (empty($new['tables'])) {
+            return null;
+        }
+        $output = [];
+        foreach ($new['tables'] as $tableName => $table) {
+            if ($tableName == $this->options['default_migration_table']) {
+                continue;
+            }
+            if (empty($table['foreign_keys'])) {
+                continue;
+            }
+            foreach ($table['foreign_keys'] as $fkName => $fkData) {
+                if (!isset($old['tables'][$tableName]['foreign_keys'][$fkName])) {
+                    $output[] = $this->getForeignKeyCreate($tableName, $fkName);
+                } else {
+                    $output[] = $this->getForeignKeyRemove($tableName, $fkName);
+                }
+            }
+        }
+
+        return $output;
     }
 
     /**
@@ -1276,6 +1244,7 @@ class PhinxMySqlGenerator
         $output[] = sprintf("%s\$this->table(\"%s\")->addForeignKey(%s, %s, %s, %s)->save();", $this->ind2, $table, $columns, $referencedTable, $referencedColumns, $options);
 
         $result = implode($this->nl, $output);
+
         return $result;
     }
 
@@ -1299,6 +1268,7 @@ class PhinxMySqlGenerator
             $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['DELETE_RULE']) . '"';
         }
         $result = '[' . implode(', ', $options) . ']';
+
         return $result;
     }
 
@@ -1323,6 +1293,7 @@ class PhinxMySqlGenerator
         if ($value == 'set null') {
             return 'SET_NULL';
         }
+
         return 'NO_ACTION';
     }
 
@@ -1336,74 +1307,154 @@ class PhinxMySqlGenerator
     protected function getForeignKeyRemove($table, $indexName)
     {
         $result = sprintf("%s\$this->table(\"%s\")->dropForeignKey('%s');", $this->ind2, $table, $indexName);
+
         return $result;
     }
 
     /**
-     * Generate SetForeignKeyCheck.
+     * Append lines
      *
-     * @param int $value
-     * @return string
+     * @param array $array1
+     * @param array $array2
+     * @return array
      */
-    protected function getSetForeignKeyCheck($value)
+    protected function appendLines(array $array1 = array(), array $array2 = array())
     {
-        return sprintf("%s\$this->execute(\"SET FOREIGN_KEY_CHECKS = %s;\");", $this->ind2, $value);
-    }
-
-    /**
-     * Generate Set Unique Checks.
-     *
-     * @param int $value 0 or 1
-     * @return string
-     */
-    protected function getSetUniqueChecks($value)
-    {
-        return sprintf("%s\$this->execute(\"SET UNIQUE_CHECKS = %s;\");", $this->ind2, $value);
-    }
-
-    /**
-     * Compare array
-     *
-     * @param array $arr
-     * @param array $arr2
-     * @param array $keys
-     * @return bool
-     */
-    protected function eq($arr, $arr2, $keys)
-    {
-        $val1 = $this->find($arr, $keys);
-        $val2 = $this->find($arr2, $keys);
-        return $val1 === $val2;
-    }
-
-    /**
-     * Compare array (not)
-     *
-     * @param array $arr
-     * @param array $arr2
-     * @param array $keys
-     * @return bool
-     */
-    protected function neq($arr, $arr2, $keys)
-    {
-        return !$this->eq($arr, $arr2, $keys);
-    }
-
-    /**
-     * Get array value by keys.
-     *
-     * @param array $array
-     * @param array $parts
-     * @return mixed
-     */
-    protected function find($array, $parts)
-    {
-        foreach ($parts as $part) {
-            if (!array_key_exists($part, $array)) {
-                return null;
-            }
-            $array = $array[$part];
+        if (empty($array2)) {
+            return $array1;
         }
-        return $array;
+        foreach ($array2 as $value) {
+            $array1[] = $value;
+        }
+
+        return $array1;
+    }
+
+    /**
+     * Get table migration (old tables).
+     *
+     * @param array $output
+     * @param array $new
+     * @param array $old
+     * @return array
+     */
+    protected function getTableMigrationOldTables($output, $new, $old)
+    {
+        if (empty($old['tables'])) {
+            return $output;
+        }
+
+        foreach ($old['tables'] as $tableName => $table) {
+            if ($tableName == $this->options['default_migration_table']) {
+                continue;
+            }
+            if (!empty($old['tables'][$tableName]['indexes'])) {
+                foreach ($old['tables'][$tableName]['indexes'] as $indexName => $indexSequences) {
+                    if (!isset($new['tables'][$tableName]['indexes'][$indexName])) {
+                        $output[] = $this->getIndexRemove($tableName, $indexName);
+                    }
+                }
+            }
+
+            if (!isset($new['tables'][$tableName])) {
+                $output[] = $this->getDropTable($tableName);
+                continue;
+            }
+
+            // Detect changes for existing tables (like engine, character set, collation, ...)
+            $oldTable = $old['tables'][$tableName]['table'];
+            $newTable = $new['tables'][$tableName]['table'];
+            if ($oldTable != $newTable) {
+                $output = $this->getUpdateTable($output, $new['tables'][$tableName], $tableName);
+            }
+
+            // @todo Detect changes on primary keys
+        }
+
+        return $output;
+    }
+
+    /**
+     * Generate drop table.
+     *
+     * @param string $table
+     * @return string
+     */
+    protected function getDropTable($table)
+    {
+        return sprintf("%s\$this->dropTable(\"%s\");", $this->ind2, $table);
+    }
+
+    /**
+     * Generate update table.
+     *
+     * @param array $output
+     * @param array $table
+     * @param string $tableName
+     * @return array
+     */
+    protected function getUpdateTable($output, $table, $tableName)
+    {
+        $output = $this->getCreateTable($output, $table, $tableName, true);
+
+        return $output;
+    }
+
+    /**
+     * Generate Alter Table Engine.
+     * @param string $table
+     * @param string $engine
+     * @return string
+     */
+    protected function getAlterTableEngine($table, $engine)
+    {
+        $engine = $this->dba->quote($engine);
+
+        return sprintf("%s\$this->execute(\"ALTER TABLE `%s` ENGINE=%s;\");", $this->ind2, $table, $engine);
+    }
+
+    /**
+     * Generate Alter Table Charset.
+     *
+     * @param string $table
+     * @param string $charset
+     * @return string
+     */
+    protected function getAlterTableCharset($table, $charset)
+    {
+        $table = $this->dba->ident($table);
+        $charset = $this->dba->quote($charset);
+
+        return sprintf("%s\$this->execute(\"ALTER TABLE %s CHARSET=%s;\");", $this->ind2, $table, $charset);
+    }
+
+    /**
+     * Generate Alter Table Collate
+     *
+     * @param string $table
+     * @param string $collate
+     * @return string
+     */
+    protected function getAlterTableCollate($table, $collate)
+    {
+        $table = $this->dba->ident($table);
+        $collate = $this->dba->quote($collate);
+
+        return sprintf("%s\$this->execute(\"ALTER TABLE %s COLLATE=%s;\");", $this->ind2, $table, $collate);
+    }
+
+    /**
+     * Generate alter table comment.
+     *
+     * @param string $table
+     * @param string $comment
+     * @return string
+     */
+    protected function getAlterTableComment($table, $comment)
+    {
+        $table = $this->dba->ident($table);
+        $commentSave = $this->dba->quote($comment);
+
+        return sprintf("%s\$this->execute(\"ALTER TABLE %s COMMENT=%s;\");", $this->ind2, $table, $commentSave);
     }
 }

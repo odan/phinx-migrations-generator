@@ -59,12 +59,14 @@ class GenerateCommand extends AbstractCommand
         $envOptions = $this->getConfig()->getEnvironment($environment);
         if (isset($envOptions['adapter']) && $envOptions['adapter'] != 'mysql') {
             $output->writeln('<error>adapter not supported</error> ' . $envOptions['adapter']);
+
             return 1;
         }
         if (isset($envOptions['name'])) {
             $output->writeln('<info>using database</info> ' . $envOptions['name']);
         } else {
             $output->writeln('<error>Could not determine database name! Please specify a database name in your config file.</error>');
+
             return 1;
         }
 
@@ -121,6 +123,7 @@ class GenerateCommand extends AbstractCommand
         );
 
         $generator = new MigrationGenerator($settings, $input, $output);
+
         return $generator->generate();
     }
 
