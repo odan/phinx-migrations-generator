@@ -1,13 +1,16 @@
 <?php
 
+namespace Odan\Migration\Test;
+
 use Odan\Migration\Command\GenerateCommand;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @coversDefaultClass \Odan\Migration\Command\GenerateCommand
  */
-class GenerateCommandTest extends \PHPUnit\Framework\TestCase
+class GenerateCommandTest extends TestCase
 {
 
     /**

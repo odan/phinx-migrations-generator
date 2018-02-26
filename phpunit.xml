@@ -14,7 +14,6 @@
                 <directory>docs</directory>
                 <directory>tmp</directory>
                 <directory>vendor</directory>
-                <directory>public</directory>
             </exclude>
         </whitelist>
     </filter>

@@ -1,13 +1,17 @@
 <?php
 
+namespace Odan\Migration\Test;
+
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
+use PDO;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * @coversDefaultClass \Odan\Migration\Adapter\Generator\PhinxMySqlGenerator
  */
-class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
+class PhinxGeneratorTest extends TestCase
 {
 
     /**
@@ -77,36 +81,6 @@ class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Read php file
-     *
-     * @param string $filename
-     * @return mixed
-     */
-    public function read($filename)
-    {
-        return require $filename;
-    }
-
-    /**
-     * Get Db
-     *
-     * @param array $settings
-     * @return PDO
-     */
-    public function getPdo($settings)
-    {
-        $options = array_replace_recursive($settings['options'], [
-            // Enable exceptions
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_PERSISTENT => false,
-            // Set default fetch mode
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-        $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
-        return $pdo;
-    }
-
-    /**
      * Get settings for test database.
      *
      * @return array
@@ -128,5 +102,36 @@ class GenerateMigrationTest extends \PHPUnit\Framework\TestCase
             'foreign_keys' => false,
             'migration_path' => __DIR__
         );
+    }
+
+    /**
+     * Get Db
+     *
+     * @param array $settings
+     * @return PDO
+     */
+    public function getPdo($settings)
+    {
+        $options = array_replace_recursive($settings['options'], [
+            // Enable exceptions
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_PERSISTENT => false,
+            // Set default fetch mode
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        ]);
+        $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
+
+        return $pdo;
+    }
+
+    /**
+     * Read php file
+     *
+     * @param string $filename
+     * @return mixed
+     */
+    public function read($filename)
+    {
+        return require $filename;
     }
 }

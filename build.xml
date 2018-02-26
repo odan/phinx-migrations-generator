@@ -1,44 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="phinx-migrations" default="phpunit">
-    
-    <target name="noop"/>
-    <property environment="env"/>
-    
-    <condition property="is_windows">
-        <os family="windows"/>
-    </condition>
-    
-    <tstamp>
-        <format property="now" pattern="yyyy-MM-dd HH:mm:ss" locale="en,UK"/>
-        <format property="now_num" pattern="yyyyMMddHHmmss" locale="en,UK"/>
-        <format property="now_file" pattern="yyyy-MM-dd_HHmmss" locale="en,UK"/>
-    </tstamp>
-    
-    <!-- By default, we assume all tools to be on the $PATH -->
+<project name="app" basedir=".">
+
     <condition property="ext" value=".bat">
         <os family="windows"/>
     </condition>
 
-    <!-- DISPLAYS WINDOWS OS -->
-    <target name="display_windows" if="is_windows" >
-        <echo message="OS Family is: Windows" />
-    </target>
-    
-    <condition property="is_windows">
-        <os family="windows"/>
-    </condition>
-    <condition property="is_linux">
-        <os family="unix" />
-    </condition>
-     
-    <target name="phpunit" description="Run unit tests with PHPUnit">
+    <target name="phpunit" description="Run PHPUnit">
         <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit">
             <arg value="--configuration"/>
             <arg path="${basedir}/phpunit.xml"/>
         </exec>
     </target>
-    
-    <target name="phpunit-coverage" description="Run unit tests with PHPUnit with coverage">
+
+    <target name="phpunit-coverage" description="Run PHPUnit with coverage">
         <delete dir="${basedir}/build/coverage"/>
         <mkdir dir="${basedir}/build/coverage"/>
         <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit-coverage">
@@ -50,24 +24,41 @@
             <arg path="${basedir}/build/coverage"/>
         </exec>
     </target>
-    
-    <target name="php-cs-fixer" description="Code style fixer">
+
+    <target name="fix-style" description="Code style fixer">
         <mkdir dir="${basedir}/build"/>
-        <get src="https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.0.0/php-cs-fixer.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
+        <get src="https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.10.2/php-cs-fixer.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
         <exec executable="php" searchpath="true" resolveexecutable="true">
             <arg value="${basedir}/build/php-cs-fixer.phar"/>
             <arg value="fix"/>
-            <arg value="${basedir}/src/"/>
             <arg value="--rules=@PSR2"/>
             <arg value="--using-cache=no"/>
-        </exec>   
+            <arg path="${basedir}/src"/>
+        </exec>
         <exec executable="php" searchpath="true" resolveexecutable="true">
             <arg value="${basedir}/build/php-cs-fixer.phar"/>
             <arg value="fix"/>
-            <arg value="${basedir}/tests/"/>
             <arg value="--rules=@PSR2"/>
             <arg value="--using-cache=no"/>
-        </exec>   
+            <arg path="${basedir}/tests"/>
+        </exec>
     </target>
-    
+
+    <target name="phpstan" description="PHP Static Analysis Tool - discover bugs in your code without running it">
+        <mkdir dir="${basedir}/build"/>
+        <get src="https://github.com/phpstan/phpstan/releases/download/0.9.2/phpstan.phar"
+             dest="${basedir}/build/phpstan.phar" skipexisting="true"/>
+        <exec executable="php" searchpath="true" resolveexecutable="true" failonerror="true">
+            <arg value="${basedir}/build/phpstan.phar"/>
+            <arg value="analyse"/>
+            <arg value="-l"/>
+            <arg value="5"/>
+            <arg value="-c"/>
+            <arg path="${basedir}/phpstan.neon"/>
+            <arg value="src"/>
+            <arg value="tests"/>
+            <arg value="--no-interaction"/>
+            <arg value="--no-progress"/>
+        </exec>
+    </target>
 </project>

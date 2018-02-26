@@ -1,28 +1,38 @@
 {
-    "name": "odan/phinx-migrations-generator",
-    "type": "library",
-    "description": "Migration generator for Phinx",
-    "keywords": ["migration", "phinx", "database"],
-    "homepage": "http://github.com/odan/phinx-migrations-generator",
-    "license": "MIT",
-    "require": {
-        "php": "^7.0",
-        "symfony/console": "^2.8|^3.0|^4.0",
-        "robmorgan/phinx": "^0.9"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^6.0"
-    },
-     "scripts": {
-        "test": "phpunit",
-        "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
-        "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit -n --no-patch 1 src tests"
-    },
-    "autoload": {
-        "psr-4": {
-            "Odan\\": "src",
-            "Odan\\Test\\": "tests"
-        }
-    },
-    "bin": ["./bin/phinx-migrations"]
+  "name": "odan/phinx-migrations-generator",
+  "type": "library",
+  "description": "Migration generator for Phinx",
+  "keywords": [
+    "migration",
+    "phinx",
+    "database"
+  ],
+  "homepage": "http://github.com/odan/phinx-migrations-generator",
+  "license": "MIT",
+  "require": {
+    "php": "^7.0",
+    "symfony/console": "^2.8|^3.0|^4.0",
+    "robmorgan/phinx": "^0.9"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.0"
+  },
+  "scripts": {
+    "test": "phpunit",
+    "check-style": "phpcs -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests",
+    "fix-style": "phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit -n --no-patch 1 src tests"
+  },
+  "autoload": {
+    "psr-4": {
+      "Odan\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Odan\\Migration\\Test\\": "tests"
+    }
+  },
+  "bin": [
+    "./bin/phinx-migrations"
+  ]
 }
