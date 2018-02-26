@@ -845,6 +845,10 @@ class PhinxMySqlGenerator
             'longblob' => 'blob',
             'float' => 'float',
             'varbinary' => 'varbinary',
+            'geometry' => 'geometry',
+            'point' => 'point',
+            'linestring' => 'linestring',
+            'polygon' => 'polygon',
         );
 
         $type = $this->getMySQLColumnType($columnData);
