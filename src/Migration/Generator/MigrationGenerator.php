@@ -131,7 +131,7 @@ class MigrationGenerator
         if (empty($diffs[0]) && empty($diffs[1])) {
             $this->output->writeln('No database changes detected.');
 
-            return false;
+            return 1;
         }
 
         if (empty($this->settings['name'])) {
@@ -142,7 +142,7 @@ class MigrationGenerator
         if (empty($name)) {
             $this->output->writeln('Aborted');
 
-            return false;
+            return 1;
         }
         $path = $this->settings['migration_path'];
         $className = $this->createClassName($name);
