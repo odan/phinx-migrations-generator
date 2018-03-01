@@ -153,13 +153,13 @@ foreign_keys | bool | false | Experimental foreign key support.
 
 ### Example configuration
 
-Filename: config/phinx.php
+Filename: `phinx.php` (in your project root directory)
 
 ```php
 <?php
 
 // Framework bootstrap code here
-require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/config/bootstrap.php';
 
 // Get PDO object
 $pdo = new PDO(
@@ -172,7 +172,7 @@ $pdo = new PDO(
 );
 
 // Get migration path for phinx classes
-$migrationPath = __DIR__ . '/../resources/migrations';
+$migrationPath = __DIR__ . '/resources/migrations';
 
 return array(
     'paths' => [
