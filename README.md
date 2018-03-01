@@ -10,8 +10,8 @@ Generate a migration by comparing your current database to your mapping informat
 [![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg)](https://packagist.org/packages/odan/phinx-migrations-generator)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-Currently, Phinx (a migration library) cannot automatically generate migrations.
-Phinx creates "only" an empty class with `up`, `down` or `change` functions. You still have to write the migration manually.
+[Phinx](https://phinx.org/) cannot automatically generate migrations.
+Phinx creates "only" an class with empty `up`, `down` or `change` functions. You still have to write the migration manually.
 
 In reality, you should rarely have to write migrations manually because the migration library should automatically generate migration classes by comparing your schema mapping information (i.e. how your database should look like) with your current database structure.
 
