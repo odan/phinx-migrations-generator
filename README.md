@@ -133,14 +133,12 @@ The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-mi
 
 Linux
 ```
-$ cd config/
-$ ../vendor/bin/phinx-migrations migrate
+$ vendor/bin/phinx migrate
 ```
 
 Windows
 ```
-cd config
-call ../vendor/bin/phinx-migrations migrate
+call vendor/bin/phinx.bat migrate
 ```
 
 ## Configuration
