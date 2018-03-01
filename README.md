@@ -49,7 +49,7 @@ $ vendor/bin/phinx-migrations generate
 
 Windows
 ```
-call vendor/bin/phinx-migrations.bat generate
+> vendor\bin\phinx-migrations generate
 ```
 
 By executing the `generate` command again, only the difference to the last schema is generated.
@@ -138,7 +138,7 @@ $ vendor/bin/phinx migrate
 
 Windows
 ```
-call vendor/bin/phinx.bat migrate
+> vendor\bin\phinx migrate
 ```
 
 ## Configuration
@@ -188,27 +188,6 @@ return array(
         ]
     ]
 );
-```
-
-## Ant task
-
-Example ant target for build.xml:
-
-```xml
-<condition property="script_ext" value=".bat" else="">
-    <os family="windows"/>
-</condition>
-
-<target name="generate-migration" description="Generate a new database migration">
-    <input message="Enter migration name" addproperty="migrationName"/>
-    <exec executable="${basedir}/vendor/bin/phinx-migrations${script_ext}" dir="${basedir}/config">
-        <arg line="generate --name ${migrationName} --overwrite"/>
-    </exec> 
-</target>
-```
-
-```bash
-$ ant migrations
 ```
 
 ## Testing
