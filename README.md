@@ -10,10 +10,10 @@ Generate a migration by comparing your current database to your mapping informat
 [![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg)](https://packagist.org/packages/odan/phinx-migrations-generator)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
-Currently Phinx (a migration library) cannot generate migrations automatically.
-Phinx "only" generates a empty class with up and down functions. You still have to write the migration manually.
+Currently, Phinx (a migration library) cannot automatically generate migrations.
+Phinx creates "only" an empty class with `up`, `down` or `change` functions. You still have to write the migration manually.
 
-In reality, you should rarely need to write migrations manually, as the migrations library "should" generate migration classes automatically by comparing your schema mapping information (i.e. what your database should look like) with your actual current database structure.
+In reality, you should rarely have to write migrations manually because the migration library should automatically generate migration classes by comparing your schema mapping information (i.e. how your database should look like) with your current database structure.
 
 ## Features
 
@@ -39,7 +39,7 @@ $ composer require odan/phinx-migrations-generator --dev
 ### Generating migrations
 
 On the first run, an inital schema and a migration class is generated.
-The `schema.php` file contains the previous database schema and is getting compared with the the current schema.
+The `schema.php` file contains the previous database schema and is getting compared with the current schema.
 Based on the difference, a Phinx migration class is generated.
 
 Linux
@@ -180,7 +180,7 @@ return [
     ],
     'foreign_keys' => false,
     'environments' => [
-        'default_database' => "local",
+        'default_database' => 'local',
         'local' => [
             // Database name
             'name' => $pdo->query('select database()')->fetchColumn(),
