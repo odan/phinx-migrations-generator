@@ -31,7 +31,7 @@ In reality, you should rarely need to write migrations manually, as the migratio
 Via Composer
 
 ```
-$ composer require-dev odan/phinx-migrations-generator
+$ composer require odan/phinx-migrations-generator --dev
 ```
 
 ## Usage
