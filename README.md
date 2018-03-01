@@ -167,16 +167,16 @@ $pdo = new PDO(
     array(
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_PERSISTENT => false,
-        PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8 COLLATE utf8_unicode_ci"
+        PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
     )
 );
 
 // Get migration path for phinx classes
 $migrationPath = __DIR__ . '/resources/migrations';
 
-return array(
+return [
     'paths' => [
-        'migrations' => $migrationPath
+        'migrations' => $migrationPath,
     ],
     'foreign_keys' => false,
     'environments' => [
@@ -184,10 +184,10 @@ return array(
         'local' => [
             // Database name
             'name' => $pdo->query('select database()')->fetchColumn(),
-            'connection' => $pdo
+            'connection' => $pdo,
         ]
     ]
-);
+];
 ```
 
 ## Testing
