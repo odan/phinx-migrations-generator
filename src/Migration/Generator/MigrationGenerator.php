@@ -14,61 +14,61 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * MigrationGenerator
+ * MigrationGenerator.
  */
 class MigrationGenerator
 {
     /**
-     * Settings
+     * Settings.
      *
      * @var array
      */
-    protected $settings = array();
+    protected $settings = [];
 
     /**
-     * Database adapter
+     * Database adapter.
      *
      * @var MySqlAdapter
      */
     protected $dba;
 
     /**
-     * Generator
+     * Generator.
      *
      * @var PhinxMySqlGenerator
      */
     protected $generator;
 
     /**
-     * PDO
+     * PDO.
      *
      * @var PDO
      */
     protected $pdo;
 
     /**
-     * Database name
+     * Database name.
      *
      * @var string
      */
     protected $dbName;
 
     /**
-     * Console output
+     * Console output.
      *
      * @var OutputInterface
      */
     protected $output;
 
     /**
-     * Console input
+     * Console input.
      *
      * @var InputInterface
      */
     protected $input;
 
     /**
-     * Console style
+     * Console style.
      *
      * @var SymfonyStyle
      */
@@ -93,9 +93,10 @@ class MigrationGenerator
     }
 
     /**
-     * Get Db
+     * Get Db.
      *
      * @param array $settings
+     *
      * @return PDO
      */
     public function getPdo($settings)
@@ -118,7 +119,7 @@ class MigrationGenerator
     }
 
     /**
-     * Generate
+     * Generate.
      *
      * @return int Status
      */
@@ -200,6 +201,7 @@ class MigrationGenerator
      * Get old database schema.
      *
      * @param array $settings
+     *
      * @return mixed
      */
     public function getOldSchema($settings)
@@ -211,8 +213,10 @@ class MigrationGenerator
      * Get schema data.
      *
      * @param array $settings
-     * @return array
+     *
      * @throws Exception
+     *
+     * @return array
      */
     public function getSchemaFileData($settings)
     {
@@ -220,7 +224,7 @@ class MigrationGenerator
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
 
         if (!file_exists($schemaFile)) {
-            return array();
+            return [];
         }
 
         if ($fileExt == 'php') {
@@ -239,6 +243,7 @@ class MigrationGenerator
      * Generate schema filename.
      *
      * @param array $settings
+     *
      * @return string Schema filename
      */
     public function getSchemaFilename($settings)
@@ -253,9 +258,10 @@ class MigrationGenerator
     }
 
     /**
-     * Read php file
+     * Read php file.
      *
      * @param string $filename
+     *
      * @return mixed
      */
     public function read($filename)
@@ -268,6 +274,7 @@ class MigrationGenerator
      *
      * @param array $newSchema
      * @param array $oldSchema
+     *
      * @return array Difference
      */
     public function compareSchema($newSchema, $oldSchema)
@@ -280,7 +287,7 @@ class MigrationGenerator
         // To remove
         $result2 = $this->diff($oldSchema, $newSchema);
 
-        return array($result, $result2);
+        return [$result, $result2];
     }
 
     /**
@@ -288,11 +295,12 @@ class MigrationGenerator
      *
      * @param array $array1
      * @param array $array2
+     *
      * @return array
      */
     protected function diff($array1, $array2)
     {
-        $difference = array();
+        $difference = [];
         foreach ($array1 as $key => $value) {
             if (is_array($value)) {
                 if (!isset($array2[$key]) || !is_array($array2[$key])) {
@@ -317,6 +325,7 @@ class MigrationGenerator
      * Create a class name.
      *
      * @param string $name Name
+     *
      * @return string Class name
      */
     protected function createClassName($name)
@@ -395,6 +404,7 @@ class MigrationGenerator
      *
      * @param array $schema
      * @param array $settings
+     *
      * @throws Exception
      */
     protected function saveSchemaFile($schema, $settings)

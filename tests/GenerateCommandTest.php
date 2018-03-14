@@ -12,12 +12,11 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class GenerateCommandTest extends TestCase
 {
-
     /**
-     * Test
+     * Test.
      *
      * @covers ::execute
-     * @expectedException Exception
+     * @expectedException \Exception
      */
     public function testGenerate()
     {
@@ -26,7 +25,7 @@ class GenerateCommandTest extends TestCase
 
         $command = $application->find('generate');
         $commandTester = new CommandTester($command);
-        $commandTester->execute(array('command' => $command->getName()));
+        $commandTester->execute(['command' => $command->getName()]);
 
         $this->assertRegExp('/.../', $commandTester->getDisplay());
     }

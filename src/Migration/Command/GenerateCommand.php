@@ -9,15 +9,15 @@ use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterWrapper;
 use Phinx\Db\Adapter\PdoAdapter;
 use Phinx\Migration\Manager;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class GenerateCommand extends AbstractCommand
 {
-
     /**
-     * Configure
+     * Configure.
      */
     protected function configure()
     {
@@ -41,9 +41,10 @@ class GenerateCommand extends AbstractCommand
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @return int integer 0 on success, or an error code.
      *
      * @throws Exception On Error
+     *
+     * @return int integer 0 on success, or an error code
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -79,7 +80,7 @@ class GenerateCommand extends AbstractCommand
         $output->writeln('<info>using config file</info> ' . $configFilePath);
 
         // First, try the non-interactive option:
-        $migrationsPaths = (array)$input->getOption('path');
+        $migrationsPaths = (array) $input->getOption('path');
         if (empty($migrationsPaths)) {
             $migrationsPaths = $config->getMigrationPaths();
         }
@@ -108,7 +109,7 @@ class GenerateCommand extends AbstractCommand
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
 
-        $settings = array(
+        $settings = [
             'pdo' => $pdo,
             'manager' => $manager,
             'environment' => $environment,
@@ -120,8 +121,8 @@ class GenerateCommand extends AbstractCommand
             'name' => $name,
             'overwrite' => $overwrite,
             'mark_migration' => true,
-            'default_migration_table' => $defaultMigrationTable
-        );
+            'default_migration_table' => $defaultMigrationTable,
+        ];
 
         $generator = new MigrationGenerator($settings, $input, $output);
 
@@ -133,8 +134,10 @@ class GenerateCommand extends AbstractCommand
      *
      * @param Manager $manager Manager
      * @param string $environment Environment name
-     * @return PDO PDO object
+     *
      * @throws Exception On error
+     *
+     * @return PDO PDO object
      */
     protected function getPdo(Manager $manager, $environment)
     {
@@ -143,15 +146,17 @@ class GenerateCommand extends AbstractCommand
 
         if ($dbAdapter instanceof PdoAdapter) {
             $pdo = $dbAdapter->getConnection();
-        } else {
+        } else if($dbAdapter instanceof AdapterWrapper) {
             $dbAdapter->connect();
             $pdo = $dbAdapter->getAdapter()->getConnection();
+        } else {
+            throw new RuntimeException('Adapter not found');
         }
         if (!$pdo) {
             $pdo = $dbAdapter->getOption('connection');
         }
         if (!$pdo instanceof PDO) {
-            throw new Exception('No PDO database connection found.');
+            throw new RuntimeException('PDO database connection not found.');
         }
 
         return $pdo;

@@ -9,10 +9,8 @@ require_once __DIR__ . '/../vendor/autoload.php';
 $phpunit = new \PHPUnit\TextUI\TestRunner();
 
 try {
-    echo "<pre>\n";
-    $testResults = $phpunit->doRun($phpunit->getTest(__DIR__, '', 'Test.php'), array(), false);
-    echo "</pre>\n";
+    $testResults = $phpunit->doRun($phpunit->getTest(__DIR__, '', 'Test.php'), [], false);
 } catch (\PHPUnit\Framework\Exception $e) {
-    print $e->getMessage() . "\n";
-    echo "Unit tests failed.";
+    echo $e->getMessage() . "\n";
+    echo 'Unit tests failed.';
 }

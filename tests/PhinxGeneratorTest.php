@@ -13,9 +13,8 @@ use Symfony\Component\Console\Output\NullOutput;
  */
 class PhinxGeneratorTest extends TestCase
 {
-
     /**
-     * Test
+     * Test.
      *
      * @covers ::createMigration
      * @covers ::addChangeMethod
@@ -74,7 +73,7 @@ class PhinxGeneratorTest extends TestCase
 
         $diff = $this->read(__DIR__ . '/diffs/newtable.php');
         $actual = $gen->createMigration('MyNewMigration', $diff, []);
-        //file_put_contents(__DIR__ . '/diffs/actual.php', $actual);
+        file_put_contents(__DIR__ . '/diffs/actual.php', $actual);
 
         $expected = file_get_contents(__DIR__ . '/diffs/newtable_expected.php');
         $this->assertEquals($expected, $actual);
@@ -87,27 +86,28 @@ class PhinxGeneratorTest extends TestCase
      */
     public function getSettings()
     {
-        return array(
+        return [
             'dsn' => 'mysql:host=127.0.0.1;dbname=test',
             'username' => 'root',
             'password' => '',
-            'options' => array(
+            'options' => [
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
                 // Enable exceptions
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 // Set default fetch mode
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ),
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ],
             'schema_file' => __DIR__ . '/schema.php',
             'foreign_keys' => false,
-            'migration_path' => __DIR__
-        );
+            'migration_path' => __DIR__,
+        ];
     }
 
     /**
-     * Get Db
+     * Get Db.
      *
      * @param array $settings
+     *
      * @return PDO
      */
     public function getPdo($settings)
@@ -125,9 +125,10 @@ class PhinxGeneratorTest extends TestCase
     }
 
     /**
-     * Read php file
+     * Read php file.
      *
      * @param string $filename
+     *
      * @return mixed
      */
     public function read($filename)

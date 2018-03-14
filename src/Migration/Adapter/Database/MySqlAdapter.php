@@ -6,34 +6,33 @@ use PDO;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * MySqlAdapter
+ * MySqlAdapter.
  */
 class MySqlAdapter
 {
-
     /**
-     * PDO
+     * PDO.
      *
      * @var PDO
      */
     protected $pdo;
 
     /**
-     * Console Output Interface
+     * Console Output Interface.
      *
      * @var OutputInterface
      */
     protected $output;
 
     /**
-     * Current database name
+     * Current database name.
      *
      * @var string
      */
     protected $dbName;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param PDO $pdo
      * @param OutputInterface $output
@@ -47,7 +46,7 @@ class MySqlAdapter
     }
 
     /**
-     * Get current database name
+     * Get current database name.
      *
      * @return string
      */
@@ -64,7 +63,7 @@ class MySqlAdapter
     public function getSchema()
     {
         $this->output->writeln('Load current database schema.');
-        $result = array();
+        $result = [];
 
         $result['database'] = $this->getDatabaseSchemata($this->dbName);
 
@@ -85,15 +84,16 @@ class MySqlAdapter
      * Get database schemata.
      *
      * @param string $dbName
+     *
      * @return array
      */
     public function getDatabaseSchemata($dbName)
     {
-        $sql = "SELECT
+        $sql = 'SELECT
             default_character_set_name,
             default_collation_name
             FROM information_schema.SCHEMATA
-            WHERE schema_name = %s;";
+            WHERE schema_name = %s;';
         $sql = sprintf($sql, $this->quote($dbName));
         $row = $this->pdo->query($sql)->fetch();
 
@@ -104,6 +104,7 @@ class MySqlAdapter
      * Quote value.
      *
      * @param string|null $value
+     *
      * @return string
      */
     public function quote($value)
@@ -122,7 +123,7 @@ class MySqlAdapter
      */
     public function getTables()
     {
-        $result = array();
+        $result = [];
         $sql = "SELECT *
             FROM
                 information_schema.tables AS t,
@@ -150,13 +151,14 @@ class MySqlAdapter
      * Get table columns.
      *
      * @param string $tableName
+     *
      * @return array
      */
     public function getColumns($tableName)
     {
-        $sql = sprintf("SELECT * FROM information_schema.columns
+        $sql = sprintf('SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
-                    AND table_name = %s", $this->quote($tableName));
+                    AND table_name = %s', $this->quote($tableName));
         $rows = $this->pdo->query($sql)->fetchAll();
 
         $result = [];
@@ -172,6 +174,7 @@ class MySqlAdapter
      * Get indexes.
      *
      * @param string $tableName
+     *
      * @return array
      */
     public function getIndexes($tableName)
@@ -192,15 +195,16 @@ class MySqlAdapter
     }
 
     /**
-     * Escape identifier (column, table) with backtick
+     * Escape identifier (column, table) with backtick.
      *
      * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
      *
      * @param string $value
      * @param string $quote
+     *
      * @return string identifier escaped string
      */
-    public function ident($value, $quote = "`")
+    public function ident($value, $quote = '`')
     {
         $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
         if (strpos($value, '.') !== false) {
@@ -217,6 +221,7 @@ class MySqlAdapter
      * Get foreign keys.
      *
      * @param string $tableName
+     *
      * @return array|null
      */
     public function getForeignKeys($tableName)
@@ -266,6 +271,7 @@ class MySqlAdapter
      * Get SQL to create a table.
      *
      * @param string $tableName
+     *
      * @return string
      */
     public function getTableCreateSql($tableName)
@@ -280,6 +286,7 @@ class MySqlAdapter
      * Escape value.
      *
      * @param string|null $value
+     *
      * @return string
      */
     public function esc($value)
