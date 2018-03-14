@@ -136,6 +136,13 @@ class PhinxMySqlGenerator
             $output[] = $this->getSetForeignKeyCheck(0);
         }
 
+        if (!empty($old['tables'])) {
+            $old['tables'] = array_change_key_case($old['tables']);
+        }
+        if (!empty($new['tables'])) {
+            $new['tables'] = array_change_key_case($new['tables']);
+        }
+
         $output = $this->getTableMigrationNewDatabase($output, $new, $old);
         $output = $this->getTableMigrationNewTables($output, $new, $old);
 
@@ -294,20 +301,22 @@ class PhinxMySqlGenerator
         if (empty($new['tables'])) {
             return $output;
         }
-        foreach ($new['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
+        foreach ($new['tables'] as $tableId => $newTable) {
+            if ($newTable['table']['table_name'] == $this->options['default_migration_table']) {
                 continue;
             }
 
-            if (!isset($old['tables'][$tableName])) {
+            if (!isset($old['tables'][$tableId])) {
                 // create the table
-                $table['has_table_variable'] = true;
-                $output = $this->getCreateTable($output, $table, $tableName);
+                $newTable['has_table_variable'] = true;
+                $output = $this->getCreateTable($output, $newTable);
+            } elseif ($old['tables'][$tableId]['table']['table_name'] !== $newTable['table']['table_name']) {
+                $output = $this->getRenameTable($output, $old['tables'][$tableId]['table']['table_name'], $newTable['table']['table_name']);
             }
 
-            $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
-            $output = $this->getTableMigrationOldTablesColumns($output, $tableName, $new, $old);
-            $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
+            $output = $this->getTableMigrationNewTablesColumns($output, $newTable, $tableId, $new, $old);
+            $output = $this->getTableMigrationOldTablesColumns($output, $tableId, $new, $old);
+            $output = $this->getTableMigrationIndexes($output, $newTable, $tableId, $new, $old);
         }
 
         return $output;
@@ -318,13 +327,12 @@ class PhinxMySqlGenerator
      *
      * @param array $output
      * @param array $table
-     * @param string $tableName
      * @param bool $forceSave (false)
      * @return array
      */
-    protected function getCreateTable($output, $table, $tableName, $forceSave = false)
+    protected function getCreateTable($output, $table, $forceSave = false)
     {
-        $output[] = $this->getTableVariable($table, $tableName);
+        $output[] = $this->getTableVariable($table);
 
         $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
         if (empty($alternatePrimaryKeys) || $forceSave) {
@@ -335,16 +343,35 @@ class PhinxMySqlGenerator
     }
 
     /**
+     * Generate rename table.
+     *
+     * @param array $output
+     * @param string $oldTableName
+     * @param string $newTableName
+     *
+     * @return array
+     */
+    protected function getRenameTable($output, $oldTableName, $newTableName)
+    {
+        // Changing case requires a temporary name
+        $tempName = $oldTableName . '-phinx-rename';
+        $output[] = sprintf("%s\$table = \$this->table(\"%s\");", $this->ind2, $oldTableName);
+        $output[] = sprintf("%s\$table->rename(\"%s\");", $this->ind2, $tempName);
+        $output[] = sprintf("%s\$table->rename(\"%s\");", $this->ind2, $newTableName);
+
+        return $output;
+    }
+
+    /**
      * Generate create table variable.
      *
      * @param array $table
-     * @param string $tableName
      * @return string
      */
-    protected function getTableVariable($table, $tableName)
+    protected function getTableVariable($table)
     {
         $options = $this->getTableOptions($table);
-        $result = sprintf("%s\$table = \$this->table(\"%s\", %s);", $this->ind2, $tableName, $options);
+        $result = sprintf("%s\$table = \$this->table(\"%s\", %s);", $this->ind2, $table['table']['table_name'], $options);
 
         return $result;
     }
@@ -500,14 +527,15 @@ class PhinxMySqlGenerator
     /**
      * Get table migration (new table columns).
      *
-     * @param array $output
-     * @param array $table
-     * @param string $tableName
-     * @param array $new
-     * @param array $old
+     * @param array  $output
+     * @param array  $table
+     * @param string $tableId
+     * @param array  $new
+     * @param array  $old
+     *
      * @return array
      */
-    protected function getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old)
+    protected function getTableMigrationNewTablesColumns($output, $table, $tableId, $new, $old)
     {
         if (empty($table['columns'])) {
             return $output;
@@ -517,26 +545,26 @@ class PhinxMySqlGenerator
         $opened = false;
 
         foreach ($table['columns'] as $columnName => $columnData) {
-            if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
+            if (!isset($old['tables'][$tableId]['columns'][$columnName])) {
                 $opened = true;
 
                 if (!$hasTableVariable) {
-                    $output[] = sprintf("%s\$table = \$this->table(\"%s\");", $this->ind2, $tableName);
+                    $output[] = sprintf("%s\$table = \$this->table(\"%s\");", $this->ind2, $table['table']['table_name']);
                     $hasTableVariable = true;
                 }
 
                 if ($columnName == 'id') {
-                    $output[] = $this->getColumnCreateId($new, $tableName, $columnName);
+                    $output[] = $this->getColumnCreateId($new, $tableId, $columnName);
                 } else {
                     if (!empty($alternatePrimaryKeys)) {
-                        $output[] = $this->getColumnCreateAddNoUpdate($new, $tableName, $columnName);
+                        $output[] = $this->getColumnCreateAddNoUpdate($new, $tableId, $columnName);
                     } else {
-                        $output[] = $this->getColumnCreateAdd($new, $tableName, $columnName);
+                        $output[] = $this->getColumnCreateAdd($new, $tableId, $columnName);
                     }
                 }
             } else {
-                if ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
-                    $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
+                if ($this->neq($new, $old, ['tables', $tableId, 'columns', $columnName])) {
+                    $output[] = $this->getColumnUpdate($new, $tableId, $columnName);
                 }
             }
         }
@@ -550,14 +578,15 @@ class PhinxMySqlGenerator
     /**
      * Get primary key column update commands.
      *
-     * @param array $schema
-     * @param string $table
+     * @param array  $schema
+     * @param string $tableId
      * @param string $columnName
+     *
      * @return string
      */
-    protected function getColumnCreateId($schema, $table, $columnName)
+    protected function getColumnCreateId($schema, $tableId, $columnName)
     {
-        $result = $this->getColumnCreate($schema, $table, $columnName);
+        $result = $this->getColumnCreate($schema, $tableId, $columnName);
         $output = [];
         $output[] = sprintf("%sif (\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $result[0], $result[1]);
         $output[] = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', %s)->update();", $this->ind3, $result[0], $result[1], $result[2], $result[3]);
@@ -571,19 +600,21 @@ class PhinxMySqlGenerator
     /**
      * Generate column create.
      *
-     * @param array $schema
-     * @param string $table
+     * @param array  $schema
+     * @param string $tableId
      * @param string $columnName
+     *
      * @return string[]
      */
-    protected function getColumnCreate($schema, $table, $columnName)
+    protected function getColumnCreate($schema, $tableId, $columnName)
     {
-        $columns = $schema['tables'][$table]['columns'];
+        $tableName = $schema['tables'][$tableId]['table']['table_name'];
+        $columns = $schema['tables'][$tableId]['columns'];
         $columnData = $columns[$columnName];
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
 
-        return [$table, $columnName, $phinxType, $columnAttributes];
+        return [$tableName, $columnName, $phinxType, $columnAttributes];
     }
 
     /**
@@ -983,14 +1014,15 @@ class PhinxMySqlGenerator
     /**
      * Get addColumn method.
      *
-     * @param array $schema
-     * @param string $table
+     * @param array  $schema
+     * @param string $tableId
      * @param string $columnName
+     *
      * @return string
      */
-    protected function getColumnCreateAddNoUpdate($schema, $table, $columnName)
+    protected function getColumnCreateAddNoUpdate($schema, $tableId, $columnName)
     {
-        $result = $this->getColumnCreate($schema, $table, $columnName);
+        $result = $this->getColumnCreate($schema, $tableId, $columnName);
 
         return sprintf("%s\$table->addColumn('%s', '%s', %s);", $this->ind2, $result[1], $result[2], $result[3]);
     }
@@ -998,14 +1030,15 @@ class PhinxMySqlGenerator
     /**
      * Get addColumn method.
      *
-     * @param array $schema
-     * @param string $table
+     * @param array  $schema
+     * @param string $tableId
      * @param string $columnName
+     *
      * @return string
      */
-    protected function getColumnCreateAdd($schema, $table, $columnName)
+    protected function getColumnCreateAdd($schema, $tableId, $columnName)
     {
-        $result = $this->getColumnCreate($schema, $table, $columnName);
+        $result = $this->getColumnCreate($schema, $tableId, $columnName);
 
         return sprintf("%s\$table->addColumn('%s', '%s', %s)->update();", $this->ind2, $result[1], $result[2], $result[3]);
     }
@@ -1013,19 +1046,21 @@ class PhinxMySqlGenerator
     /**
      * Generate column update.
      *
-     * @param array $schema
-     * @param string $table
+     * @param array  $schema
+     * @param string $tableId
      * @param string $columnName
+     *
      * @return string
      */
-    protected function getColumnUpdate($schema, $table, $columnName)
+    protected function getColumnUpdate($schema, $tableId, $columnName)
     {
-        $columns = $schema['tables'][$table]['columns'];
+        $tableName = $schema['tables'][$tableId]['table']['table_name'];
+        $columns = $schema['tables'][$tableId]['columns'];
         $columnData = $columns[$columnName];
 
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
-        $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $table, $columnName, $phinxType, $columnAttributes);
+        $result = sprintf("%s\$this->table(\"%s\")->changeColumn('%s', '%s', $columnAttributes)->update();", $this->ind2, $tableName, $columnName, $phinxType, $columnAttributes);
 
         return $result;
     }
@@ -1033,19 +1068,23 @@ class PhinxMySqlGenerator
     /**
      * Get table migration (old table columns).
      *
-     * @param array $output
-     * @param string $tableName
-     * @param array $new
-     * @param array $old
+     * @param array  $output
+     * @param string $tableId
+     * @param array  $new
+     * @param array  $old
+     *
      * @return array
      */
-    protected function getTableMigrationOldTablesColumns($output, $tableName, $new, $old)
+    protected function getTableMigrationOldTablesColumns($output, $tableId, $new, $old)
     {
-        if (empty($old['tables'][$tableName]['columns'])) {
+        if (empty($old['tables'][$tableId]['columns'])) {
             return $output;
         }
-        foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
-            if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
+
+        $tableName = $old['tables'][$tableId]['table']['table_name'];
+
+        foreach ($old['tables'][$tableId]['columns'] as $oldColumnName => $oldColumnData) {
+            if (!isset($new['tables'][$tableId]['columns'][$oldColumnName])) {
                 $output[] = $this->getColumnRemove($tableName, $oldColumnName);
             }
         }
@@ -1056,15 +1095,16 @@ class PhinxMySqlGenerator
     /**
      * Generate column remove.
      *
-     * @param string $table
+     * @param string $tableName
      * @param string $columnName
+     *
      * @return string
      */
-    protected function getColumnRemove($table, $columnName)
+    protected function getColumnRemove($tableName, $columnName)
     {
         $output = [];
-        $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
-        $output[] = $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind3, $table, $columnName);
+        $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $tableName, $columnName);
+        $output[] = $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind3, $tableName, $columnName);
         $output[] = sprintf("%s}", $this->ind2);
         $result = implode($this->nl, $output);
 
@@ -1074,24 +1114,25 @@ class PhinxMySqlGenerator
     /**
      * Get table migration (indexes).
      *
-     * @param array $output
-     * @param array $table
-     * @param string $tableName
-     * @param array $new
-     * @param array $old
+     * @param array  $output
+     * @param array  $table
+     * @param string $tableId
+     * @param array  $new
+     * @param array  $old
+     *
      * @return array
      */
-    protected function getTableMigrationIndexes($output, $table, $tableName, $new, $old)
+    protected function getTableMigrationIndexes($output, $table, $tableId, $new, $old)
     {
         if (empty($table['indexes'])) {
             return $output;
         }
         foreach ($table['indexes'] as $indexName => $indexSequences) {
-            if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
-                $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
+            if (!isset($old['tables'][$tableId]['indexes'][$indexName])) {
+                $output = $this->getIndexCreate($output, $new, $tableId, $indexName);
             } else {
-                if ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
-                    $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
+                if ($this->neq($new, $old, ['tables', $tableId, 'indexes', $indexName])) {
+                    $output = $this->getIndexCreate($output, $new, $tableId, $indexName);
                 }
             }
         }
@@ -1102,27 +1143,30 @@ class PhinxMySqlGenerator
     /**
      * Generate index create.
      *
-     * @param string[] $output Output
-     * @param array $schema Schema
-     * @param string $table Tablename
-     * @param string $indexName Index name
+     * @param string[] $output    Output
+     * @param array    $schema    Schema
+     * @param string   $tableId Table Id
+     * @param string   $indexName Index name
+     *
      * @return array Output
      */
-    protected function getIndexCreate($output, $schema, $table, $indexName)
+    protected function getIndexCreate($output, $schema, $tableId, $indexName)
     {
         if ($indexName == 'PRIMARY') {
             return $output;
         }
-        $indexes = $schema['tables'][$table]['indexes'];
+        $indexes = $schema['tables'][$tableId]['indexes'];
         $indexSequences = $indexes[$indexName];
 
         $indexFields = $this->getIndexFields($indexSequences);
         $indexOptions = $this->getIndexOptions(array_values($indexSequences)[0]);
 
-        $output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $table, $indexName);
-        $output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($table, $indexName));
+        $tableName = $schema['tables'][$tableId]['table']['table_name'];
+
+        $output[] = sprintf("%sif(\$this->table('%s')->hasIndex('%s')) {", $this->ind2, $tableName, $indexName);
+        $output[] = sprintf("%s%s", $this->ind, $this->getIndexRemove($tableName, $indexName));
         $output[] = sprintf("%s}", $this->ind2);
-        $output[] = sprintf("%s\$this->table(\"%s\")->addIndex(%s, %s)->save();", $this->ind2, $table, $indexFields, $indexOptions);
+        $output[] = sprintf("%s\$this->table(\"%s\")->addIndex(%s, %s)->save();", $this->ind2, $tableName, $indexFields, $indexOptions);
 
         return $output;
     }
@@ -1181,13 +1225,14 @@ class PhinxMySqlGenerator
     /**
      * Generate index remove.
      *
-     * @param string $table
+     * @param string $tableName
      * @param string $indexName
+     *
      * @return string
      */
-    protected function getIndexRemove($table, $indexName)
+    protected function getIndexRemove($tableName, $indexName)
     {
-        $result = sprintf("%s\$this->table(\"%s\")->removeIndexByName('%s');", $this->ind2, $table, $indexName);
+        $result = sprintf("%s\$this->table(\"%s\")->removeIndexByName('%s');", $this->ind2, $tableName, $indexName);
 
         return $result;
     }
@@ -1344,28 +1389,28 @@ class PhinxMySqlGenerator
             return $output;
         }
 
-        foreach ($old['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
+        foreach ($old['tables'] as $tableId => $oldTable) {
+            if ($oldTable['table']['table_name'] === $this->options['default_migration_table']) {
                 continue;
             }
-            if (!empty($old['tables'][$tableName]['indexes'])) {
-                foreach ($old['tables'][$tableName]['indexes'] as $indexName => $indexSequences) {
-                    if (!isset($new['tables'][$tableName]['indexes'][$indexName])) {
-                        $output[] = $this->getIndexRemove($tableName, $indexName);
+
+            $newTable = $new['tables'][$tableId];
+            if (!empty($oldTable['indexes'])) {
+                foreach ($oldTable['indexes'] as $indexName => $indexSequences) {
+                    if (!isset($newTable['indexes'][$indexName])) {
+                        $output[] = $this->getIndexRemove($tableId, $indexName);
                     }
                 }
             }
 
-            if (!isset($new['tables'][$tableName])) {
-                $output[] = $this->getDropTable($tableName);
+            if (!isset($new['tables'][$tableId])) {
+                $output[] = $this->getDropTable($tableId);
                 continue;
             }
 
             // Detect changes for existing tables (like engine, character set, collation, ...)
-            $oldTable = $old['tables'][$tableName]['table'];
-            $newTable = $new['tables'][$tableName]['table'];
-            if ($oldTable != $newTable) {
-                $output = $this->getUpdateTable($output, $new['tables'][$tableName], $tableName);
+            if ($oldTable['table'] != $newTable['table']) {
+                $output = $this->getUpdateTable($output, $newTable);
             }
 
             // @todo Detect changes on primary keys
@@ -1390,12 +1435,11 @@ class PhinxMySqlGenerator
      *
      * @param array $output
      * @param array $table
-     * @param string $tableName
      * @return array
      */
-    protected function getUpdateTable($output, $table, $tableName)
+    protected function getUpdateTable($output, $table)
     {
-        $output = $this->getCreateTable($output, $table, $tableName, true);
+        $output = $this->getCreateTable($output, $table, true);
 
         return $output;
     }
