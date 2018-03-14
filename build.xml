@@ -5,6 +5,10 @@
         <os family="windows"/>
     </condition>
 
+    <condition property="ext" value=".bat" else="">
+        <os family="windows"/>
+    </condition>
+
     <target name="phpunit" description="Run PHPUnit">
         <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit">
             <arg value="--configuration"/>
