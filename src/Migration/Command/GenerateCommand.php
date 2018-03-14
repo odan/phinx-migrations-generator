@@ -146,7 +146,7 @@ class GenerateCommand extends AbstractCommand
 
         if ($dbAdapter instanceof PdoAdapter) {
             $pdo = $dbAdapter->getConnection();
-        } else if($dbAdapter instanceof AdapterWrapper) {
+        } elseif ($dbAdapter instanceof AdapterWrapper) {
             $dbAdapter->connect();
             $pdo = $dbAdapter->getAdapter()->getConnection();
         } else {
