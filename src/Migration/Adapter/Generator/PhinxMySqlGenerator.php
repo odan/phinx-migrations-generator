@@ -1205,18 +1205,26 @@ class PhinxMySqlGenerator
             return [];
         }
         $output = [];
-        foreach ($new['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
+        foreach ($new['tables'] as $tableId => $newTable) {
+            if ($newTable['table']['table_name'] === $this->options['default_migration_table']) {
                 continue;
             }
-            if (empty($table['foreign_keys'])) {
-                continue;
+
+            $oldTable = $old['tables'][$tableId];
+
+            if (!empty($oldTable['foreign_keys'])) {
+                foreach ($oldTable['foreign_keys'] as $fkName => $fkData) {
+                    if (!isset($newTable['foreign_keys'][$fkName])) {
+                        $output[] = $this->getForeignKeyRemove($tableId, $fkName);
+                    }
+                }
             }
-            foreach ($table['foreign_keys'] as $fkName => $fkData) {
-                if (!isset($old['tables'][$tableName]['foreign_keys'][$fkName])) {
-                    $output[] = $this->getForeignKeyCreate($tableName, $fkName);
-                } else {
-                    $output[] = $this->getForeignKeyRemove($tableName, $fkName);
+
+            if (!empty($newTable['foreign_keys'])) {
+                foreach ($newTable['foreign_keys'] as $fkName => $fkData) {
+                    if (!isset($oldTable['foreign_keys'][$fkName])) {
+                        $output[] = $this->getForeignKeyCreate($tableId, $fkName);
+                    }
                 }
             }
         }
