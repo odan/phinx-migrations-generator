@@ -12,8 +12,10 @@ before_script:
   - cd $TRAVIS_BUILD_DIR
 
 script:
-  - mkdir -p build/logs
-  - vendor/bin/phpunit -c phpunit.xml --coverage-clover build/logs/clover.xml
+  - ant check-style
+  - ant phpstan
+  - ant phpunit-coverage
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) 
+  - if [ "$TRAVIS_PHP_VERSION" == "7.2" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
+  - if [ "$TRAVIS_PHP_VERSION" == "7.2" ]; then php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml; fi

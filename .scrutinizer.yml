@@ -1,37 +1,25 @@
+filter:
+    paths: ["src/*"]
+    excluded_paths: ["vendor/*", "tests/*"]
+
 checks:
     php:
         code_rating: true
         duplication: true
-tools:
-    php_cs_fixer:
-        enabled: true
-        extensions:
-            - php
-        config: { level: psr2 }
-        filter:
-            paths:
-                - src/
-    php_sim:
-        enabled: true
-        min_mass: 30             # Defaults to 16
-    php_code_sniffer:
-        enabled: true
-        config:
-            standard: PSR2
-        filter:
-            paths:
-                - src/
 
-filter:
-    paths:
-        - src/*
-    excluded_paths:
-        - tests/
+tools:
+    external_code_coverage:
+        timeout: 600
+        runs: 1
 
 build:
+    tests:
+        override:
+            command: "php -v"
     environment:
-        php: 7.1.1
+        php: 7.2
         mysql: true
+        node: false
         postgresql: false
         mongodb: false
         elasticsearch: false
@@ -39,13 +27,3 @@ build:
         memcached: false
         neo4j: false
         rabbitmq: false
-    dependencies:
-        before:
-            - mysql -uroot -e 'CREATE DATABASE test'
-    tests:
-        override:
-            -
-                command: 'vendor/bin/phpunit --coverage-clover build/logs/clover.xml'
-                coverage:
-                    file: 'build/logs/clover.xml'
-                    format: 'clover'

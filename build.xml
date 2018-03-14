@@ -12,10 +12,11 @@
         </exec>
     </target>
 
-    <target name="phpunit-coverage" description="Run PHPUnit with coverage">
+    <target name="phpunit-coverage" description="Run unit tests with PHPUnit with coverage">
         <delete dir="${basedir}/build/coverage"/>
         <mkdir dir="${basedir}/build/coverage"/>
         <exec executable="${basedir}/vendor/bin/phpunit${ext}" searchpath="true" resolveexecutable="true" failonerror="true" taskname="phpunit-coverage">
+            <arg value="--coverage-text"/>
             <arg value="--configuration"/>
             <arg path="${basedir}/phpunit.xml"/>
             <arg value="--coverage-clover"/>
@@ -27,20 +28,19 @@
 
     <target name="fix-style" description="Code style fixer">
         <mkdir dir="${basedir}/build"/>
-        <get src="https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v2.10.2/php-cs-fixer.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
-        <exec executable="php" searchpath="true" resolveexecutable="true">
+        <get src="https://cs.sensiolabs.org/download/php-cs-fixer-v2.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
+        <exec executable="php" searchpath="true" resolveexecutable="true" failonerror="true">
             <arg value="${basedir}/build/php-cs-fixer.phar"/>
-            <arg value="fix"/>
-            <arg value="--rules=@PSR2"/>
-            <arg value="--using-cache=no"/>
-            <arg path="${basedir}/src"/>
+            <arg line="fix --config=.cs.php"/>
         </exec>
-        <exec executable="php" searchpath="true" resolveexecutable="true">
+    </target>
+
+    <target name="check-style" description="Code style checker">
+        <mkdir dir="${basedir}/build"/>
+        <get src="https://cs.sensiolabs.org/download/php-cs-fixer-v2.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
+        <exec executable="php" searchpath="true" resolveexecutable="true" failonerror="true">
             <arg value="${basedir}/build/php-cs-fixer.phar"/>
-            <arg value="fix"/>
-            <arg value="--rules=@PSR2"/>
-            <arg value="--using-cache=no"/>
-            <arg path="${basedir}/tests"/>
+            <arg line="fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php"/>
         </exec>
     </target>
 
