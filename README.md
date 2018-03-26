@@ -24,7 +24,7 @@ In reality, you should rarely have to write migrations manually because the migr
 * Tables: create, update, remove, engine, comment, character set, collation
 * Columns: create, update, remove
 * Indexes: create, remove
-* Foreign keys (experimental): create, remove, constraint name
+* Foreign keys: create, remove, constraint name
 
 ## Install
 
