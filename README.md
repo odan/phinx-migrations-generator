@@ -11,7 +11,7 @@ Generate a migration by comparing your current database to your mapping informat
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 
 [Phinx](https://phinx.org/) cannot automatically generate migrations.
-Phinx creates "only" an class with empty `up`, `down` or `change` functions. You still have to write the migration manually.
+Phinx creates "only" a class with empty `up`, `down` or `change` functions. You still have to write the migration manually.
 
 In reality, you should rarely have to write migrations manually because the migration library should automatically generate migration classes by comparing your schema mapping information (i.e. how your database should look like) with your current database structure.
 
@@ -149,7 +149,7 @@ The phinx-migrations-generator uses the configuration of phinx.
 
 Parameter | Values | Default | Description
 --- | --- | --- | ---
-foreign_keys | bool | false | Experimental foreign key support.
+foreign_keys | bool | false | Enable or disable foreign key migrations.
 
 ### Example configuration
 
