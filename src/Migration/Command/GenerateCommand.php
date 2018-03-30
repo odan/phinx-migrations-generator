@@ -80,7 +80,7 @@ class GenerateCommand extends AbstractCommand
         $output->writeln('<info>using config file</info> ' . $configFilePath);
 
         // First, try the non-interactive option:
-        $migrationsPaths = (array) $input->getOption('path');
+        $migrationsPaths = (array)$input->getOption('path');
         if (empty($migrationsPaths)) {
             $migrationsPaths = $config->getMigrationPaths();
         }
