@@ -4,8 +4,11 @@
   "description": "Migration generator for Phinx",
   "keywords": [
     "migration",
+    "migrations",
+    "generator",
     "phinx",
-    "database"
+    "database",
+    "mysql"
   ],
   "homepage": "http://github.com/odan/phinx-migrations-generator",
   "license": "MIT",
@@ -24,12 +27,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Odan\\": "src"
+      "Odan\\Migration\\": "src/Migration/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Odan\\Migration\\Test\\": "tests"
+      "Odan\\Migration\\Test\\": "tests/"
     }
   },
   "bin": [
