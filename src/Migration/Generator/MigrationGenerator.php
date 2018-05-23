@@ -360,14 +360,7 @@ class MigrationGenerator
         /* @var $adapter \Phinx\Db\Adapter\AdapterInterface */
         $adapter = $this->settings['adapter'];
 
-        /* @var $manager Manager */
-        $manager = $this->settings['manager'];
-
-        $envName = $this->settings['environment'];
-
-        /* @var $env Environment */
-        $env = $manager->getEnvironment($envName);
-        $schemaTableName = $env->getSchemaTableName();
+        $schemaTableName = $this->settings['default_migration_table'];
 
         /* @var $pdo \PDO */
         $pdo = $this->settings['adapter'];
