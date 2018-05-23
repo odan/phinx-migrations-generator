@@ -6,8 +6,6 @@ use Exception;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use PDO;
-use Phinx\Migration\Manager;
-use Phinx\Migration\Manager\Environment;
 use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
