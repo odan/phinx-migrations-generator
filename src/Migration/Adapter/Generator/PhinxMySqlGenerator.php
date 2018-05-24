@@ -1255,7 +1255,7 @@ class PhinxMySqlGenerator
                 continue;
             }
 
-            $oldTable = $old['tables'][$tableName];
+            $oldTable = !empty($old['tables'][$tableName]) ? $old['tables'][$tableName] : [];
 
             if (!empty($oldTable['foreign_keys'])) {
                 foreach ($oldTable['foreign_keys'] as $fkName => $fkData) {
