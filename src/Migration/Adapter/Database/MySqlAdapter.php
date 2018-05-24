@@ -141,6 +141,7 @@ class MySqlAdapter
                 'table_comment' => $row['TABLE_COMMENT'],
                 'table_collation' => $row['TABLE_COLLATION'],
                 'character_set_name' => $row['CHARACTER_SET_NAME'],
+                'row_format' => $row['ROW_FORMAT'],
             ];
         }
 

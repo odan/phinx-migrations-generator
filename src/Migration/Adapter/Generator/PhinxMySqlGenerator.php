@@ -384,6 +384,9 @@ class PhinxMySqlGenerator
         // comment
         $attributes = $this->getPhinxTableComment($attributes, $table);
 
+        // row_format
+        $attributes = $this->getPhinxTableRowFormat($attributes, $table);
+
         $result = '[' . implode(', ', $attributes) . ']';
 
         return $result;
@@ -509,6 +512,23 @@ class PhinxMySqlGenerator
             $attributes[] = '\'comment\' => "' . addslashes($table['table']['table_comment']) . '"';
         } else {
             $attributes[] = '\'comment\' => ""';
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * Get table for format
+     *
+     * @param array $attributes
+     * @param array $table
+     *
+     * @return array Attributes
+     */
+    protected function getPhinxTableRowFormat($attributes, $table)
+    {
+        if (!empty($table['table']['row_format'])) {
+            $attributes[] = '\'row_format\' => "' . addslashes($table['table']['row_format']) . '"';
         }
 
         return $attributes;
