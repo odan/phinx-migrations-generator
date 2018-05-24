@@ -1334,7 +1334,7 @@ class PhinxMySqlGenerator
         if (isset($fkData['UPDATE_RULE'])) {
             $options[] = '\'update\' => "' . $this->getForeignKeyRuleValue($fkData['UPDATE_RULE']) . '"';
         }
-        if (isset($fkData['delete_rule'])) {
+        if (isset($fkData['DELETE_RULE'])) {
             $options[] = '\'delete\' => "' . $this->getForeignKeyRuleValue($fkData['DELETE_RULE']) . '"';
         }
         $result = '[' . implode(', ', $options) . ']';
