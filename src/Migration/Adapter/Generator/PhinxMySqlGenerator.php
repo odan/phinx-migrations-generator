@@ -749,7 +749,7 @@ class PhinxMySqlGenerator
     protected function getPhinxColumnOptionsDefault($attributes, $columnData)
     {
         if ($columnData['COLUMN_DEFAULT'] !== null) {
-            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '\'' . $columnData['COLUMN_DEFAULT'] . '\'';
+            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '"' . $columnData['COLUMN_DEFAULT'] . '"';
             $attributes[] = '\'default\' => ' . $default;
         }
 
