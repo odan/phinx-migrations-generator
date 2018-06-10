@@ -67,6 +67,8 @@ class PhinxMySqlGenerator
         $default = [
             // Experimental foreign key support.
             'foreign_keys' => false,
+            // Set to true for default NULL values to dont have quotes (ie: 'NULL' => NULL)
+            'null_no_quotes' => false,
             // Default migration table name
             'default_migration_table' => 'phinxlog',
         ];
@@ -769,7 +771,7 @@ class PhinxMySqlGenerator
     protected function getPhinxColumnOptionsDefault($attributes, $columnData)
     {
         if ($columnData['COLUMN_DEFAULT'] !== null) {
-            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '"' . $columnData['COLUMN_DEFAULT'] . '"';
+            $default = is_int($columnData['COLUMN_DEFAULT']) || ($this->options['null_no_quotes'] && $columnData['COLUMN_DEFAULT'] === 'NULL') ? $columnData['COLUMN_DEFAULT'] : '"' . $columnData['COLUMN_DEFAULT'] . '"';
             $attributes[] = '\'default\' => ' . $default;
         }
 

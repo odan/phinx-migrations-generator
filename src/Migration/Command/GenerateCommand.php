@@ -103,6 +103,7 @@ class GenerateCommand extends AbstractCommand
         $pdo = $this->getPdo($manager, $environment);
 
         $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
+        $nullNoQuotes = $config->offsetExists('null_no_quotes') ? $config->offsetGet('null_no_quotes') : false;
 
         $defaultMigrationTable = isset($envOptions['default_migration_table']) ? $envOptions['default_migration_table'] : 'phinxlog';
 
@@ -117,6 +118,7 @@ class GenerateCommand extends AbstractCommand
             'schema_file' => $schemaFile,
             'migration_path' => $migrationsPaths[0],
             'foreign_keys' => $foreignKeys,
+            'null_no_quotes' => $nullNoQuotes,
             'config_file' => $configFilePath,
             'name' => $name,
             'overwrite' => $overwrite,
