@@ -518,7 +518,7 @@ class PhinxMySqlGenerator
     }
 
     /**
-     * Get table for format
+     * Get table for format.
      *
      * @param array $attributes
      * @param array $table
