@@ -311,6 +311,7 @@ class PhinxMySqlGenerator
                 // create the table
                 $table['has_table_variable'] = true;
                 $output = $this->getCreateTable($output, $table, $tableName);
+                $output[] = sprintf('%s$table->save();', $this->ind2);
             }
 
             $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
@@ -327,18 +328,12 @@ class PhinxMySqlGenerator
      * @param array $output
      * @param array $table
      * @param string $tableName
-     * @param bool $forceSave (false)
      *
      * @return array
      */
-    protected function getCreateTable($output, $table, $tableName, $forceSave = false)
+    protected function getCreateTable($output, $table, $tableName)
     {
         $output[] = $this->getTableVariable($table, $tableName);
-
-        $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
-        if (empty($alternatePrimaryKeys) || $forceSave) {
-            $output[] = sprintf('%s$table->save();', $this->ind2);
-        }
 
         return $output;
     }
@@ -404,7 +399,7 @@ class PhinxMySqlGenerator
     {
         $alternatePrimaryKeys = $this->getAlternatePrimaryKeys($table);
         if (!empty($alternatePrimaryKeys)) {
-            $attributes[] = "'id' => false";
+            $attributes[] = "'identity' => false";
             $valueString = '[' . implode(', ', $alternatePrimaryKeys) . ']';
             $attributes[] = "'primary_key' => " . $valueString;
         }
@@ -1476,7 +1471,8 @@ class PhinxMySqlGenerator
      */
     protected function getUpdateTable($output, $table, $tableName)
     {
-        $output = $this->getCreateTable($output, $table, $tableName, true);
+        $output = $this->getCreateTable($output, $table, $tableName);
+        $output[] = sprintf('%s$table->save();', $this->ind2);
 
         return $output;
     }
