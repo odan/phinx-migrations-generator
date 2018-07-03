@@ -8,14 +8,15 @@
     "generator",
     "phinx",
     "database",
-    "mysql"
+    "mysql",
+    "mariadb"
   ],
-  "homepage": "http://github.com/odan/phinx-migrations-generator",
+  "homepage": "https://github.com/odan/phinx-migrations-generator",
   "license": "MIT",
   "require": {
     "php": "^7.0",
     "symfony/console": "^2.8|^3.0|^4.0",
-    "robmorgan/phinx": "^0.9"
+    "robmorgan/phinx": "^0.10"
   },
   "require-dev": {
     "phpunit/phpunit": "^6.0"

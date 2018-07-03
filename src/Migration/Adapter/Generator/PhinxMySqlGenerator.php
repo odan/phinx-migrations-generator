@@ -1432,7 +1432,7 @@ class PhinxMySqlGenerator
      */
     protected function getDropTable($table)
     {
-        return sprintf('%s$this->dropTable("%s");', $this->ind2, $table);
+        return sprintf('%s$this->table("%s")->drop()->save();', $this->ind2, $table);
     }
 
     /**

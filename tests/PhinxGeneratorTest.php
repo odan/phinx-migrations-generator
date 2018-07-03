@@ -15,53 +15,6 @@ class PhinxGeneratorTest extends TestCase
 {
     /**
      * Test.
-     *
-     * @covers ::createMigration
-     * @covers ::addChangeMethod
-     * @covers ::getTableMigration
-     * @covers ::getTableMigrationNewDatabase
-     * @covers ::getTableMigrationNewTables
-     * @covers ::getTableMigrationNewTablesColumns
-     * @covers ::getTableMigrationOldTablesColumns
-     * @covers ::getTableMigrationIndexes
-     * @covers ::getTableMigrationOldTables
-     * @covers ::appendLines
-     * @covers ::getForeignKeysMigrations
-     * @covers ::getAlterDatabaseCharset
-     * @covers ::getAlterDatabaseCollate
-     * @covers ::getCreateTable
-     * @covers ::getDropTable
-     * @covers ::getAlterTableEngine
-     * @covers ::getAlterTableCharset
-     * @covers ::getAlterTableCollate
-     * @covers ::getAlterTableComment
-     * @covers ::getColumnCreate
-     * @covers ::getColumnUpdate
-     * @covers ::getColumnRemove
-     * @covers ::getMySQLColumnType
-     * @covers ::getPhinxColumnType
-     * @covers ::getPhinxColumnOptions
-     * @covers ::getPhinxColumnOptionsDefault
-     * @covers ::getPhinxColumnOptionsNull
-     * @covers ::getPhinxColumnOptionsTimestamp
-     * @covers ::getPhinxColumnOptionsLimit
-     * @covers ::getPhinxColumnOptionsComment
-     * @covers ::getPhinxColumnOptionsNumeric
-     * @covers ::getPhinxColumnOptionsAfter
-     * @covers ::getOptionEnumValue
-     * @covers ::getColumnLimit
-     * @covers ::getIndexCreate
-     * @covers ::getIndexFields
-     * @covers ::getIndexOptions
-     * @covers ::getIndexRemove
-     * @covers ::getForeignKeyCreate
-     * @covers ::getForeignKeyOptions
-     * @covers ::getForeignKeyRuleValue
-     * @covers ::getForeignKeyRemove
-     * @covers ::getSetForeignKeyCheck
-     * @covers ::getSetUniqueChecks
-     * @covers ::eq
-     * @covers ::neq
      */
     public function testGenerate()
     {
