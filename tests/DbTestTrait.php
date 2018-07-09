@@ -175,6 +175,13 @@ trait DbTestTrait
             '--path' => __DIR__,
         ]);
 
+        // print content
+        $files = glob(__DIR__ . '/*_test1.php');
+        foreach ($files ?: [] as $file) {
+            fwrite(STDERR, $file . "\n");
+            fwrite(STDERR, file_get_contents($file) . "\n");
+        }
+
         $display = $commandTester->getDisplay();
         $statusCode = $commandTester->getStatusCode();
         if ($statusCode > 0 || !strpos($display, 'Generate migration finished')) {
