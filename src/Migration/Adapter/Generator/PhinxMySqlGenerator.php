@@ -1016,7 +1016,7 @@ class PhinxMySqlGenerator
     {
         $result = $this->getColumnCreate($schema, $table, $columnName);
 
-        return sprintf("%s\$table->addColumn('%s', '%s', %s);", $this->ind2, $result[1], $result[2], $result[3]);
+        return sprintf("%s\$table->addColumn('%s', '%s', %s)->save();", $this->ind2, $result[1], $result[2], $result[3]);
     }
 
     /**
