@@ -66,8 +66,6 @@ trait DbTestTrait
     /**
      * Get Db.
      *
-     * @param array $settings
-     *
      * @return PDO
      */
     public function getPdo(): PDO

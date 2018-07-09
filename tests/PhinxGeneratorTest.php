@@ -21,7 +21,7 @@ class PhinxGeneratorTest extends TestCase
     {
         $settings = $this->getSettings();
         $output = new NullOutput();
-        $pdo = $this->getPdo($settings);
+        $pdo = $this->getPdo();
         $dba = new MySqlAdapter($pdo, $output);
         $gen = new PhinxMySqlGenerator($dba, $output, $settings);
 
