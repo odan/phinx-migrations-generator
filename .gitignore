@@ -14,3 +14,9 @@ vendor/
 build/
 bin/schema.php
 bin/schema.json
+
+tests/*_test1.php
+tests/phinx.php
+tests/schema.php
+bin/phinx.php
+tests/diffs/actual.php
