@@ -4,6 +4,16 @@ php:
   - 7.1
   - 7.2
 
+services:
+  - mysql
+
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
+
 before_script:
   - composer self-update
   - composer install --no-interaction --prefer-source

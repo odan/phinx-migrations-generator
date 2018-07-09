@@ -33,10 +33,8 @@ trait DbTestTrait
      */
     protected function setUpDatabase()
     {
-        //$this->createTables();
         $this->dropDatabase();
         $this->createDatabase();
-        //$this->dropTables();
     }
 
     /**
@@ -97,7 +95,6 @@ trait DbTestTrait
     {
         $this->execSql('CREATE DATABASE `phinx_test` CHARACTER SET utf8 COLLATE utf8_unicode_ci;');
         $this->execSql('USE `phinx_test`');
-        //$this->getPdo()->query("USE `phinx_test`; ");
     }
 
     protected function dropDatabase()
@@ -147,6 +144,7 @@ trait DbTestTrait
 
     protected function execSql(string $sql)
     {
+        fwrite(STDERR, file_get_contents($sql) . "\n");
         $this->getPdo()->exec($sql);
     }
 
