@@ -182,6 +182,9 @@ trait DbTestTrait
             fwrite(STDERR, file_get_contents($file) . "\n");
         }
 
+        fwrite(STDERR, __DIR__ . '/schema.php' . "\n");
+        fwrite(STDERR, file_get_contents(__DIR__ . '/schema.php') . "\n");
+
         $display = $commandTester->getDisplay();
         $statusCode = $commandTester->getStatusCode();
         if ($statusCode > 0 || !strpos($display, 'Generate migration finished')) {
