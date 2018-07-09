@@ -144,7 +144,7 @@ trait DbTestTrait
 
     protected function execSql(string $sql)
     {
-        fwrite(STDERR, file_get_contents($sql) . "\n");
+        fwrite(STDERR, $sql . "\n");
         $this->getPdo()->exec($sql);
     }
 
