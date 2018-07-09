@@ -132,7 +132,6 @@ trait DbTestTrait
         $db = $this->getPdo();
         $sql = sprintf('SHOW CREATE TABLE `%s`;', $table);
         $statement = $db->query($sql);
-        //$statement->execute();
         $row = $statement->fetch(PDO::FETCH_ASSOC);
 
         if (empty($row)) {
@@ -144,7 +143,7 @@ trait DbTestTrait
 
     protected function execSql(string $sql)
     {
-        fwrite(STDERR, $sql . "\n");
+        //fwrite(STDERR, $sql . "\n");
         $this->getPdo()->exec($sql);
     }
 
@@ -173,15 +172,17 @@ trait DbTestTrait
             '--path' => __DIR__,
         ]);
 
-        // print content
-        $files = glob(__DIR__ . '/*_test1.php');
-        foreach ($files ?: [] as $file) {
-            fwrite(STDERR, $file . "\n");
-            fwrite(STDERR, file_get_contents($file) . "\n");
-        }
+        // debugging: print content (only for travis-ci)
+        if (false) {
+            $files = glob(__DIR__ . '/*_test1.php');
+            foreach ($files ?: [] as $file) {
+                fwrite(STDERR, $file . "\n");
+                fwrite(STDERR, file_get_contents($file) . "\n");
+            }
 
-        fwrite(STDERR, __DIR__ . '/schema.php' . "\n");
-        fwrite(STDERR, file_get_contents(__DIR__ . '/schema.php') . "\n");
+            fwrite(STDERR, __DIR__ . '/schema.php' . "\n");
+            fwrite(STDERR, file_get_contents(__DIR__ . '/schema.php') . "\n");
+        }
 
         $display = $commandTester->getDisplay();
         $statusCode = $commandTester->getStatusCode();
