@@ -4,6 +4,7 @@ namespace Odan\Migration\Test;
 
 use Odan\Migration\Command\GenerateCommand;
 use PDO;
+use PDOException;
 use Phinx\Console\Command\Migrate;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -143,8 +144,16 @@ trait DbTestTrait
 
     protected function execSql(string $sql)
     {
-        //fwrite(STDERR, $sql . "\n");
-        $this->getPdo()->exec($sql);
+        $pdo = $this->getPdo();
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        try {
+            $pdo->exec($sql);
+        } catch (PDOException $exception) {
+            if ($exception->getCode() !== '00000') {
+                fwrite(STDERR, 'PDO Error: ' . $exception->getMessage() . "\n");
+                fwrite(STDERR, $sql . "\n");
+            }
+        }
     }
 
     protected function migrate()
