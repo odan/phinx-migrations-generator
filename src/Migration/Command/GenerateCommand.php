@@ -157,7 +157,7 @@ class GenerateCommand extends AbstractCommand
         } else {
             throw new RuntimeException('Adapter not found');
         }
-        if (!$pdo) {
+        if (empty($pdo)) {
             $pdo = $dbAdapter->getOption('connection');
         }
         if (!$pdo instanceof PDO) {
