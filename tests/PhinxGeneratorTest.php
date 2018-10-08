@@ -61,7 +61,7 @@ class PhinxGeneratorTest extends TestCase
         $this->execSql('CREATE TABLE `accounts` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
         $oldSchema = $this->getTableSchema('accounts');
         $this->migrate();
 

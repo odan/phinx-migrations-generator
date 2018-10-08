@@ -184,16 +184,16 @@ trait DbTestTrait
         ]);
 
         // debugging: print content (only for travis-ci)
-        if (false) {
-            $files = glob(__DIR__ . '/*_test*.php');
-            foreach ($files ?: [] as $file) {
-                fwrite(STDERR, $file . "\n");
-                fwrite(STDERR, file_get_contents($file) . "\n");
-            }
-
-            fwrite(STDERR, __DIR__ . '/schema.php' . "\n");
-            fwrite(STDERR, file_get_contents(__DIR__ . '/schema.php') . "\n");
+        /*
+        $files = glob(__DIR__ . '/*_test*.php');
+        foreach ($files ?: [] as $file) {
+            fwrite(STDERR, $file . "\n");
+            fwrite(STDERR, file_get_contents($file) . "\n");
         }
+
+        fwrite(STDERR, __DIR__ . '/schema.php' . "\n");
+        fwrite(STDERR, file_get_contents(__DIR__ . '/schema.php') . "\n");
+        */
 
         $display = $commandTester->getDisplay();
         $statusCode = $commandTester->getStatusCode();
