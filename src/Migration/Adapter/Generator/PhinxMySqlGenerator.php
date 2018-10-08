@@ -608,7 +608,7 @@ class PhinxMySqlGenerator
         if ($columnType == 'tinyint(1)') {
             return 'boolean';
         }
-
+        \Phinx\Db\Adapter\AdapterInterface::PHINX_TYPE_BIG_INTEGER;
         $map = [
             'tinyint' => 'integer',
             'smallint' => 'integer',
@@ -623,6 +623,22 @@ class PhinxMySqlGenerator
             'mediumblob' => 'blob',
             'longblob' => 'blob',
         ];
+
+        /**
+        biginteger
+        binary
+        boolean
+        date
+        datetime
+        decimal
+        float
+        integer
+        string
+        text
+        time
+        timestamp
+        uuid
+         */
 
         $type = $this->getMySQLColumnType($columnData);
         if (isset($map[$type])) {
