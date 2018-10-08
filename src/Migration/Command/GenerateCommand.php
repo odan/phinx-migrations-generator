@@ -52,12 +52,17 @@ class GenerateCommand extends AbstractCommand
 
         $environment = $input->getOption('environment');
 
-        if (null === $environment) {
+        if ($environment === null) {
             $environment = $this->getConfig()->getDefaultEnvironment();
             $output->writeln('<comment>warning</comment> no environment specified, defaulting to: ' . $environment);
         } else {
             $output->writeln('<info>using environment</info> ' . $environment);
         }
+
+        if (!is_string($environment)) {
+            throw new RuntimeException('Invalid or missing environment');
+        }
+
         $envOptions = $this->getConfig()->getEnvironment($environment);
         if (isset($envOptions['adapter']) && $envOptions['adapter'] != 'mysql') {
             $output->writeln('<error>adapter not supported</error> ' . $envOptions['adapter']);
