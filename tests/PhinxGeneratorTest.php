@@ -55,4 +55,26 @@ class PhinxGeneratorTest extends TestCase
         $newSchema = $this->getTableSchema('table1');
         $this->assertSame($oldSchema, $newSchema);
     }
+
+    public function testAccountsTable()
+    {
+        $this->execSql("CREATE TABLE `accounts` (
+          `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+          `type` int(11) unsigned NOT NULL,
+          `status` int(11) unsigned NOT NULL DEFAULT '1',
+          `username` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `pwhash` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
+          `staff_level` int(11) unsigned NOT NULL DEFAULT '1',
+          `display` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+          `logo` tinyint(4) DEFAULT '0',
+          PRIMARY KEY (`id`),
+          UNIQUE KEY `username_ui` (`username`),
+          KEY `type_i` (`type`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;");
+        $oldSchema = $this->getTableSchema('accounts');
+        $this->migrate();
+
+        $newSchema = $this->getTableSchema('accounts');
+        $this->assertSame($oldSchema, $newSchema);
+    }
 }

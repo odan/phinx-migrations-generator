@@ -155,10 +155,12 @@ trait DbTestTrait
             unlink(__DIR__ . '/schema.php');
         }
 
-        $files = glob(__DIR__ . '/*_test1.php');
+        $files = glob(__DIR__ . '/*_test*.php');
         foreach ($files ?: [] as $file) {
             unlink($file);
         }
+
+        $number = date('YmdHisu');
 
         // generate
         $application = new Application();
@@ -167,14 +169,14 @@ trait DbTestTrait
         $command = $application->find('generate');
         $commandTester = new CommandTester($command);
         $commandTester->execute(['command' => $command->getName(),
-            '--name' => 'Test1',
+            '--name' => 'Test' . $number,
             '--overwrite' => '1',
             '--path' => __DIR__,
         ]);
 
         // debugging: print content (only for travis-ci)
         if (false) {
-            $files = glob(__DIR__ . '/*_test1.php');
+            $files = glob(__DIR__ . '/*_test*.php');
             foreach ($files ?: [] as $file) {
                 fwrite(STDERR, $file . "\n");
                 fwrite(STDERR, file_get_contents($file) . "\n");
