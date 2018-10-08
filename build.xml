@@ -50,7 +50,7 @@
 
     <target name="phpstan" description="PHP Static Analysis Tool - discover bugs in your code without running it">
         <mkdir dir="${basedir}/build"/>
-        <get src="https://github.com/phpstan/phpstan/releases/download/0.10.2/phpstan.phar"
+        <get src="https://github.com/phpstan/phpstan/releases/download/0.9.2/phpstan.phar"
              dest="${basedir}/build/phpstan.phar" skipexisting="true"/>
         <exec executable="php" searchpath="true" resolveexecutable="true" failonerror="true">
             <arg value="${basedir}/build/phpstan.phar"/>
