@@ -1220,7 +1220,10 @@ class PhinxMySqlGenerator
     protected function getIndexRemove($table, $indexName, array $output)
     {
         $output[] = $this->getTableWithoutOptionsVariable($table);
-        $output[] = sprintf('%s$table->removeIndexByName("%s");', $this->ind2, $indexName);
+
+        $output[] = sprintf('%sif ($table->hasIndex("%s")) {', $this->ind2, $indexName);
+        $output[] = sprintf('%s$table->removeIndexByName("%s")->save();', $this->ind3, $indexName);
+        $output[] = sprintf('%s}', $this->ind2);
 
         return $output;
     }
