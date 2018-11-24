@@ -32,11 +32,13 @@ trait DbTestTrait
      */
     protected function setUp()
     {
-        $this->setUpDatabase();
+        $this->dropTables();
     }
 
     protected function tearDown()
     {
+        $this->dropTables();
+
         $files = glob(__DIR__ . '/*_test*.php');
         foreach ($files ?: [] as $file) {
             unlink($file);
@@ -50,9 +52,8 @@ trait DbTestTrait
      */
     protected function setUpDatabase()
     {
-        //$this->dropDatabase();
-        //$this->createDatabase();
-        $this->dropTables();
+        $this->dropDatabase();
+        $this->createDatabase();
     }
 
     /**
