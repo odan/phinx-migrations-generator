@@ -203,8 +203,8 @@ trait DbTestTrait
         }
 
         // Run phinx migrate
-        $this->dropDatabase();
-        $this->createDatabase();
+        //$this->dropDatabase();
+        //$this->createDatabase();
 
         $phinxApplication = new Application();
         $phinxApplication->add(new Migrate());
