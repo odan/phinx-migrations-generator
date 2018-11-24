@@ -35,6 +35,14 @@ trait DbTestTrait
         $this->setUpDatabase();
     }
 
+    protected function tearDown()
+    {
+        $files = glob(__DIR__ . '/*_test*.php');
+        foreach ($files ?: [] as $file) {
+            unlink($file);
+        }
+    }
+
     /**
      * Call this template method before each test method is run.
      *
@@ -171,11 +179,6 @@ trait DbTestTrait
 
         if (file_exists(__DIR__ . '/schema.php')) {
             unlink(__DIR__ . '/schema.php');
-        }
-
-        $files = glob(__DIR__ . '/*_test*.php');
-        foreach ($files ?: [] as $file) {
-            unlink($file);
         }
 
         // must be really unique
