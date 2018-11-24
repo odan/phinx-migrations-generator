@@ -15,9 +15,15 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 trait DbTestTrait
 {
+    /**
+     * @var PDO
+     */
     protected $pdo;
 
-    static $counter;
+    /**
+     * @var Counter
+     */
+    public static $counter;
 
     /**
      * Call this template method before each test method is run.
