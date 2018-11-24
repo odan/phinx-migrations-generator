@@ -17,7 +17,7 @@ addons:
 before_script:
   - composer self-update
   - composer install --no-interaction --prefer-source
-  - mysql -e 'create database test;'
+  - mysql -e 'create database phinx_test;'
   - cd $TRAVIS_BUILD_DIR
 
 script:
