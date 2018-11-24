@@ -34,8 +34,9 @@ trait DbTestTrait
      */
     protected function setUpDatabase()
     {
-        $this->dropDatabase();
-        $this->createDatabase();
+        //$this->dropDatabase();
+        //$this->createDatabase();
+        $this->dropTables();
     }
 
     /**
@@ -46,7 +47,7 @@ trait DbTestTrait
     public function getSettings()
     {
         return [
-            'dsn' => 'mysql:host=127.0.0.1',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
             'username' => 'root',
             'password' => '',
             'options' => [

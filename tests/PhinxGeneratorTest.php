@@ -70,11 +70,32 @@ class PhinxGeneratorTest extends TestCase
     public function testRemoveIndex()
     {
         $this->execSql('CREATE TABLE `table1` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `field` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `field` (`field`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `field` int(11) DEFAULT NULL,
+              PRIMARY KEY (`id`),
+              KEY `field` (`field`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+
+        $oldSchema = $this->getTableSchema('table1');
+        $this->migrate();
+
+        $newSchema = $this->getTableSchema('table1');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    public function testIndexWithMultipleFields()
+    {
+        $this->execSql('CREATE TABLE `table1` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `field` int(11) DEFAULT NULL,
+              `field2` int(11) DEFAULT NULL,
+              PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+
+        // $oldSchema = $this->getTableSchema('table1');
+        $this->migrate();
+
+        $this->execSql('ALTER TABLE `table1` ADD INDEX `indexname` (`field`, `field2`); ');
         $oldSchema = $this->getTableSchema('table1');
         $this->migrate();
 
