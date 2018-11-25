@@ -2,6 +2,7 @@
 
 namespace Odan\Migration\Test;
 
+use Exception;
 use Odan\Migration\Command\GenerateCommand;
 use PDO;
 use PDOException;
@@ -21,7 +22,7 @@ trait DbTestTrait
     protected $pdo;
 
     /**
-     * @var Counter
+     * @var int Counter
      */
     public static $counter;
 
@@ -33,12 +34,17 @@ trait DbTestTrait
     protected function setUp()
     {
         $this->dropTables();
+        $this->deleteTestFiles();
     }
 
     protected function tearDown()
     {
         $this->dropTables();
+        $this->deleteTestFiles();
+    }
 
+    protected function deleteTestFiles()
+    {
         $files = glob(__DIR__ . '/*_test*.php');
         foreach ($files ?: [] as $file) {
             unlink($file);
@@ -146,6 +152,22 @@ trait DbTestTrait
         $db->exec('SET FOREIGN_KEY_CHECKS=1;');
     }
 
+    protected function existsTable(string $table): bool
+    {
+        $pdo = $this->getPdo();
+
+        $sql = 'SELECT table_name
+                FROM information_schema.tables
+                WHERE table_schema = database()
+                AND table_name = :table_name';
+
+        $statement = $pdo->prepare($sql);
+        $statement->execute(['table_name' => $table]);
+        $row = $statement->fetch();
+
+        return !empty($row);
+    }
+
     protected function getTableSchema(string $table): string
     {
         $db = $this->getPdo();
@@ -174,12 +196,18 @@ trait DbTestTrait
         }
     }
 
-    protected function migrate()
+    protected function runGenerate(): bool
     {
         chdir(__DIR__);
 
         if (file_exists(__DIR__ . '/schema.php')) {
             unlink(__DIR__ . '/schema.php');
+        }
+
+        if ($this->existsTable('phinxlog')) {
+            // wait because the phinxlog.id must be unique (format: YmdHis)
+            //fwrite(STDERR, "sleep(1)\n");
+            sleep(1);
         }
 
         // must be really unique
@@ -215,9 +243,12 @@ trait DbTestTrait
             throw new RuntimeException('Generate migration failed');
         }
 
-        // Run phinx migrate
-        //$this->dropDatabase();
-        //$this->createDatabase();
+        return true;
+    }
+
+    protected function runMigrate(): bool
+    {
+        chdir(__DIR__);
 
         $phinxApplication = new Application();
         $phinxApplication->add(new Migrate());
@@ -233,6 +264,13 @@ trait DbTestTrait
         }
 
         return true;
+    }
+
+    protected function runGenerateAndMigrate(): bool
+    {
+        $this->runGenerate();
+
+        return $this->runMigrate();
     }
 
     /**
