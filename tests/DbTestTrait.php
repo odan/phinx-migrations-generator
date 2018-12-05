@@ -246,7 +246,7 @@ trait DbTestTrait
         return true;
     }
 
-    protected function runMigrate(): bool
+    protected function runMigration(): bool
     {
         chdir(__DIR__);
 
@@ -270,7 +270,7 @@ trait DbTestTrait
     {
         $this->runGenerate();
 
-        return $this->runMigrate();
+        return $this->runMigration();
     }
 
     /**
