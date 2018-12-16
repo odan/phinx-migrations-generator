@@ -8,8 +8,7 @@
     "generator",
     "phinx",
     "database",
-    "mysql",
-    "mariadb"
+    "mysql"
   ],
   "homepage": "https://github.com/odan/phinx-migrations-generator",
   "license": "MIT",
