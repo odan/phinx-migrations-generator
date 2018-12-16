@@ -3,6 +3,7 @@
 namespace Odan\Migration\Generator;
 
 use Exception;
+use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use PDO;
@@ -147,14 +148,14 @@ class MigrationGenerator
         $className = $this->createClassName($name);
 
         if (!Util::isValidPhinxClassName($className)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The migration class name "%s" is invalid. Please use CamelCase format.',
                 $className
             ));
         }
 
         if (!Util::isUniqueMigrationClassName($className, $path)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The migration class name "%s" already exists',
                 $className
             ));
@@ -165,7 +166,7 @@ class MigrationGenerator
         $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
 
         if (is_file($filePath)) {
-            throw new \InvalidArgumentException(sprintf(
+            throw new InvalidArgumentException(sprintf(
                 'The file "%s" already exists',
                 $filePath
             ));
@@ -231,7 +232,7 @@ class MigrationGenerator
             $content = file_get_contents($schemaFile);
             $data = json_decode($content, true);
         } else {
-            throw new Exception(sprintf('Invalid schema file extension: %s', $fileExt));
+            throw new InvalidArgumentException(sprintf('Invalid schema file extension: %s', $fileExt));
         }
 
         return $data;
@@ -397,12 +398,16 @@ class MigrationGenerator
      * @param array $settings
      *
      * @throws Exception
+     *
+     * @return void
      */
-    protected function saveSchemaFile($schema, $settings)
+    protected function saveSchemaFile(array $schema, array $settings): void
     {
         $schemaFile = $this->getSchemaFilename($settings);
         $this->output->writeln(sprintf('Save schema file: %s', basename($schemaFile)));
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
+
+        $this->unsetArrayKeys($schema, 'TABLE_SCHEMA');
 
         if ($fileExt == 'php') {
             $content = var_export($schema, true);
@@ -410,8 +415,27 @@ class MigrationGenerator
         } elseif ($fileExt == 'json') {
             $content = json_encode($schema, JSON_PRETTY_PRINT);
         } else {
-            throw new Exception(sprintf('Invalid schema file extension: %s', $fileExt));
+            throw new InvalidArgumentException(sprintf('Invalid schema file extension: %s', $fileExt));
         }
+
         file_put_contents($schemaFile, $content);
+    }
+
+    /**
+     * Unset array keys.
+     *
+     * @param array $array The array
+     * @param mixed $unwantedKey The key to remove
+     *
+     * @return void
+     */
+    protected function unsetArrayKeys(array &$array, $unwantedKey): void
+    {
+        unset($array[$unwantedKey]);
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                $this->unsetArrayKeys($value, $unwantedKey);
+            }
+        }
     }
 }
