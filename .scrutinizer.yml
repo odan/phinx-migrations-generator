@@ -13,6 +13,9 @@ tools:
         runs: 1
 
 build:
+    tests:
+        override:
+            command: "php -v"
     environment:
         php: 7.2
         mysql: true
@@ -24,13 +27,3 @@ build:
         memcached: false
         neo4j: false
         rabbitmq: false
-    dependencies:
-        before:
-            - mysql -uroot -e 'CREATE DATABASE phinx_test'
-    tests:
-        override:
-            -
-                command: 'vendor/bin/phpunit --coverage-clover build/logs/clover.xml'
-                coverage:
-                    file: 'build/logs/clover.xml'
-                    format: 'clover'
