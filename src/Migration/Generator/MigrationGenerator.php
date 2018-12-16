@@ -98,7 +98,7 @@ class MigrationGenerator
      *
      * @return PDO
      */
-    public function getPdo($settings)
+    public function getPdo($settings): PDO
     {
         if (isset($settings['pdo']) && $settings['pdo'] instanceof PDO) {
             $settings['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -120,9 +120,11 @@ class MigrationGenerator
     /**
      * Generate.
      *
+     * @throws Exception
+     *
      * @return int Status
      */
-    public function generate()
+    public function generate(): int
     {
         $schema = $this->dba->getSchema();
         $oldSchema = $this->getOldSchema($this->settings);
@@ -203,7 +205,7 @@ class MigrationGenerator
      *
      * @return mixed
      */
-    public function getOldSchema($settings)
+    public function getOldSchema(array $settings)
     {
         return $this->getSchemaFileData($settings);
     }
@@ -217,7 +219,7 @@ class MigrationGenerator
      *
      * @return array
      */
-    public function getSchemaFileData($settings)
+    public function getSchemaFileData(array $settings): array
     {
         $schemaFile = $this->getSchemaFilename($settings);
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
@@ -245,7 +247,7 @@ class MigrationGenerator
      *
      * @return string Schema filename
      */
-    public function getSchemaFilename($settings)
+    public function getSchemaFilename(array $settings): string
     {
         // Default
         $schemaFile = sprintf('%s/%s', getcwd(), 'schema.php');
@@ -263,7 +265,7 @@ class MigrationGenerator
      *
      * @return mixed
      */
-    public function read($filename)
+    public function read(string $filename)
     {
         return require $filename;
     }
@@ -276,7 +278,7 @@ class MigrationGenerator
      *
      * @return array Difference
      */
-    public function compareSchema($newSchema, $oldSchema)
+    public function compareSchema(array $newSchema, array $oldSchema): array
     {
         $this->output->writeln('Comparing schema file to the database.');
 
@@ -297,7 +299,7 @@ class MigrationGenerator
      *
      * @return array
      */
-    protected function diff($array1, $array2)
+    protected function diff(array $array1, array $array2): array
     {
         $difference = [];
         foreach ($array1 as $key => $value) {
@@ -327,7 +329,7 @@ class MigrationGenerator
      *
      * @return string Class name
      */
-    protected function createClassName($name)
+    protected function createClassName(string $name): string
     {
         $result = str_replace('_', ' ', $name);
 
@@ -340,7 +342,7 @@ class MigrationGenerator
      * @param string $filePath Name of migration file
      * @param string $migration Migration code
      */
-    protected function saveMigrationFile($filePath, $migration)
+    protected function saveMigrationFile(string $filePath, string $migration): void
     {
         $this->output->writeln(sprintf('Generate migration file: %s', $filePath));
         file_put_contents($filePath, $migration);
@@ -352,7 +354,7 @@ class MigrationGenerator
      * @param string $migrationName migrationName
      * @param string $fileName fileName
      */
-    protected function markMigration($migrationName, $fileName)
+    protected function markMigration(string $migrationName, string $fileName): void
     {
         $this->output->writeln('Mark migration');
 
@@ -425,13 +427,14 @@ class MigrationGenerator
      * Unset array keys.
      *
      * @param array $array The array
-     * @param mixed $unwantedKey The key to remove
+     * @param string $unwantedKey The key to remove
      *
      * @return void
      */
-    protected function unsetArrayKeys(array &$array, $unwantedKey): void
+    protected function unsetArrayKeys(array &$array, string $unwantedKey): void
     {
         unset($array[$unwantedKey]);
+
         foreach ($array as &$value) {
             if (is_array($value)) {
                 $this->unsetArrayKeys($value, $unwantedKey);

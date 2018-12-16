@@ -82,7 +82,7 @@ class PhinxMySqlGenerator
      *
      * @return string PHP code
      */
-    public function createMigration($name, $newSchema, $oldSchema)
+    public function createMigration($name, $newSchema, $oldSchema): string
     {
         $output = [];
         $output[] = '<?php';
@@ -109,7 +109,7 @@ class PhinxMySqlGenerator
      *
      * @return string[] Output
      */
-    public function addChangeMethod($output, $new, $old)
+    public function addChangeMethod($output, $new, $old): array
     {
         $output[] = $this->ind . 'public function change()';
         $output[] = $this->ind . '{';
@@ -128,7 +128,7 @@ class PhinxMySqlGenerator
      *
      * @return array Output
      */
-    public function getTableMigration($output, $new, $old)
+    public function getTableMigration($output, $new, $old): array
     {
         if (!empty($this->options['foreign_keys'])) {
             $output[] = $this->getSetUniqueChecks(0);
@@ -160,7 +160,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getSetUniqueChecks($value)
+    protected function getSetUniqueChecks($value): string
     {
         return sprintf('%s$this->execute("SET UNIQUE_CHECKS = %s;");', $this->ind2, $value);
     }
@@ -172,7 +172,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getSetForeignKeyCheck($value)
+    protected function getSetForeignKeyCheck($value): string
     {
         return sprintf('%s$this->execute("SET FOREIGN_KEY_CHECKS = %s;");', $this->ind2, $value);
     }
@@ -186,7 +186,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getTableMigrationNewDatabase($output, $new, $old)
+    protected function getTableMigrationNewDatabase($output, $new, $old): array
     {
         if (empty($new['database'])) {
             return $output;
@@ -210,7 +210,7 @@ class PhinxMySqlGenerator
      *
      * @return bool
      */
-    protected function neq($arr, $arr2, $keys)
+    protected function neq($arr, $arr2, $keys): bool
     {
         return !$this->eq($arr, $arr2, $keys);
     }
@@ -224,7 +224,7 @@ class PhinxMySqlGenerator
      *
      * @return bool
      */
-    protected function eq($arr, $arr2, $keys)
+    protected function eq($arr, $arr2, $keys): bool
     {
         $val1 = $this->find($arr, $keys);
         $val2 = $this->find($arr2, $keys);
@@ -260,7 +260,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getAlterDatabaseCharset($charset, $database = null)
+    protected function getAlterDatabaseCharset($charset, $database = null): string
     {
         if ($database !== null) {
             $database = ' ' . $this->dba->ident($database);
@@ -278,7 +278,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getAlterDatabaseCollate($collate, $database = null)
+    protected function getAlterDatabaseCollate($collate, $database = null): string
     {
         if ($database) {
             $database = ' ' . $this->dba->ident($database);
@@ -297,13 +297,13 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getTableMigrationNewTables($output, $new, $old)
+    protected function getTableMigrationNewTables($output, $new, $old): array
     {
         if (empty($new['tables'])) {
             return $output;
         }
         foreach ($new['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
+            if ($tableName === $this->options['default_migration_table']) {
                 continue;
             }
 
@@ -330,7 +330,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getCreateTable($output, $table, $tableName)
+    protected function getCreateTable(array $output, array $table, string $tableName): array
     {
         $output[] = $this->getTableVariable($table, $tableName);
 
@@ -345,7 +345,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getTableVariable($table, $tableName)
+    protected function getTableVariable(array $table, string $tableName): string
     {
         $options = $this->getTableOptions($table);
         $result = sprintf('%s$table = $this->table("%s", %s);', $this->ind2, $tableName, $options);
@@ -360,7 +360,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getTableWithoutOptionsVariable($tableName)
+    protected function getTableWithoutOptionsVariable(string $tableName): string
     {
         return sprintf('%s$table = $this->table("%s");', $this->ind2, $tableName);
     }
@@ -372,7 +372,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getTableOptions($table)
+    protected function getTableOptions(array $table): string
     {
         $attributes = [];
 
@@ -406,7 +406,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxTablePrimaryKey($attributes, $table)
+    protected function getPhinxTablePrimaryKey(array $attributes, array $table): array
     {
         $primaryKeys = $this->getPrimaryKeys($table);
         $attributes[] = "'id' => false";
@@ -426,7 +426,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getPrimaryKeys($table)
+    protected function getPrimaryKeys(array $table): array
     {
         $primaryKeys = [];
         foreach ($table['columns'] as $column) {
@@ -449,7 +449,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxTableEngine($attributes, $table)
+    protected function getPhinxTableEngine(array $attributes, array $table): array
     {
         if (!empty($table['table']['engine'])) {
             $attributes[] = '\'engine\' => "' . addslashes($table['table']['engine']) . '"';
@@ -468,7 +468,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxTableEncoding($attributes, $table)
+    protected function getPhinxTableEncoding(array $attributes, array $table): array
     {
         if (!empty($table['table']['character_set_name'])) {
             $attributes[] = '\'encoding\' => "' . addslashes($table['table']['character_set_name']) . '"';
@@ -487,7 +487,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxTableCollation($attributes, $table)
+    protected function getPhinxTableCollation(array $attributes, array $table): array
     {
         if (!empty($table['table']['table_collation'])) {
             $attributes[] = '\'collation\' => "' . addslashes($table['table']['table_collation']) . '"';
@@ -506,7 +506,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxTableComment($attributes, $table)
+    protected function getPhinxTableComment(array $attributes, array $table): array
     {
         if (!empty($table['table']['table_comment'])) {
             $attributes[] = '\'comment\' => "' . addslashes($table['table']['table_comment']) . '"';
@@ -525,7 +525,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxTableRowFormat($attributes, $table)
+    protected function getPhinxTableRowFormat(array $attributes, array $table): array
     {
         if (!empty($table['table']['row_format'])) {
             $attributes[] = '\'row_format\' => "' . addslashes($table['table']['row_format']) . '"';
@@ -545,7 +545,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old)
+    protected function getTableMigrationNewTablesColumns(array $output, array $table, string $tableName, array $new, array $old): array
     {
         if (empty($table['columns'])) {
             return $output;
@@ -580,19 +580,19 @@ class PhinxMySqlGenerator
      * Generate column create.
      *
      * @param array $schema
-     * @param string $table
+     * @param string $tableName
      * @param string $columnName
      *
      * @return string[]
      */
-    protected function getColumnCreate($schema, $table, $columnName)
+    protected function getColumnCreate(array $schema, string $tableName, string $columnName): array
     {
-        $columns = $schema['tables'][$table]['columns'];
+        $columns = $schema['tables'][$tableName]['columns'];
         $columnData = $columns[$columnName];
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
 
-        return [$table, $columnName, $phinxType, $columnAttributes];
+        return [$tableName, $columnName, $phinxType, $columnAttributes];
     }
 
     /**
@@ -602,7 +602,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    public function getPhinxColumnType($columnData)
+    public function getPhinxColumnType(array $columnData): string
     {
         $columnType = $columnData['COLUMN_TYPE'];
         if ($columnType == 'tinyint(1)') {
@@ -638,7 +638,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getMySQLColumnType($columnData)
+    protected function getMySQLColumnType(array $columnData): string
     {
         $type = $columnData['COLUMN_TYPE'];
         $pattern = '/^[a-z]+/';
@@ -659,7 +659,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getPhinxColumnOptions($phinxType, $columnData, $columns)
+    protected function getPhinxColumnOptions(string $phinxType, array $columnData, array $columns): string
     {
         $attributes = [];
 
@@ -714,7 +714,7 @@ class PhinxMySqlGenerator
      *
      * @return string[] Attributes
      */
-    protected function getPhinxColumnOptionsNull($attributes, $columnData)
+    protected function getPhinxColumnOptionsNull(array $attributes, array $columnData): array
     {
         // has NULL
         if ($columnData['IS_NULLABLE'] === 'YES') {
@@ -734,7 +734,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnOptionsDefault($attributes, $columnData)
+    protected function getPhinxColumnOptionsDefault(array $attributes, array $columnData): array
     {
         if ($columnData['COLUMN_DEFAULT'] !== null) {
             $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '"' . $columnData['COLUMN_DEFAULT'] . '"';
@@ -752,7 +752,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnOptionsTimestamp($attributes, $columnData)
+    protected function getPhinxColumnOptionsTimestamp(array $attributes, array $columnData): array
     {
         // default set default value (use with CURRENT_TIMESTAMP)
         // on update CURRENT_TIMESTAMP
@@ -771,7 +771,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnOptionsLimit($attributes, $columnData)
+    protected function getPhinxColumnOptionsLimit(array $attributes, array $columnData): array
     {
         $limit = $this->getColumnLimit($columnData);
         if ($limit) {
@@ -788,10 +788,11 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    public function getColumnLimit($columnData)
+    public function getColumnLimit(array $columnData): string
     {
-        $limit = 0;
+        $limit = '0';
         $type = $this->getMySQLColumnType($columnData);
+
         switch ($type) {
             case 'int':
                 $limit = 'MysqlAdapter::INT_REGULAR';
@@ -851,7 +852,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnOptionsNumeric($attributes, $columnData)
+    protected function getPhinxColumnOptionsNumeric(array $attributes, array $columnData): array
     {
         // For decimal columns
         if (!empty($columnData['NUMERIC_PRECISION'])) {
@@ -885,7 +886,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    public function getOptionEnumValue($attributes, $columnData)
+    public function getOptionEnumValue(array $attributes, array $columnData): array
     {
         $match = null;
         $pattern = '/enum\((.*)\)/';
@@ -913,7 +914,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnCollation($phinxType, $attributes, $columnData)
+    protected function getPhinxColumnCollation(string $phinxType, array $attributes, array $columnData): array
     {
         $allowedTypes = [
             AdapterInterface::PHINX_TYPE_CHAR,
@@ -940,7 +941,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnEncoding($phinxType, $attributes, $columnData)
+    protected function getPhinxColumnEncoding(string $phinxType, array $attributes, array $columnData): array
     {
         $allowedTypes = [
             AdapterInterface::PHINX_TYPE_CHAR,
@@ -966,7 +967,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnOptionsComment($attributes, $columnData)
+    protected function getPhinxColumnOptionsComment(array $attributes, array $columnData): array
     {
         // Set a text comment on the column
         if (!empty($columnData['COLUMN_COMMENT'])) {
@@ -985,7 +986,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    protected function getPhinxColumnOptionsAfter($attributes, $columnData, $columns)
+    protected function getPhinxColumnOptionsAfter(array $attributes, array $columnData, array $columns): array
     {
         $columnName = $columnData['COLUMN_NAME'];
         $after = null;
@@ -1011,7 +1012,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getColumnCreateAddNoUpdate($schema, $table, $columnName)
+    protected function getColumnCreateAddNoUpdate(array $schema, string $table, string $columnName): string
     {
         $result = $this->getColumnCreate($schema, $table, $columnName);
 
@@ -1027,7 +1028,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getColumnCreateAdd($schema, $table, $columnName)
+    protected function getColumnCreateAdd(array $schema, string $table, string $columnName): string
     {
         $result = $this->getColumnCreate($schema, $table, $columnName);
 
@@ -1043,7 +1044,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getColumnUpdate($schema, $table, $columnName)
+    protected function getColumnUpdate(array $schema, string $table, string $columnName): string
     {
         $columns = $schema['tables'][$table]['columns'];
         $columnData = $columns[$columnName];
@@ -1065,7 +1066,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getTableMigrationOldTablesColumns($output, $tableName, $new, $old)
+    protected function getTableMigrationOldTablesColumns(array $output, string $tableName, array $new, array $old): array
     {
         if (empty($old['tables'][$tableName]['columns'])) {
             return $output;
@@ -1087,7 +1088,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getColumnRemove($table, $columnName)
+    protected function getColumnRemove(string $table, string $columnName): string
     {
         $output = [];
         $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
@@ -1109,7 +1110,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getTableMigrationIndexes($output, $table, $tableName, $new, $old)
+    protected function getTableMigrationIndexes(array $output, array $table, string $tableName, array $new, array $old): array
     {
         if (empty($table['indexes'])) {
             return $output;
@@ -1137,7 +1138,7 @@ class PhinxMySqlGenerator
      *
      * @return array Output
      */
-    protected function getIndexCreate($output, $schema, $table, $indexName)
+    protected function getIndexCreate(array $output, array $schema, string $table, string $indexName): array
     {
         if ($indexName == 'PRIMARY') {
             return $output;
@@ -1162,7 +1163,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    public function getIndexFields($indexSequences)
+    public function getIndexFields(array $indexSequences): string
     {
         $indexFields = [];
         foreach ($indexSequences as $indexData) {
@@ -1180,7 +1181,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    public function getIndexOptions($indexData)
+    public function getIndexOptions(array $indexData): string
     {
         $options = [];
 
@@ -1217,7 +1218,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getIndexRemove($table, $indexName, array $output)
+    protected function getIndexRemove(string $table, string $indexName, array $output): array
     {
         $output[] = $this->getTableWithoutOptionsVariable($table);
 
@@ -1236,12 +1237,14 @@ class PhinxMySqlGenerator
      *
      * @return array Output
      */
-    protected function getForeignKeysMigrations($new = [], $old = [])
+    protected function getForeignKeysMigrations(array $new = [], array $old = []): array
     {
         if (empty($new['tables'])) {
             return [];
         }
+
         $output = [];
+
         foreach ($new['tables'] as $tableName => $newTable) {
             if ($tableName === $this->options['default_migration_table']) {
                 continue;
@@ -1277,7 +1280,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getForeignKeyRemove($table, $indexName)
+    protected function getForeignKeyRemove(string $table, string $indexName): string
     {
         $result = sprintf("%s\$this->table(\"%s\")->dropForeignKey('%s');", $this->ind2, $table, $indexName);
 
@@ -1292,7 +1295,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getForeignKeyCreate($table, $fkName)
+    protected function getForeignKeyCreate(string $table, string $fkName): string
     {
         $foreignKeys = $this->dba->getForeignKeys($table);
         $fkData = $foreignKeys[$fkName];
@@ -1317,7 +1320,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getForeignKeyOptions($fkData, $fkName = null)
+    protected function getForeignKeyOptions(array $fkData, string $fkName = null): string
     {
         $options = [];
         if (isset($fkName)) {
@@ -1341,7 +1344,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getForeignKeyRuleValue($value)
+    protected function getForeignKeyRuleValue(string $value): string
     {
         $value = strtolower($value);
         if ($value == 'no action') {
@@ -1368,7 +1371,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function appendLines(array $array1 = [], array $array2 = [])
+    protected function appendLines(array $array1 = [], array $array2 = []): array
     {
         if (empty($array2)) {
             return $array1;
@@ -1389,14 +1392,14 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getTableMigrationOldTables(array $output, array $new, array $old)
+    protected function getTableMigrationOldTables(array $output, array $new, array $old): array
     {
         if (empty($old['tables'])) {
             return $output;
         }
 
         foreach ($old['tables'] as $tableName => $table) {
-            if ($tableName == $this->options['default_migration_table']) {
+            if ($tableName === $this->options['default_migration_table']) {
                 continue;
             }
             if (!empty($old['tables'][$tableName]['indexes'])) {
@@ -1432,7 +1435,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getDropTable($table)
+    protected function getDropTable(string $table): string
     {
         return sprintf('%s$this->table("%s")->drop()->save();', $this->ind2, $table);
     }
@@ -1446,7 +1449,7 @@ class PhinxMySqlGenerator
      *
      * @return array
      */
-    protected function getUpdateTable($output, $table, $tableName)
+    protected function getUpdateTable(array $output, array $table, string $tableName): array
     {
         $output = $this->getCreateTable($output, $table, $tableName);
         $output[] = sprintf('%s$table->save();', $this->ind2);
@@ -1462,7 +1465,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getAlterTableEngine($table, $engine)
+    protected function getAlterTableEngine(string $table, string $engine): string
     {
         $engine = $this->dba->quote($engine);
 
@@ -1477,7 +1480,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getAlterTableCharset($table, $charset)
+    protected function getAlterTableCharset(string $table, string $charset): string
     {
         $table = $this->dba->ident($table);
         $charset = $this->dba->quote($charset);
@@ -1493,7 +1496,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getAlterTableCollate($table, $collate)
+    protected function getAlterTableCollate(string $table, string $collate): string
     {
         $table = $this->dba->ident($table);
         $collate = $this->dba->quote($collate);
@@ -1509,7 +1512,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    protected function getAlterTableComment($table, $comment)
+    protected function getAlterTableComment(string $table, string $comment): string
     {
         $table = $this->dba->ident($table);
         $commentSave = $this->dba->quote($comment);

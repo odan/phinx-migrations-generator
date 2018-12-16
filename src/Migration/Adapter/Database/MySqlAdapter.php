@@ -50,7 +50,7 @@ class MySqlAdapter
      *
      * @return string
      */
-    public function getDbName()
+    public function getDbName(): string
     {
         return $this->pdo->query('select database()')->fetchColumn();
     }
@@ -60,14 +60,16 @@ class MySqlAdapter
      *
      * @return array
      */
-    public function getSchema()
+    public function getSchema(): array
     {
         $this->output->writeln('Load current database schema.');
+
         $result = [];
 
         $result['database'] = $this->getDatabaseSchemata($this->dbName);
 
         $tables = $this->getTables();
+
         foreach ($tables as $table) {
             $tableName = $table['table_name'];
             $this->output->writeln(sprintf('Table: <info>%s</info>', $tableName));
@@ -87,7 +89,7 @@ class MySqlAdapter
      *
      * @return array
      */
-    public function getDatabaseSchemata($dbName)
+    public function getDatabaseSchemata(string $dbName): array
     {
         $sql = 'SELECT
             default_character_set_name,
@@ -107,7 +109,7 @@ class MySqlAdapter
      *
      * @return string
      */
-    public function quote($value)
+    public function quote($value): string
     {
         if ($value === null) {
             return 'NULL';
@@ -121,7 +123,7 @@ class MySqlAdapter
      *
      * @return array
      */
-    public function getTables()
+    public function getTables(): array
     {
         $result = [];
         $sql = "SELECT *
@@ -134,6 +136,7 @@ class MySqlAdapter
                 AND t.table_type = 'BASE TABLE'";
 
         $rows = $this->pdo->query($sql)->fetchAll();
+
         foreach ($rows as $row) {
             $result[] = [
                 'table_name' => $row['TABLE_NAME'],
@@ -155,11 +158,12 @@ class MySqlAdapter
      *
      * @return array
      */
-    public function getColumns($tableName)
+    public function getColumns($tableName): array
     {
         $sql = sprintf('SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
                     AND table_name = %s', $this->quote($tableName));
+
         $rows = $this->pdo->query($sql)->fetchAll();
 
         $result = [];
@@ -178,7 +182,7 @@ class MySqlAdapter
      *
      * @return array
      */
-    public function getIndexes($tableName)
+    public function getIndexes($tableName): array
     {
         $sql = sprintf('SHOW INDEX FROM %s', $this->ident($tableName));
         $rows = $this->pdo->query($sql)->fetchAll();
@@ -205,9 +209,10 @@ class MySqlAdapter
      *
      * @return string identifier escaped string
      */
-    public function ident($value, $quote = '`')
+    public function ident($value, $quote = '`'): string
     {
         $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
+
         if (strpos($value, '.') !== false) {
             $values = explode('.', $value);
             $value = $quote . implode($quote . '.' . $quote, $values) . $quote;
@@ -225,7 +230,7 @@ class MySqlAdapter
      *
      * @return array|null
      */
-    public function getForeignKeys($tableName)
+    public function getForeignKeys($tableName): ?array
     {
         $sql = sprintf("SELECT
                 cols.TABLE_NAME,
@@ -275,7 +280,7 @@ class MySqlAdapter
      *
      * @return string
      */
-    public function getTableCreateSql($tableName)
+    public function getTableCreateSql($tableName): string
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
         $result = $this->pdo->query($sql)->fetch();
@@ -290,11 +295,12 @@ class MySqlAdapter
      *
      * @return string
      */
-    public function esc($value)
+    public function esc($value): string
     {
         if ($value === null) {
             return 'NULL';
         }
+
         $value = substr($this->pdo->quote($value), 1, -1);
 
         return $value;

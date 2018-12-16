@@ -91,7 +91,7 @@ class GenerateCommand extends AbstractCommand
         }
         // No paths? That's a problem.
         if (empty($migrationsPaths)) {
-            throw new \Exception('No migration paths set in your Phinx configuration file.');
+            throw new RuntimeException('No migration paths set in your Phinx configuration file.');
         }
 
         $migrationsPath = $migrationsPaths[0];
@@ -109,7 +109,7 @@ class GenerateCommand extends AbstractCommand
 
         $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
 
-        $defaultMigrationTable = isset($envOptions['default_migration_table']) ? $envOptions['default_migration_table'] : 'phinxlog';
+        $defaultMigrationTable = $envOptions['default_migration_table'] ?? 'phinxlog';
 
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
@@ -144,7 +144,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return PDO PDO object
      */
-    protected function getPdo(Manager $manager, $environment)
+    protected function getPdo(Manager $manager, $environment): PDO
     {
         /* @var AdapterWrapper $dbAdapter */
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
