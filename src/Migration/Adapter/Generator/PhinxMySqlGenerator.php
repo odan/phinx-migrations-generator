@@ -2,7 +2,7 @@
 
 namespace Odan\Migration\Adapter\Generator;
 
-use Odan\Migration\Adapter\Database\MySqlAdapter;
+use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Phinx\Db\Adapter\AdapterInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -14,7 +14,7 @@ class PhinxMySqlGenerator
     /**
      * Database adapter.
      *
-     * @var MySqlAdapter
+     * @var SchemaAdapterInterface
      */
     protected $dba;
 
@@ -55,11 +55,11 @@ class PhinxMySqlGenerator
     /**
      * Constructor.
      *
-     * @param MySqlAdapter $dba
+     * @param SchemaAdapterInterface $dba
      * @param OutputInterface $output
      * @param mixed $options Options
      */
-    public function __construct(MySqlAdapter $dba, OutputInterface $output, $options = [])
+    public function __construct(SchemaAdapterInterface $dba, OutputInterface $output, $options = [])
     {
         $this->dba = $dba;
         $this->output = $output;

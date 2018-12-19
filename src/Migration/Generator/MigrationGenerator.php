@@ -5,8 +5,10 @@ namespace Odan\Migration\Generator;
 use Exception;
 use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\MySqlAdapter;
+use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use PDO;
+use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -79,12 +81,13 @@ class MigrationGenerator
      * @param array $settings
      * @param InputInterface $input
      * @param OutputInterface $output
+     * @param SchemaAdapterInterface $dba
      */
-    public function __construct(array $settings, InputInterface $input, OutputInterface $output)
+    public function __construct(array $settings, InputInterface $input, OutputInterface $output, SchemaAdapterInterface $dba)
     {
         $this->settings = $settings;
         $this->pdo = $this->getPdo($settings);
-        $this->dba = new MySqlAdapter($this->pdo, $output);
+        $this->dba = $dba;
         $this->generator = new PhinxMySqlGenerator($this->dba, $output, $settings);
         $this->output = $output;
         $this->input = $input;
@@ -358,7 +361,7 @@ class MigrationGenerator
     {
         $this->output->writeln('Mark migration');
 
-        /* @var $adapter \Phinx\Db\Adapter\AdapterInterface */
+        /* @var $adapter AdapterInterface */
         $adapter = $this->settings['adapter'];
 
         $schemaTableName = $this->settings['default_migration_table'];

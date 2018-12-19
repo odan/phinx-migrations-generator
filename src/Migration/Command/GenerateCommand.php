@@ -129,7 +129,8 @@ class GenerateCommand extends AbstractCommand
             'default_migration_table' => $defaultMigrationTable,
         ];
 
-        $generator = new MigrationGenerator($settings, $input, $output);
+        $dba = new \Odan\Migration\Adapter\Database\MySqlAdapter($pdo, $output);
+        $generator = new MigrationGenerator($settings, $input, $output, $dba);
 
         return $generator->generate();
     }

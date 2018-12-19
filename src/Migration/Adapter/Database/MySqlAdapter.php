@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * MySqlAdapter.
  */
-class MySqlAdapter
+class MySqlAdapter implements SchemaAdapterInterface
 {
     /**
      * PDO.
