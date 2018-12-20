@@ -4,7 +4,6 @@ namespace Odan\Migration\Generator;
 
 use Exception;
 use InvalidArgumentException;
-use Odan\Migration\Adapter\Database\MySqlAdapter;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use PDO;
@@ -29,7 +28,7 @@ class MigrationGenerator
     /**
      * Database adapter.
      *
-     * @var MySqlAdapter
+     * @var SchemaAdapterInterface
      */
     protected $dba;
 

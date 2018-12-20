@@ -46,7 +46,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return int integer 0 on success, or an error code
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->bootstrap($input, $output);
 

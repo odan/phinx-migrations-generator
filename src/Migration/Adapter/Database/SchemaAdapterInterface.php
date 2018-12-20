@@ -1,13 +1,12 @@
 <?php
+
 namespace Odan\Migration\Adapter\Database;
 
 /**
- * Interface for all Database adapters
- *
+ * Interface for all Database adapters.
  */
 interface SchemaAdapterInterface
 {
-
     /**
      * Load current database schema.
      *
@@ -27,7 +26,7 @@ interface SchemaAdapterInterface
     /**
      * Escape identifier (column, table) with backtick.
      *
-     * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
+     * @see: http://dev.mysql.com/doc/refman/5.7/en/identifiers.html
      *
      * @param string $value
      * @param string $quote
