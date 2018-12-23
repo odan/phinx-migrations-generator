@@ -411,8 +411,6 @@ class MigrationGenerator
         $this->output->writeln(sprintf('Save schema file: %s', basename($schemaFile)));
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
 
-        $this->unsetArrayKeys($schema, 'TABLE_SCHEMA');
-
         if ($fileExt == 'php') {
             $content = var_export($schema, true);
             $content = "<?php\n\nreturn " . $content . ';';
@@ -423,24 +421,5 @@ class MigrationGenerator
         }
 
         file_put_contents($schemaFile, $content);
-    }
-
-    /**
-     * Unset array keys.
-     *
-     * @param array $array The array
-     * @param string $unwantedKey The key to remove
-     *
-     * @return void
-     */
-    protected function unsetArrayKeys(array &$array, string $unwantedKey): void
-    {
-        unset($array[$unwantedKey]);
-
-        foreach ($array as &$value) {
-            if (is_array($value)) {
-                $this->unsetArrayKeys($value, $unwantedKey);
-            }
-        }
     }
 }

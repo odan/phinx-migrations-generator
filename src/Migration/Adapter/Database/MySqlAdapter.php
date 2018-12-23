@@ -2,6 +2,7 @@
 
 namespace Odan\Migration\Adapter\Database;
 
+use Odan\Migration\Utility\ArrayUtil;
 use PDO;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -78,6 +79,9 @@ class MySqlAdapter implements SchemaAdapterInterface
             $result['tables'][$tableName]['indexes'] = $this->getIndexes($tableName);
             $result['tables'][$tableName]['foreign_keys'] = $this->getForeignKeys($tableName);
         }
+
+        $array = new ArrayUtil();
+        $array->unsetArrayKeys($result, 'TABLE_SCHEMA');
 
         return $result;
     }

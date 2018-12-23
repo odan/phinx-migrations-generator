@@ -50,7 +50,7 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
-    public function testCreateTable()
+    public function testCreateTable(): void
     {
         $this->execSql('CREATE TABLE `table1` (`id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
@@ -66,7 +66,7 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
-    public function testCreateTable2()
+    public function testCreateTable2(): void
     {
         $this->execSql('CREATE TABLE `table2` (`id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
@@ -82,7 +82,7 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
-    public function testRemoveIndex()
+    public function testRemoveIndex(): void
     {
         $this->execSql('CREATE TABLE `table3` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -103,7 +103,7 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
-    public function testIndexWithMultipleFields()
+    public function testIndexWithMultipleFields(): void
     {
         $this->execSql('CREATE TABLE `table4` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -112,14 +112,67 @@ class PhinxGeneratorTest extends TestCase
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
 
-        // $oldSchema = $this->getTableSchema('table4');
         $this->runGenerateAndMigrate();
 
         $this->execSql('ALTER TABLE `table4` ADD INDEX `indexname` (`field`, `field2`); ');
         $oldSchema = $this->getTableSchema('table4');
-        $this->runGenerateAndMigrate();
+        $this->runGenerateAndMigrate(false);
 
         $newSchema = $this->getTableSchema('table4');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test. #46.
+     *
+     * @return void
+     */
+    public function testIndexWithMultiplePkFields(): void
+    {
+        $this->execSql('CREATE TABLE `test` (
+            `pk1` int(11) unsigned NOT NULL,
+            `pk2` int(11) unsigned NOT NULL,
+            PRIMARY KEY (`pk1`,`pk2`)
+            ) ENGINE=InnoDB');
+
+        $this->runGenerateAndMigrate();
+
+        $this->execSql('ALTER TABLE `test` ADD INDEX `indexname` (`pk1`, `pk2`); ');
+        $oldSchema = $this->getTableSchema('test');
+        $this->runGenerateAndMigrate(false);
+
+        $newSchema = $this->getTableSchema('test');
+        $this->assertSame($oldSchema, $newSchema);
+
+        $this->execSql('ALTER TABLE `test` DROP INDEX `indexname`;');
+        $oldSchema = $this->getTableSchema('test');
+        $this->runGenerateAndMigrate(false);
+
+        $newSchema = $this->getTableSchema('test');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test. #46.
+     *
+     * @return void
+     */
+    public function testEnum(): void
+    {
+        $this->execSql("CREATE TABLE `test`( 
+            `id` INT(11) NOT NULL AUTO_INCREMENT, 
+            `simple_value` ENUM('1'), 
+            `multiple_values` ENUM('1','2','3','abc'), 
+            PRIMARY KEY (`id`) );
+        ");
+
+        $this->runGenerateAndMigrate();
+
+        $this->execSql("ALTER TABLE `test` CHANGE `multiple_values` `multiple_values` ENUM('1','2');");
+        $oldSchema = $this->getTableSchema('test');
+        $this->runGenerateAndMigrate(false);
+
+        $newSchema = $this->getTableSchema('test');
         $this->assertSame($oldSchema, $newSchema);
     }
 }

@@ -196,11 +196,11 @@ trait DbTestTrait
         }
     }
 
-    protected function runGenerate(): bool
+    protected function runGenerate(bool $deleteSchema = true): bool
     {
         chdir(__DIR__);
 
-        if (file_exists(__DIR__ . '/schema.php')) {
+        if ($deleteSchema === true && file_exists(__DIR__ . '/schema.php')) {
             unlink(__DIR__ . '/schema.php');
         }
 
@@ -266,9 +266,16 @@ trait DbTestTrait
         return true;
     }
 
-    protected function runGenerateAndMigrate(): bool
+    /**
+     * Run phinx generate and migrate command.
+     *
+     * @param bool $deleteSchema Delete schema.php file
+     *
+     * @return bool Success
+     */
+    protected function runGenerateAndMigrate(bool $deleteSchema = true): bool
     {
-        $this->runGenerate();
+        $this->runGenerate($deleteSchema);
 
         return $this->runMigration();
     }
