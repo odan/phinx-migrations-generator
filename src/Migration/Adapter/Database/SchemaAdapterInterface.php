@@ -29,18 +29,9 @@ interface SchemaAdapterInterface
      * @see: http://dev.mysql.com/doc/refman/5.7/en/identifiers.html
      *
      * @param string $value
-     * @param string $quote
      *
      * @return string identifier escaped string
      */
-    public function ident($value, $quote = '`'): string;
+    public function ident($value): string;
 
-    /**
-     * Get foreign keys.
-     *
-     * @param string $tableName
-     *
-     * @return array|null
-     */
-    public function getForeignKeys($tableName): ?array;
 }

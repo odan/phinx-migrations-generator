@@ -111,7 +111,7 @@ class PhinxMySqlGenerator
      *
      * @return string[] Output
      */
-    public function addChangeMethod($output, $new, $old): array
+    protected function addChangeMethod($output, $new, $old): array
     {
         $output[] = $this->ind . 'public function change()';
         $output[] = $this->ind . '{';
@@ -317,22 +317,6 @@ class PhinxMySqlGenerator
     }
 
     /**
-     * Generate create table.
-     *
-     * @param array $output
-     * @param array $table
-     * @param string $tableName
-     *
-     * @return array
-     */
-    protected function getCreateTable(array $output, array $table, string $tableName): array
-    {
-        $output[] = $this->getTableVariable($table, $tableName);
-
-        return $output;
-    }
-
-    /**
      * Generate create table variable.
      *
      * @param array $table
@@ -346,18 +330,6 @@ class PhinxMySqlGenerator
         $result = sprintf('%s$this->table("%s", %s)', $this->ind2, $tableName, $options);
 
         return $result;
-    }
-
-    /**
-     * Generate create table variable.
-     *
-     * @param string $tableName
-     *
-     * @return string
-     */
-    protected function getTableWithoutOptionsVariable(string $tableName): string
-    {
-        return sprintf('%s$this->table("%s")', $this->ind2, $tableName);
     }
 
     /**
@@ -590,7 +562,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    public function getPhinxColumnType(array $columnData): string
+    protected function getPhinxColumnType(array $columnData): string
     {
         $columnType = $columnData['COLUMN_TYPE'];
         if ($columnType == 'tinyint(1)') {
@@ -776,7 +748,7 @@ class PhinxMySqlGenerator
      *
      * @return string
      */
-    public function getColumnLimit(array $columnData): string
+    protected function getColumnLimit(array $columnData): string
     {
         $limit = '0';
         $type = $this->getMySQLColumnType($columnData);
@@ -874,7 +846,7 @@ class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    public function getOptionEnumValue(array $attributes, array $columnData): array
+    protected function getOptionEnumValue(array $attributes, array $columnData): array
     {
         $match = null;
         $pattern = '/enum\((.*)\)/';

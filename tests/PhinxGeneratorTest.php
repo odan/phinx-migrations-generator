@@ -2,7 +2,7 @@
 
 namespace Odan\Migration\Test;
 
-use Odan\Migration\Adapter\Database\MySqlAdapter;
+use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
@@ -22,7 +22,7 @@ class PhinxGeneratorTest extends TestCase
         $settings = $this->getSettings();
         $output = new NullOutput();
         $pdo = $this->getPdo();
-        $dba = new MySqlAdapter($pdo, $output);
+        $dba = new MySqlSchemaAdapter($pdo, $output);
         $gen = new PhinxMySqlGenerator($dba, $output, $settings);
 
         $diff = $this->read(__DIR__ . '/diffs/newtable.php');

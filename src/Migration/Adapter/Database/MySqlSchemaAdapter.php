@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * MySqlAdapter.
  */
-class MySqlAdapter implements SchemaAdapterInterface
+class MySqlSchemaAdapter implements SchemaAdapterInterface
 {
     /**
      * PDO.
@@ -51,7 +51,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return string
      */
-    public function getDbName(): string
+    protected function getDbName(): string
     {
         return $this->pdo->query('select database()')->fetchColumn();
     }
@@ -93,7 +93,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    public function getDatabaseSchemata(string $dbName): array
+    protected function getDatabaseSchemata(string $dbName): array
     {
         $sql = 'SELECT
             default_character_set_name,
@@ -127,7 +127,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    public function getTables(): array
+    protected function getTables(): array
     {
         $result = [];
         $sql = "SELECT *
@@ -162,7 +162,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    public function getColumns($tableName): array
+    protected function getColumns($tableName): array
     {
         $sql = sprintf('SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
@@ -186,7 +186,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    public function getIndexes($tableName): array
+    protected function getIndexes($tableName): array
     {
         $sql = sprintf('SHOW INDEX FROM %s', $this->ident($tableName));
         $rows = $this->pdo->query($sql)->fetchAll();
@@ -209,12 +209,12 @@ class MySqlAdapter implements SchemaAdapterInterface
      * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
      *
      * @param string $value
-     * @param string $quote
      *
      * @return string identifier escaped string
      */
-    public function ident($value, $quote = '`'): string
+    public function ident($value): string
     {
+        $quote = '`';
         $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
 
         if (strpos($value, '.') !== false) {
@@ -234,7 +234,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return array|null
      */
-    public function getForeignKeys($tableName): ?array
+    protected function getForeignKeys($tableName): ?array
     {
         $sql = sprintf("SELECT
                 cols.TABLE_NAME,
@@ -265,6 +265,7 @@ class MySqlAdapter implements SchemaAdapterInterface
             ;", $this->quote($tableName));
         $stm = $this->pdo->query($sql);
         $rows = $stm->fetchAll();
+
         if (empty($rows)) {
             return null;
         }
@@ -284,7 +285,7 @@ class MySqlAdapter implements SchemaAdapterInterface
      *
      * @return string
      */
-    public function getTableCreateSql($tableName): string
+    protected function getTableCreateSql($tableName): string
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
         $result = $this->pdo->query($sql)->fetch();

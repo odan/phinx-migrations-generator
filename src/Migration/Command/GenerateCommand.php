@@ -3,6 +3,7 @@
 namespace Odan\Migration\Command;
 
 use Exception;
+use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Generator\MigrationGenerator;
 use PDO;
 use Phinx\Console\Command\AbstractCommand;
@@ -129,7 +130,7 @@ class GenerateCommand extends AbstractCommand
             'default_migration_table' => $defaultMigrationTable,
         ];
 
-        $dba = new \Odan\Migration\Adapter\Database\MySqlAdapter($pdo, $output);
+        $dba = new MySqlSchemaAdapter($pdo, $output);
         $generator = new MigrationGenerator($settings, $input, $output, $dba);
 
         return $generator->generate();
