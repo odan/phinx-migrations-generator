@@ -1007,9 +1007,10 @@ class PhinxMySqlGenerator
         if (empty($old['tables'][$tableName]['columns'])) {
             return $output;
         }
+
         foreach ($old['tables'][$tableName]['columns'] as $oldColumnName => $oldColumnData) {
             if (!isset($new['tables'][$tableName]['columns'][$oldColumnName])) {
-                $output[] = $this->getColumnRemove($tableName, $oldColumnName);
+                $output = $this->getColumnRemove($output, $oldColumnName);
             }
         }
 
@@ -1019,20 +1020,16 @@ class PhinxMySqlGenerator
     /**
      * Generate column remove.
      *
-     * @param string $table
+     * @param array $output
      * @param string $columnName
      *
-     * @return string
+     * @return array
      */
-    protected function getColumnRemove(string $table, string $columnName): string
+    protected function getColumnRemove(array $output, string $columnName): array
     {
-        $output = [];
-        $output[] = sprintf("%sif(\$this->table('%s')->hasColumn('%s')) {", $this->ind2, $table, $columnName);
-        $output[] = $result = sprintf("%s\$this->table(\"%s\")->removeColumn('%s')->update();", $this->ind3, $table, $columnName);
-        $output[] = sprintf('%s}', $this->ind2);
-        $result = implode($this->nl, $output);
+        $output[] = sprintf("%s->removeColumn('%s')", $this->ind3, $columnName);
 
-        return $result;
+        return $output;
     }
 
     /**

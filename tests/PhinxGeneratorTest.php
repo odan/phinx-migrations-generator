@@ -86,6 +86,29 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
+    public function testRemoveColumn(): void
+    {
+        $this->execSql('CREATE TABLE `table1` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `field2` INT,
+            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+        $this->generate();
+
+        $this->execSql('ALTER TABLE `table1` DROP COLUMN `field2`; ');
+        $oldSchema = $this->getTableSchema('table1');
+        $this->generateAgain();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table1');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function testRemoveIndex(): void
     {
         $this->execSql('CREATE TABLE `table3` (

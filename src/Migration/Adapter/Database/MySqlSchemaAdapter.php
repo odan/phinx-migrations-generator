@@ -113,7 +113,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return string
      */
-    public function quote($value): string
+    public function quote(?string $value): string
     {
         if ($value === null) {
             return 'NULL';
@@ -212,10 +212,10 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return string identifier escaped string
      */
-    public function ident($value): string
+    public function ident(string $value): string
     {
         $quote = '`';
-        $value = preg_replace('/[^A-Za-z0-9_]+/', '', $value);
+        $value = preg_replace('/[^A-Za-z0-9_\.]+/', '', $value);
 
         if (strpos($value, '.') !== false) {
             $values = explode('.', $value);
@@ -276,21 +276,6 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         }
 
         return $result;
-    }
-
-    /**
-     * Get SQL to create a table.
-     *
-     * @param string $tableName
-     *
-     * @return string
-     */
-    protected function getTableCreateSql(string $tableName): string
-    {
-        $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
-        $result = $this->pdo->query($sql)->fetch();
-
-        return $result['CREATE TABLE'];
     }
 
     /**

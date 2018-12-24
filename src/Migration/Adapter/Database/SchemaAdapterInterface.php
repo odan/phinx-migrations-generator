@@ -21,7 +21,7 @@ interface SchemaAdapterInterface
      *
      * @return string
      */
-    public function quote($value): string;
+    public function quote(?string $value): string;
 
     /**
      * Escape identifier (column, table) with backtick.
@@ -32,5 +32,5 @@ interface SchemaAdapterInterface
      *
      * @return string identifier escaped string
      */
-    public function ident($value): string;
+    public function ident(string $value): string;
 }
