@@ -33,5 +33,4 @@ interface SchemaAdapterInterface
      * @return string identifier escaped string
      */
     public function ident($value): string;
-
 }
