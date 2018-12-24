@@ -1217,7 +1217,7 @@ class PhinxMySqlGenerator
      */
     protected function getForeignKeyRemove(array $output, string $indexName): array
     {
-        $output[] = sprintf("%s->dropForeignKey('%s');", $this->ind2, $indexName);
+        $output[] = sprintf("%s->dropForeignKey('%s')", $this->ind2, $indexName);
 
         return $output;
     }
