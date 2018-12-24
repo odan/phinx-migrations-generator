@@ -234,7 +234,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array|null
      */
-    protected function getForeignKeys($tableName): ?array
+    protected function getForeignKeys(string $tableName): ?array
     {
         $sql = sprintf("SELECT
                 cols.TABLE_NAME,
@@ -285,7 +285,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return string
      */
-    protected function getTableCreateSql($tableName): string
+    protected function getTableCreateSql(string $tableName): string
     {
         $sql = sprintf('SHOW CREATE TABLE %s', $this->ident($tableName));
         $result = $this->pdo->query($sql)->fetch();
@@ -300,7 +300,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return string
      */
-    public function esc($value): string
+    public function esc(?string $value): string
     {
         if ($value === null) {
             return 'NULL';

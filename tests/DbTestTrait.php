@@ -196,7 +196,12 @@ trait DbTestTrait
         }
     }
 
-    protected function runGenerate(bool $deleteSchema = true): bool
+    protected function generateAgain(): bool
+    {
+        return $this->generate(false);
+    }
+
+    protected function generate(bool $deleteSchema = true): bool
     {
         chdir(__DIR__);
 
@@ -246,7 +251,7 @@ trait DbTestTrait
         return true;
     }
 
-    protected function runMigration(): bool
+    public function migrate(): bool
     {
         chdir(__DIR__);
 
@@ -264,20 +269,6 @@ trait DbTestTrait
         }
 
         return true;
-    }
-
-    /**
-     * Run phinx generate and migrate command.
-     *
-     * @param bool $deleteSchema Delete schema.php file
-     *
-     * @return bool Success
-     */
-    protected function runGenerateAndMigrate(bool $deleteSchema = true): bool
-    {
-        $this->runGenerate($deleteSchema);
-
-        return $this->runMigration();
     }
 
     /**

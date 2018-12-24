@@ -297,8 +297,7 @@ class PhinxMySqlGenerator
             $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
 
             if (!empty($this->options['foreign_keys'])) {
-                $lines = $this->getForeignKeysMigrations($new, $old);
-                $output = $this->appendLines($output, $lines);
+                $output = $this->getForeignKeysMigrations($output, $tableName, $new, $old);
             }
 
             if (isset($old['tables'][$tableName])) {
@@ -1175,39 +1174,35 @@ class PhinxMySqlGenerator
     /**
      * Generate foreign keys migrations.
      *
+     * @param array $output
+     * @param string $tableName
      * @param array $new New schema
      * @param array $old Old schema
      *
      * @return array Output
      */
-    protected function getForeignKeysMigrations(array $new = [], array $old = []): array
+    protected function getForeignKeysMigrations(array $output, string $tableName, array $new = [], array $old = []): array
     {
-        if (empty($new['tables'])) {
+        if (empty($new['tables'][$tableName])) {
             return [];
         }
 
-        $output = [];
+        $newTable = $new['tables'][$tableName];
 
-        foreach ($new['tables'] as $tableName => $newTable) {
-            if ($tableName === $this->options['default_migration_table']) {
-                continue;
-            }
+        $oldTable = !empty($old['tables'][$tableName]) ? $old['tables'][$tableName] : [];
 
-            $oldTable = !empty($old['tables'][$tableName]) ? $old['tables'][$tableName] : [];
-
-            if (!empty($oldTable['foreign_keys'])) {
-                foreach ($oldTable['foreign_keys'] as $fkName => $fkData) {
-                    if (!isset($newTable['foreign_keys'][$fkName])) {
-                        $output[] = $this->getForeignKeyRemove($fkName);
-                    }
+        if (!empty($oldTable['foreign_keys'])) {
+            foreach ($oldTable['foreign_keys'] as $fkName => $fkData) {
+                if (!isset($newTable['foreign_keys'][$fkName])) {
+                    $output = $this->getForeignKeyRemove($output, $fkName);
                 }
             }
+        }
 
-            if (!empty($newTable['foreign_keys'])) {
-                foreach ($newTable['foreign_keys'] as $fkName => $fkData) {
-                    if (!isset($oldTable['foreign_keys'][$fkName])) {
-                        $output[] = $this->getForeignKeyCreate($tableName, $fkName);
-                    }
+        if (!empty($newTable['foreign_keys'])) {
+            foreach ($newTable['foreign_keys'] as $fkName => $fkData) {
+                if (!isset($oldTable['foreign_keys'][$fkName])) {
+                    $output = $this->getForeignKeyCreate($output, $fkName, $fkData);
                 }
             }
         }
@@ -1218,40 +1213,37 @@ class PhinxMySqlGenerator
     /**
      * Generate foreign key remove.
      *
+     * @param array $output
      * @param string $indexName
      *
-     * @return string
+     * @return array
      */
-    protected function getForeignKeyRemove(string $indexName): string
+    protected function getForeignKeyRemove(array $output, string $indexName): array
     {
-        $result = sprintf("%s->dropForeignKey('%s');", $this->ind2, $indexName);
+        $output[] = sprintf("%s->dropForeignKey('%s');", $this->ind2, $indexName);
 
-        return $result;
+        return $output;
     }
 
     /**
      * Generate foreign key create.
      *
-     * @param string $table
+     * @param array $output
      * @param string $fkName
+     * @param array $fkData
      *
-     * @return string
+     * @return array
      */
-    protected function getForeignKeyCreate(string $table, string $fkName): string
+    protected function getForeignKeyCreate(array $output, string $fkName, array $fkData): array
     {
-        $foreignKeys = $this->dba->getForeignKeys($table);
-        $fkData = $foreignKeys[$fkName];
         $columns = "'" . $fkData['COLUMN_NAME'] . "'";
         $referencedTable = "'" . $fkData['REFERENCED_TABLE_NAME'] . "'";
         $referencedColumns = "'" . $fkData['REFERENCED_COLUMN_NAME'] . "'";
         $options = $this->getForeignKeyOptions($fkData, $fkName);
 
-        $output = [];
         $output[] = sprintf('%s->addForeignKey(%s, %s, %s, %s)', $this->ind2, $columns, $referencedTable, $referencedColumns, $options);
 
-        $result = implode($this->nl, $output);
-
-        return $result;
+        return $output;
     }
 
     /**
@@ -1304,26 +1296,6 @@ class PhinxMySqlGenerator
         }
 
         return 'NO_ACTION';
-    }
-
-    /**
-     * Append lines.
-     *
-     * @param array $array1
-     * @param array $array2
-     *
-     * @return array
-     */
-    protected function appendLines(array $array1 = [], array $array2 = []): array
-    {
-        if (empty($array2)) {
-            return $array1;
-        }
-        foreach ($array2 as $value) {
-            $array1[] = $value;
-        }
-
-        return $array1;
     }
 
     /**

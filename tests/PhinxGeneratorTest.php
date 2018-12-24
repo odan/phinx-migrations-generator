@@ -55,8 +55,10 @@ class PhinxGeneratorTest extends TestCase
         $this->execSql('CREATE TABLE `table1` (`id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
         $oldSchema = $this->getTableSchema('table1');
-        $this->runGenerateAndMigrate();
+        $this->generate();
 
+        $this->dropTables();
+        $this->migrate();
         $newSchema = $this->getTableSchema('table1');
         $this->assertSame($oldSchema, $newSchema);
     }
@@ -71,8 +73,10 @@ class PhinxGeneratorTest extends TestCase
         $this->execSql('CREATE TABLE `table2` (`id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
         $oldSchema = $this->getTableSchema('table2');
-        $this->runGenerateAndMigrate();
+        $this->generate();
 
+        $this->dropTables();
+        $this->migrate();
         $newSchema = $this->getTableSchema('table2');
         $this->assertSame($oldSchema, $newSchema);
     }
@@ -92,8 +96,10 @@ class PhinxGeneratorTest extends TestCase
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
 
         $oldSchema = $this->getTableSchema('table3');
-        $this->runGenerateAndMigrate();
+        $this->generate();
 
+        $this->dropTables();
+        $this->migrate();
         $newSchema = $this->getTableSchema('table3');
         $this->assertSame($oldSchema, $newSchema);
     }
@@ -112,12 +118,14 @@ class PhinxGeneratorTest extends TestCase
               PRIMARY KEY (`id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
 
-        $this->runGenerateAndMigrate();
+        $this->generate();
 
         $this->execSql('ALTER TABLE `table4` ADD INDEX `indexname` (`field`, `field2`); ');
         $oldSchema = $this->getTableSchema('table4');
-        $this->runGenerateAndMigrate(false);
+        $this->generateAgain();
 
+        $this->dropTables();
+        $this->migrate();
         $newSchema = $this->getTableSchema('table4');
         $this->assertSame($oldSchema, $newSchema);
     }
@@ -133,20 +141,26 @@ class PhinxGeneratorTest extends TestCase
             `pk1` int(11) unsigned NOT NULL,
             `pk2` int(11) unsigned NOT NULL,
             PRIMARY KEY (`pk1`,`pk2`)
-            ) ENGINE=InnoDB');
+            ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;');
 
-        $this->runGenerateAndMigrate();
+        $this->generate();
 
         $this->execSql('ALTER TABLE `test` ADD INDEX `indexname` (`pk1`, `pk2`); ');
         $oldSchema = $this->getTableSchema('test');
-        $this->runGenerateAndMigrate(false);
+        $this->generateAgain();
 
         $newSchema = $this->getTableSchema('test');
         $this->assertSame($oldSchema, $newSchema);
 
         $this->execSql('ALTER TABLE `test` DROP INDEX `indexname`;');
         $oldSchema = $this->getTableSchema('test');
-        $this->runGenerateAndMigrate(false);
+        $this->generateAgain();
+
+        // Reset
+        $this->dropTables();
+
+        // Run all generated migrations
+        $this->migrate();
 
         $newSchema = $this->getTableSchema('test');
         $this->assertSame($oldSchema, $newSchema);
@@ -163,16 +177,66 @@ class PhinxGeneratorTest extends TestCase
             `id` INT(11) NOT NULL AUTO_INCREMENT, 
             `simple_value` ENUM('1'), 
             `multiple_values` ENUM('1','2','3','abc'), 
-            PRIMARY KEY (`id`) );
-        ");
+            PRIMARY KEY (`id`)) ROW_FORMAT=DYNAMIC;");
 
-        $this->runGenerateAndMigrate();
+        $this->generate();
 
         $this->execSql("ALTER TABLE `test` CHANGE `multiple_values` `multiple_values` ENUM('1','2');");
         $oldSchema = $this->getTableSchema('test');
-        $this->runGenerateAndMigrate(false);
+        $this->generateAgain();
+
+        // Reset
+        $this->dropTables();
+
+        // Run all generated migrations
+        $this->migrate();
 
         $newSchema = $this->getTableSchema('test');
         $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test. #46.
+     *
+     * @return void
+     */
+    public function testForeignKey(): void
+    {
+        $this->execSql('CREATE TABLE `table1` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              `table2_id` int(11) DEFAULT NULL,
+              PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+
+        $this->execSql('CREATE TABLE `table2` (
+              `id` int(11) NOT NULL AUTO_INCREMENT,
+              PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+
+        // 1. migration
+        $this->generate();
+
+        $this->execSql('ALTER TABLE `table1` ADD CONSTRAINT `table2_id` 
+            FOREIGN KEY (`table2_id`) 
+            REFERENCES `table2`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION; ');
+
+        $oldSchema = $this->getTableSchema('table1');
+        $oldSchema2 = $this->getTableSchema('table2');
+
+        // 2. migration
+        $this->generateAgain();
+
+        // Reset
+        $this->dropTables();
+
+        // Run all generated migrations
+        $this->migrate();
+
+        // Compare schemas
+        $newSchema = $this->getTableSchema('table1');
+        $this->assertSame($oldSchema, $newSchema);
+
+        $newSchema2 = $this->getTableSchema('table2');
+        $this->assertSame($oldSchema2, $newSchema2);
     }
 }
