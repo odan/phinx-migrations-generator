@@ -19,7 +19,7 @@ In reality, you should rarely have to write migrations manually because the migr
 
 * Framework independent
 * DBMS: MySQL 5.7+ (only)
-* Initial schema, schema diff
+* Initial schema and schema diff
 * Database: character set, collation
 * Tables: create, update, remove, engine, comment, character set, collation
 * Columns: create, update, remove
@@ -42,7 +42,6 @@ On the first run, an inital schema and a migration class is generated.
 The `schema.php` file contains the previous database schema and is getting compared with the current schema.
 Based on the difference, a Phinx migration class is generated.
 
-Linux
 ```
 $ vendor/bin/phinx-migrations generate
 ```
@@ -62,7 +61,6 @@ Parameter | Values | Default | Description
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
 
-Linux
 ```
 $ vendor/bin/phinx migrate
 ```
