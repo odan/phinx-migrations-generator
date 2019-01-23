@@ -6,7 +6,7 @@ Generate a migration by comparing your current database to your mapping informat
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
 [![Build Status](https://travis-ci.org/odan/phinx-migrations-generator.svg?branch=master)](https://travis-ci.org/odan/phinx-migrations-generator)
 [![Code Coverage](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/?branch=master)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/?branch=master)
+[![Quality Score](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg)](https://packagist.org/packages/odan/phinx-migrations-generator/stats)
 
 
@@ -122,7 +122,7 @@ $ composer test
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details.
+Please see [CONTRIBUTING](CONTRIBUTING.md) and [CODE_OF_CONDUCT](CODE_OF_CONDUCT.md) for details.
 
 ## License
 
