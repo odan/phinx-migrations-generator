@@ -47,11 +47,6 @@ Linux
 $ vendor/bin/phinx-migrations generate
 ```
 
-Windows
-```
-> vendor\bin\phinx-migrations generate
-```
-
 By executing the `generate` command again, only the difference to the last schema is generated.
 
 ## Parameters
@@ -63,70 +58,6 @@ Parameter | Values | Default | Description
 --path <path> | string | (from phinx) | Specify the path in which to generate this migration.
 --environment or -e | string | (from phinx) | The target environment.
 
-### Generated migration (example)
-
-Filename: `20170410194428_init.php`
-
-```php
-<?php
-
-use Phinx\Migration\AbstractMigration;
-use Phinx\Db\Adapter\MysqlAdapter;
-
-class Init extends AbstractMigration
-{
-    public function change()
-    {
-        $this->execute("ALTER DATABASE CHARACTER SET 'utf8';");
-        $this->execute("ALTER DATABASE COLLATE='utf8_unicode_ci';");
-        
-        $this->table("users")->save();
-        $this->execute("ALTER TABLE `users` ENGINE='InnoDB';");
-        $this->execute("ALTER TABLE `users` COMMENT='Users Table';");
-        $this->execute("ALTER TABLE `users` CHARSET='utf8';");
-        $this->execute("ALTER TABLE `users` COLLATE='utf8_unicode_ci';");
-        if ($this->table('users')->hasColumn('id')) {
-            $this->table("users")->changeColumn('id', 'integer', ['null' => false, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'identity' => 'enable'])->update();
-        } else {
-            $this->table("users")->addColumn('id', 'integer', ['null' => false, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'identity' => 'enable'])->update();
-        }
-        $this->table('users')
-            ->addColumn('username', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'id'])
-            ->addColumn('password', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'username'])
-            ->addColumn('email', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'password'])
-            ->addColumn('first_name', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'email'])
-            ->addColumn('last_name', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'first_name'])
-            ->addColumn('role', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'last_name'])
-            ->addColumn('locale', 'string', ['null' => true, 'limit' => 255, 'collation' => "utf8_unicode_ci", 'encoding' => "utf8", 'after' => 'role'])
-            ->addColumn('disabled', 'boolean', ['null' => false, 'default' => '0', 'limit' => MysqlAdapter::INT_TINY, 'precision' => 3, 'after' => 'locale'])
-            ->addColumn('created', 'datetime', ['null' => true, 'after' => 'disabled'])
-            ->addColumn('created_user_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'after' => 'created'])
-            ->addColumn('updated', 'datetime', ['null' => true, 'after' => 'created_user_id'])
-            ->addColumn('updated_user_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'after' => 'updated'])
-            ->addColumn('deleted', 'datetime', ['null' => true, 'after' => 'updated_user_id'])
-            ->addColumn('deleted_user_id', 'integer', ['null' => true, 'limit' => MysqlAdapter::INT_REGULAR, 'precision' => 10, 'after' => 'deleted'])
-            ->update();
-        if($this->table('users')->hasIndex('username')) {
-            $this->table("users")->removeIndexByName('username');
-        }
-        $this->table("users")->addIndex(['username'], ['name' => "username", 'unique' => true])->save();
-        if($this->table('users')->hasIndex('created_user_id')) {
-            $this->table("users")->removeIndexByName('created_user_id');
-        }
-        $this->table("users")->addIndex(['created_user_id'], ['name' => "created_user_id", 'unique' => false])->save();
-        if($this->table('users')->hasIndex('updated_user_id')) {
-            $this->table("users")->removeIndexByName('updated_user_id');
-        }
-        $this->table("users")->addIndex(['updated_user_id'], ['name' => "updated_user_id", 'unique' => false])->save();
-        if($this->table('users')->hasIndex('deleted_user_id')) {
-            $this->table("users")->removeIndexByName('deleted_user_id');
-        }
-        $this->table("users")->addIndex(['deleted_user_id'], ['name' => "deleted_user_id", 'unique' => false])->save();
-    }
-}
-```
-
-
 ### Running migrations
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
@@ -134,11 +65,6 @@ The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-mi
 Linux
 ```
 $ vendor/bin/phinx migrate
-```
-
-Windows
-```
-> vendor\bin\phinx migrate
 ```
 
 ## Configuration
