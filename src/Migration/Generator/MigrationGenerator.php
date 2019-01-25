@@ -233,7 +233,7 @@ class MigrationGenerator
         if ($fileExt == 'php') {
             $data = $this->read($schemaFile);
         } elseif ($fileExt == 'json') {
-            $content = file_get_contents($schemaFile);
+            $content = file_get_contents($schemaFile) ?: '';
             $data = json_decode($content, true);
         } else {
             throw new InvalidArgumentException(sprintf('Invalid schema file extension: %s', $fileExt));

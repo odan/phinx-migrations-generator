@@ -52,6 +52,7 @@ class GenerateCommand extends AbstractCommand
         $this->bootstrap($input, $output);
 
         $environment = $input->getOption('environment');
+        $environment = is_scalar($environment) ? (string)$environment : null;
 
         if ($environment === null) {
             $environment = $this->getConfig()->getDefaultEnvironment();
@@ -80,18 +81,26 @@ class GenerateCommand extends AbstractCommand
 
         // Load config and database adapter
         $manager = $this->getManager();
+
+        if (!$manager) {
+            throw new RuntimeException('Manager not found');
+        }
+
         $config = $manager->getConfig();
 
         $configFilePath = $config->getConfigFilePath();
         $output->writeln('<info>using config file</info> ' . $configFilePath);
 
         // First, try the non-interactive option:
-        $migrationsPaths = (array)$input->getOption('path');
+        $migrationsPaths = $input->getOption('path');
         if (empty($migrationsPaths)) {
             $migrationsPaths = $config->getMigrationPaths();
         }
+
+        $migrationsPaths = !is_array($migrationsPaths) ? (array)$migrationsPaths : [];
+
         // No paths? That's a problem.
-        if (empty($migrationsPaths)) {
+        if (empty($migrationsPaths[0])) {
             throw new RuntimeException('No migration paths set in your Phinx configuration file.');
         }
 

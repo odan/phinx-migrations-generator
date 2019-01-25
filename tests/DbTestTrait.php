@@ -6,6 +6,7 @@ use Exception;
 use Odan\Migration\Command\GenerateCommand;
 use PDO;
 use PDOException;
+use PDOStatement;
 use Phinx\Console\Command\Migrate;
 use RuntimeException;
 use Symfony\Component\Console\Application;
@@ -93,7 +94,7 @@ trait DbTestTrait
      */
     public function getPdo(): PDO
     {
-        if ($this->pdo) {
+        if ($this->pdo !== null) {
             return $this->pdo;
         }
 
@@ -142,6 +143,11 @@ trait DbTestTrait
         $db->exec('SET FOREIGN_KEY_CHECKS=0;');
 
         $statement = $db->query($sql);
+
+        if (!$statement) {
+            throw new RuntimeException('Invalid statement');
+        }
+
         $statement->execute();
 
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
@@ -170,9 +176,8 @@ trait DbTestTrait
 
     protected function getTableSchema(string $table): string
     {
-        $db = $this->getPdo();
         $sql = sprintf('SHOW CREATE TABLE `%s`;', $table);
-        $statement = $db->query($sql);
+        $statement = $this->createQueryStatement($sql);
         $row = $statement->fetch(PDO::FETCH_ASSOC);
 
         if (empty($row)) {
@@ -180,6 +185,24 @@ trait DbTestTrait
         }
 
         return (string)$row['Create Table'];
+    }
+
+    /**
+     * Create a new PDO statement.
+     *
+     * @param string $sql The sql
+     *
+     * @return PDOStatement The statement
+     */
+    protected function createQueryStatement(string $sql): PDOStatement
+    {
+        $statement = $this->getPdo()->query($sql);
+
+        if (!$statement) {
+            throw new RuntimeException('Invalid statement');
+        }
+
+        return $statement;
     }
 
     protected function execSql(string $sql)

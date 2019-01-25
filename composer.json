@@ -19,7 +19,8 @@
     "riimu/kit-phpencoder": "^2.4"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7.0"
+    "phpunit/phpunit": "^7.0",
+    "phpstan/phpstan-shim": "^0.11"
   },
   "scripts": {
     "test": "phpunit",

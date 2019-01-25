@@ -4,6 +4,8 @@ namespace Odan\Migration\Adapter\Database;
 
 use Odan\Migration\Utility\ArrayUtil;
 use PDO;
+use PDOStatement;
+use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -53,7 +55,44 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      */
     protected function getDbName(): string
     {
-        return $this->pdo->query('select database()')->fetchColumn();
+        return (string)$this->createQueryStatement('select database()')->fetchColumn();
+    }
+
+    /**
+     * Create a new PDO statement.
+     *
+     * @param string $sql The sql
+     *
+     * @return PDOStatement The statement
+     */
+    protected function createQueryStatement(string $sql): PDOStatement
+    {
+        $statement = $this->pdo->query($sql);
+
+        if (!$statement) {
+            throw new RuntimeException('Invalid statement');
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Fetch all rows as array.
+     *
+     * @param string $sql The sql
+     *
+     * @return array The rows
+     */
+    protected function queryFetchAll(string $sql): array
+    {
+        $statement = $this->createQueryStatement($sql);
+        $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$rows) {
+            return [];
+        }
+
+        return $rows;
     }
 
     /**
@@ -101,7 +140,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
             FROM information_schema.SCHEMATA
             WHERE schema_name = %s;';
         $sql = sprintf($sql, $this->quote($dbName));
-        $row = $this->pdo->query($sql)->fetch();
+        $row = $this->createQueryStatement($sql)->fetch();
 
         return $row;
     }
@@ -139,7 +178,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
                 AND t.table_schema=database()
                 AND t.table_type = 'BASE TABLE'";
 
-        $rows = $this->pdo->query($sql)->fetchAll();
+        $rows = $this->queryFetchAll($sql);
 
         foreach ($rows as $row) {
             $result[] = [
@@ -168,7 +207,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
                     WHERE table_schema=database()
                     AND table_name = %s', $this->quote($tableName));
 
-        $rows = $this->pdo->query($sql)->fetchAll();
+        $rows = $this->queryFetchAll($sql);
 
         $result = [];
         foreach ($rows as $row) {
@@ -189,7 +228,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     protected function getIndexes($tableName): array
     {
         $sql = sprintf('SHOW INDEX FROM %s', $this->ident($tableName));
-        $rows = $this->pdo->query($sql)->fetchAll();
+        $rows = $this->queryFetchAll($sql);
         $result = [];
         foreach ($rows as $row) {
             if (isset($row['Cardinality'])) {
@@ -216,6 +255,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     {
         $quote = '`';
         $value = preg_replace('/[^A-Za-z0-9_\.]+/', '', $value);
+        $value = is_scalar($value) ? (string)$value : '';
 
         if (strpos($value, '.') !== false) {
             $values = explode('.', $value);
@@ -263,8 +303,8 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
                 AND refs.REFERENCED_TABLE_NAME IS NOT NULL
                 AND cons.CONSTRAINT_TYPE = 'FOREIGN KEY'
             ;", $this->quote($tableName));
-        $stm = $this->pdo->query($sql);
-        $rows = $stm->fetchAll();
+
+        $rows = $this->queryFetchAll($sql);
 
         if (empty($rows)) {
             return null;
