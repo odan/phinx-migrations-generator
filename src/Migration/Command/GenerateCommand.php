@@ -104,7 +104,7 @@ class GenerateCommand extends AbstractCommand
             throw new RuntimeException('No migration paths set in your Phinx configuration file.');
         }
 
-        $migrationsPath = $migrationsPaths[0];
+        $migrationsPath = (string)$migrationsPaths[0];
         $this->verifyMigrationDirectory($migrationsPath);
 
         $output->writeln('<info>using migration path</info> ' . $migrationsPath);
