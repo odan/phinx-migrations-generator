@@ -53,7 +53,7 @@ class PhinxGeneratorTest extends TestCase
     public function testCreateTable(): void
     {
         $this->execSql('CREATE TABLE `table1` (`id` int(11) NOT NULL AUTO_INCREMENT,
-              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
         $oldSchema = $this->getTableSchema('table1');
         $this->generate();
 
@@ -71,7 +71,7 @@ class PhinxGeneratorTest extends TestCase
     public function testCreateTable2(): void
     {
         $this->execSql('CREATE TABLE `table2` (`id` int(11) NOT NULL AUTO_INCREMENT,
-              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
         $oldSchema = $this->getTableSchema('table2');
         $this->generate();
 
@@ -91,7 +91,7 @@ class PhinxGeneratorTest extends TestCase
         $this->execSql('CREATE TABLE `table1` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `field2` INT,
-            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
         $this->generate();
 
         $this->execSql('ALTER TABLE `table1` DROP COLUMN `field2`; ');
@@ -116,7 +116,7 @@ class PhinxGeneratorTest extends TestCase
               `field` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`),
               KEY `field` (`field`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
 
         $oldSchema = $this->getTableSchema('table3');
         $this->generate();
@@ -139,7 +139,7 @@ class PhinxGeneratorTest extends TestCase
               `field` int(11) DEFAULT NULL,
               `field2` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
 
         $this->generate();
 
@@ -200,7 +200,7 @@ class PhinxGeneratorTest extends TestCase
             `id` INT(11) NOT NULL AUTO_INCREMENT, 
             `simple_value` ENUM('1'), 
             `multiple_values` ENUM('1','2','3','abc'), 
-            PRIMARY KEY (`id`)) ROW_FORMAT=DYNAMIC;");
+            PRIMARY KEY (`id`)) ROW_FORMAT=COMPACT;");
 
         $this->generate();
 
@@ -229,12 +229,12 @@ class PhinxGeneratorTest extends TestCase
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `table2_id` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
 
         $this->execSql('CREATE TABLE `table2` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
 
         // 1. migration
         $this->generate();
