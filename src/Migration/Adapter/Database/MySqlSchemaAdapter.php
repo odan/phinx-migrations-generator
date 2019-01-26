@@ -69,7 +69,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     {
         $statement = $this->pdo->query($sql);
 
-        if (!$statement) {
+        if (!$statement instanceof PDOStatement) {
             throw new RuntimeException('Invalid statement');
         }
 

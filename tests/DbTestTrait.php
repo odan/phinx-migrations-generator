@@ -198,7 +198,7 @@ trait DbTestTrait
     {
         $statement = $this->getPdo()->query($sql);
 
-        if (!$statement) {
+        if (!$statement instanceof PDOStatement) {
             throw new RuntimeException('Invalid statement');
         }
 
