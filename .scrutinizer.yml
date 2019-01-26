@@ -24,15 +24,13 @@ build:
         memcached: false
         neo4j: false
         rabbitmq: false
+    services:
+        mysql: 5.7
     nodes:
         analysis:
             tests:
                 override:
                     - php-scrutinizer-run
-    node:
-        my-node:
-            services:
-                mysql: 5.7
     dependencies:
         before:
             - composer self-update
