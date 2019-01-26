@@ -14,8 +14,12 @@ tools:
 
 build:
     tests:
-        override:
-            command: "php -v"
+        before:
+            -
+                command: 'vendor/bin/phpunit --coverage-clover build/logs/clover.xml'
+                coverage:
+                    file: 'build/logs/clover.xml'
+                    format: 'clover'
     environment:
         php: 7.2
         mysql: true
