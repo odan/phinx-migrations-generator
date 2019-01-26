@@ -205,9 +205,9 @@ class MigrationGenerator
      *
      * @param array $settings
      *
-     * @return mixed
-     *
      * @throws Exception
+     *
+     * @return mixed
      */
     protected function getOldSchema(array $settings)
     {
