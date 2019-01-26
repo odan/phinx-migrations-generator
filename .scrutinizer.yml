@@ -24,6 +24,16 @@ build:
         memcached: false
         neo4j: false
         rabbitmq: false
+    nodes:
+        analysis:
+            tests:
+                override:
+                    - php-scrutinizer-run
+    dependencies:
+        before:
+            - composer self-update
+            - composer update --no-interaction --prefer-dist --no-progress
+            - mysql -uroot -e 'CREATE DATABASE phinx_test'
     tests:
         before:
             -
@@ -31,13 +41,3 @@ build:
                 coverage:
                     file: 'build/logs/clover.xml'
                     format: 'clover'
-    dependencies:
-        before:
-            - composer self-update
-            - composer update --no-interaction --prefer-dist --no-progress
-            - mysql -uroot -e 'CREATE DATABASE phinx_test'
-    nodes:
-        analysis:
-            tests:
-                override:
-                    - php-scrutinizer-run

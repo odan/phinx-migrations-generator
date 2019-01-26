@@ -493,7 +493,7 @@ class PhinxMySqlGenerator
     protected function getPhinxTableRowFormat(array $attributes, array $table): array
     {
         if (!empty($table['table']['row_format'])) {
-            $attributes['row_format'] = $table['table']['row_format'];
+            $attributes['row_format'] = strtoupper($table['table']['row_format']);
         }
 
         return $attributes;
