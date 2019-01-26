@@ -13,13 +13,6 @@ tools:
         runs: 1
 
 build:
-    tests:
-        before:
-            -
-                command: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
-                coverage:
-                    file: 'build/logs/clover.xml'
-                    format: 'clover'
     environment:
         php: 7.2
         mysql: true
@@ -31,10 +24,20 @@ build:
         memcached: false
         neo4j: false
         rabbitmq: false
+    tests:
+        before:
+            -
+                command: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+                coverage:
+                    file: 'build/logs/clover.xml'
+                    format: 'clover'
+    dependencies:
+        before:
+            - composer self-update
+            - composer update --no-interaction --prefer-dist --no-progress
+            - mysql -uroot -e 'CREATE DATABASE phinx_test'
     nodes:
         analysis:
             tests:
                 override:
                     - php-scrutinizer-run
-                    - sudo service start mysql || true
-                    - mysql -e "create database phinx_test;"
