@@ -16,10 +16,7 @@ build:
     tests:
         before:
             -
-                command:
-                    - sudo service start mysql || true
-                    - mysql -e "create database phinx_test;"
-                    - vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+                command: vendor/bin/phpunit --coverage-clover build/logs/clover.xml
                 coverage:
                     file: 'build/logs/clover.xml'
                     format: 'clover'
@@ -39,3 +36,5 @@ build:
             tests:
                 override:
                     - php-scrutinizer-run
+                    - sudo service start mysql || true
+                    - mysql -e "create database phinx_test;"
