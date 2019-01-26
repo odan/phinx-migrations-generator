@@ -12,11 +12,21 @@ class RawPhpValue
      */
     protected $value;
 
+    /**
+     * Constructor.
+     *
+     * @param string $value
+     */
     public function __construct(string $value)
     {
         $this->value = $value;
     }
 
+    /**
+     * To php value.
+     *
+     * @return string
+     */
     public function toPHP(): string
     {
         return $this->value;
