@@ -326,7 +326,7 @@ class PhinxMySqlGenerator
     protected function getTableVariable(array $table, string $tableName): string
     {
         $options = $this->getTableOptions($table);
-        $result = sprintf('%s$this->table("%s", %s)', $this->ind2, $tableName, $options);
+        $result = sprintf('%s$this->table(\'%s\', %s)', $this->ind2, $tableName, $options);
 
         return $result;
     }
@@ -696,8 +696,7 @@ class PhinxMySqlGenerator
     protected function getPhinxColumnOptionsDefault(array $attributes, array $columnData): array
     {
         if ($columnData['COLUMN_DEFAULT'] !== null) {
-            $default = is_int($columnData['COLUMN_DEFAULT']) ? $columnData['COLUMN_DEFAULT'] : '"' . $columnData['COLUMN_DEFAULT'] . '"';
-            $attributes['default'] = $default;
+            $attributes['default'] = $columnData['COLUMN_DEFAULT'];
         }
 
         return $attributes;
@@ -1333,7 +1332,7 @@ class PhinxMySqlGenerator
      */
     protected function getDropTable(string $table): string
     {
-        return sprintf('%s$this->table("%s")->drop()->save();', $this->ind2, $table);
+        return sprintf('%s$this->table(\'%s\')->drop()->save();', $this->ind2, $table);
     }
 
     /**
