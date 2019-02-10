@@ -7,7 +7,7 @@ class MyNewMigration extends AbstractMigration
 {
     public function change()
     {
-        $this->table("newtable", [
+        $this->table('newtable', [
                 'id' => false,
                 'primary_key' => ['id'],
                 'engine' => 'InnoDB',
