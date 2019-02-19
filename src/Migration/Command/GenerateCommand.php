@@ -30,9 +30,11 @@ class GenerateCommand extends AbstractCommand
         $this->setDescription('Generate a new migration');
 
         // Allow the migration path to be chosen non-interactively.
-        $this->addOption('path', null, InputOption::VALUE_REQUIRED, 'Specify the path in which to generate this migration');
+        $this->addOption('path', null, InputOption::VALUE_REQUIRED,
+            'Specify the path in which to generate this migration');
 
-        $this->addOption('name', null, InputOption::VALUE_REQUIRED, 'Specify the name of the migration for this migration');
+        $this->addOption('name', null, InputOption::VALUE_REQUIRED,
+            'Specify the name of the migration for this migration');
 
         $this->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite schema.php file');
     }
@@ -86,7 +88,7 @@ class GenerateCommand extends AbstractCommand
             throw new RuntimeException('Manager not found');
         }
 
-        $config = $manager->getConfig();
+        $config = $this->getConfig();
 
         $configFilePath = $config->getConfigFilePath();
         $output->writeln('<info>using config file</info> ' . $configFilePath);

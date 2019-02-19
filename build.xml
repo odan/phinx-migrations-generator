@@ -32,7 +32,7 @@
 
     <target name="fix-style" description="Code style fixer">
         <mkdir dir="${basedir}/build"/>
-        <get src="https://cs.sensiolabs.org/download/php-cs-fixer-v2.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
+        <get src="https://cs.symfony.com/download/php-cs-fixer-v2.phar" dest="${basedir}/build/php-cs-fixer.phar" skipexisting="true"/>
         <exec executable="php" searchpath="true" resolveexecutable="true" failonerror="true">
             <arg value="${basedir}/build/php-cs-fixer.phar"/>
             <arg line="fix --config=.cs.php"/>
