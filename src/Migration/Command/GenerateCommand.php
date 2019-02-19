@@ -88,7 +88,7 @@ class GenerateCommand extends AbstractCommand
             throw new RuntimeException('Manager not found');
         }
 
-        $config = $this->getConfig();
+        $config = $manager->getConfig();
 
         $configFilePath = $config->getConfigFilePath();
         $output->writeln('<info>using config file</info> ' . $configFilePath);
@@ -99,7 +99,7 @@ class GenerateCommand extends AbstractCommand
             $migrationsPaths = $config->getMigrationPaths();
         }
 
-        $migrationsPaths = !is_array($migrationsPaths) ? (array)$migrationsPaths : [];
+        $migrationsPaths = is_array($migrationsPaths) ? $migrationsPaths : (array)$migrationsPaths;
 
         // No paths? That's a problem.
         if (empty($migrationsPaths[0])) {
