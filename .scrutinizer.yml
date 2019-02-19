@@ -8,9 +8,7 @@ checks:
         duplication: true
 
 tools:
-    external_code_coverage:
-        timeout: 600
-        runs: 1
+    external_code_coverage: false
 
 build:
     environment:
