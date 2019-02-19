@@ -6,8 +6,6 @@ php:
 services:
   - mysql
 
-dist: xenial
-
 addons:
   apt:
     sources:
@@ -18,8 +16,6 @@ addons:
 before_script:
   - composer self-update
   - composer install --no-interaction --prefer-source
-  # Wait for mysql service to respond
-  - which mysql && until mysql -u root -e "show status" &>/dev/null; do sleep 1; done
   - mysql -e 'create database phinx_test;'
   - cd $TRAVIS_BUILD_DIR
 
