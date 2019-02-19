@@ -6,6 +6,8 @@ php:
 services:
   - mysql
 
+dist: xenial
+
 addons:
   apt:
     sources:
