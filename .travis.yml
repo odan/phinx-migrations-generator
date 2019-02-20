@@ -8,6 +8,11 @@ services:
   
 dist: xenial
 
+addons:
+  apt:
+    packages:
+      - ant
+
 before_script:
   - composer self-update
   - composer install --no-interaction --prefer-source
