@@ -572,7 +572,7 @@ class PhinxMySqlGenerator
             'smallint' => 'integer',
             'int' => 'integer',
             'mediumint' => 'integer',
-            'bigint' => 'integer',
+            'bigint' => 'biginteger',
             'tinytext' => 'text',
             'mediumtext' => 'text',
             'longtext' => 'text',
@@ -812,25 +812,44 @@ class PhinxMySqlGenerator
      */
     protected function getPhinxColumnOptionsNumeric(array $attributes, array $columnData): array
     {
+        $dataType = $columnData['DATA_TYPE'];
+
+        $intDefaultLimits = [
+            'int' => '11',
+            'bigint' => '20',
+        ];
+
+        // For integer and biginteger columns
+        if ($dataType === 'int' || $dataType === 'bigint') {
+            $match = null;
+            if (preg_match('/\((\d+)\)/', $columnData['COLUMN_TYPE'], $match) === 1) {
+                if ($match[1] !== $intDefaultLimits[$dataType]) {
+                    $attributes['limit'] = $match[1];
+                }
+            }
+
+            // signed enable or disable the unsigned option (only applies to MySQL)
+            $match = null;
+            $pattern = '/\(\d+\) unsigned$/';
+            if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
+                $attributes['signed'] = false;
+            }
+
+            // identity enable or disable automatic incrementing
+            if ($columnData['EXTRA'] == 'auto_increment') {
+                $attributes['identity'] = 'enable';
+            }
+        }
+
         // For decimal columns
-        if (!empty($columnData['NUMERIC_PRECISION'])) {
-            $attributes['precision'] = $columnData['NUMERIC_PRECISION'];
-        }
-        if (!empty($columnData['NUMERIC_SCALE'])) {
-            $attributes['scale'] = $columnData['NUMERIC_SCALE'];
-        }
-
-        // signed enable or disable the unsigned option (only applies to MySQL)
-        $match = null;
-        $pattern = '/\(\d+\) unsigned$/';
-        if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-            $attributes['signed'] = false;
-        }
-
-        // For integer and biginteger columns:
-        // identity enable or disable automatic incrementing
-        if ($columnData['EXTRA'] == 'auto_increment') {
-            $attributes['identity'] = 'enable';
+        if ($dataType === 'decimal') {
+            // Set decimal accuracy
+            if (!empty($columnData['NUMERIC_PRECISION'])) {
+                $attributes['precision'] = $columnData['NUMERIC_PRECISION'];
+            }
+            if (!empty($columnData['NUMERIC_SCALE'])) {
+                $attributes['scale'] = $columnData['NUMERIC_SCALE'];
+            }
         }
 
         return $attributes;

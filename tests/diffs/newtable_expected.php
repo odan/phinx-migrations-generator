@@ -18,7 +18,6 @@ class MyNewMigration extends AbstractMigration
             ->addColumn('id', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'precision' => '10',
                 'identity' => 'enable',
             ])
             ->create();

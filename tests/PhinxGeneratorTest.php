@@ -109,6 +109,59 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
+    public function testCreateTableWithDecimalColumn(): void
+    {
+        $this->execSql("CREATE TABLE `table3` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `value1` decimal(10,0) DEFAULT NULL,
+          `value2` decimal(15,2) DEFAULT NULL,
+          `value3` decimal(19,4) DEFAULT NULL,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+
+        $oldSchema = $this->getTableSchema('table3');
+        $this->generate();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table3');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test.
+     *
+     * @return void
+     */
+    public function testCreateTableWithIntColumns(): void
+    {
+        $this->execSql("CREATE TABLE `table_int` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `value1` int(10) DEFAULT NULL,
+            `value2` int(1) DEFAULT NULL,
+            `value3` tinyint(4) DEFAULT 0,
+            `value4` tinyint(1) DEFAULT 0,
+            `value5` bigint(20) DEFAULT NULL,
+            # not supported in phinx
+            # `value6` bigint(19) DEFAULT NULL,
+            # `value7` bigint(21) DEFAULT NULL,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+
+        $oldSchema = $this->getTableSchema('table_int');
+        $this->generate();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table_int');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function testRemoveColumn(): void
     {
         $this->execSql('CREATE TABLE `table1` (
