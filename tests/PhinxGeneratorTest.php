@@ -111,13 +111,13 @@ class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithDecimalColumn(): void
     {
-        $this->execSql("CREATE TABLE `table3` (
+        $this->execSql('CREATE TABLE `table3` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `value1` decimal(10,0) DEFAULT NULL,
           `value2` decimal(15,2) DEFAULT NULL,
           `value3` decimal(19,4) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
 
         $oldSchema = $this->getTableSchema('table3');
         $this->generate();
@@ -135,7 +135,7 @@ class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithIntColumns(): void
     {
-        $this->execSql("CREATE TABLE `table_int` (
+        $this->execSql('CREATE TABLE `table_int` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `value1` int(10) DEFAULT NULL,
             `value2` int(1) DEFAULT NULL,
@@ -146,7 +146,7 @@ class PhinxGeneratorTest extends TestCase
             # `value6` bigint(19) DEFAULT NULL,
             # `value7` bigint(21) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
 
         $oldSchema = $this->getTableSchema('table_int');
         $this->generate();
