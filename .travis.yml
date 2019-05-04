@@ -8,22 +8,18 @@ services:
   
 dist: xenial
 
-addons:
-  apt:
-    packages:
-      - ant
+cache:
+  directories:
+    - $HOME/.composer/cache
 
 before_script:
   - composer self-update
-  - composer install --no-interaction --prefer-source
+  - composer install --no-interaction --prefer-dist
   - mysql -e 'create database phinx_test;'
   - cd $TRAVIS_BUILD_DIR
 
 script:
-  - ant check-style
-  - ant phpstan
-  - ant phpunit-coverage
-
-after_success:
-#  - if [ "$TRAVIS_PHP_VERSION" == "7.2" ]; then wget https://scrutinizer-ci.com/ocular.phar; fi
-#  - if [ "$TRAVIS_PHP_VERSION" == "7.2" ]; then php ocular.phar code-coverage:upload --format=php-clover build/logs/clover.xml; fi
+  - composer lint
+  - composer check-style
+  - composer phpstan
+  - composer test-coverage
