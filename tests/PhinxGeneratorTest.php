@@ -86,6 +86,29 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
+    public function testCreateTableWithNonNullColumnAsDefault(): void
+    {
+        $this->execSql("CREATE TABLE `table3` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `email_verified` char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
+          `password` char(60) COLLATE utf8_unicode_ci NOT NULL,
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+
+        $oldSchema = $this->getTableSchema('table3');
+        $this->generate();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table3');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+    /**
+     * Test.
+     *
+     * @return void
+     */
     public function testRemoveColumn(): void
     {
         $this->execSql('CREATE TABLE `table1` (
