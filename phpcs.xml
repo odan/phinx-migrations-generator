@@ -9,11 +9,17 @@
     <file>./src</file>
     <file>./tests</file>
 
+    <exclude-pattern>*/tests/diffs/*$</exclude-pattern>
+
     <rule ref="PSR2"></rule>
     <rule ref="PSR12"></rule>
 
     <rule ref="Squiz.Commenting.ClassComment">
         <type>warning</type>
+    </rule>
+    <rule ref="Squiz.Commenting.ClassComment.TagNotAllowed">
+        <type>warning</type>
+        <exclude-pattern>*/tests/</exclude-pattern>
     </rule>
     <rule ref="Squiz.Commenting.ClassComment.Missing">
         <type>warning</type>
