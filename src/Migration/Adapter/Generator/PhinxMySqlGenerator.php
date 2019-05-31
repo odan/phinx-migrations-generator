@@ -72,7 +72,8 @@ class PhinxMySqlGenerator
             // Default migration table name
             'default_migration_table' => 'phinxlog',
         ];
-        $this->options = array_replace_recursive($default, $options);
+
+        $this->options = array_replace_recursive($default, $options) ?: [];
     }
 
     /**
