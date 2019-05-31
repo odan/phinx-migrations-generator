@@ -6,6 +6,7 @@ use Exception;
 use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
+use Odan\Migration\Utility\ArrayUtil;
 use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Util\Util;
@@ -286,44 +287,15 @@ class MigrationGenerator
     {
         $this->output->writeln('Comparing schema file to the database.');
 
+        $arrayUtil = new ArrayUtil();
+
         // To add or modify
-        $result = $this->diff($newSchema, $oldSchema);
+        $result = $arrayUtil->diff($newSchema, $oldSchema);
 
         // To remove
-        $result2 = $this->diff($oldSchema, $newSchema);
+        $result2 = $arrayUtil->diff($oldSchema, $newSchema);
 
         return [$result, $result2];
-    }
-
-    /**
-     * Intersect of recursive arrays.
-     *
-     * @param array $array1
-     * @param array $array2
-     *
-     * @return array
-     */
-    protected function diff(array $array1, array $array2): array
-    {
-        $difference = [];
-        foreach ($array1 as $key => $value) {
-            if (is_array($value)) {
-                if (!isset($array2[$key]) || !is_array($array2[$key])) {
-                    $difference[$key] = $value;
-                } else {
-                    $new_diff = $this->diff($value, $array2[$key]);
-                    if (!empty($new_diff)) {
-                        $difference[$key] = $new_diff;
-                    }
-                }
-            } else {
-                if (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
-                    $difference[$key] = $value;
-                }
-            }
-        }
-
-        return $difference;
     }
 
     /**

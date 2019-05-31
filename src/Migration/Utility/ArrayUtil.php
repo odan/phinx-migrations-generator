@@ -25,4 +25,35 @@ class ArrayUtil
             }
         }
     }
+
+    /**
+     * Intersect of recursive arrays.
+     *
+     * @param array $array1 The array 1
+     * @param array $array2 The array 2
+     *
+     * @return array
+     */
+    public function diff(array $array1, array $array2): array
+    {
+        $difference = [];
+        foreach ($array1 as $key => $value) {
+            if (is_array($value)) {
+                if (!isset($array2[$key]) || !is_array($array2[$key])) {
+                    $difference[$key] = $value;
+                } else {
+                    $new_diff = $this->diff($value, $array2[$key]);
+                    if (!empty($new_diff)) {
+                        $difference[$key] = $new_diff;
+                    }
+                }
+            } else {
+                if (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
+                    $difference[$key] = $value;
+                }
+            }
+        }
+
+        return $difference;
+    }
 }
