@@ -280,32 +280,33 @@ class PhinxMySqlGenerator
      */
     protected function getTableMigrationTables(array $output, array $new, array $old): array
     {
-        if (empty($new['tables'])) {
-            return $output;
-        }
-
-        foreach ($new['tables'] as $tableName => $table) {
+        foreach ($new['tables'] ?? [] as $tableName => $table) {
             if ($tableName === $this->options['default_migration_table']) {
                 continue;
             }
 
-            $output[] = $this->getTableVariable($table, $tableName);
+            $tableDiffs = $this->diff($new['tables'][$tableName] ?? [], $old['tables'][$tableName] ?? []);
+            $tableDiffsRemove = $this->diff($old['tables'][$tableName] ?? [], $new['tables'][$tableName] ?? []);
 
-            // To add or modify
-            $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
-            $output = $this->getTableMigrationOldTablesColumns($output, $tableName, $new, $old);
-            $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
+            if ($tableDiffs || $tableDiffsRemove) {
+                $output[] = $this->getTableVariable($table, $tableName);
 
-            if (!empty($this->options['foreign_keys'])) {
-                $output = $this->getForeignKeysMigrations($output, $tableName, $new, $old);
-            }
+                // To add or modify
+                $output = $this->getTableMigrationNewTablesColumns($output, $table, $tableName, $new, $old);
+                $output = $this->getTableMigrationOldTablesColumns($output, $tableName, $new, $old);
+                $output = $this->getTableMigrationIndexes($output, $table, $tableName, $new, $old);
 
-            if (isset($old['tables'][$tableName])) {
-                // Update existing table
-                $output[] = sprintf('%s->save();', $this->ind3);
-            } else {
-                // Create new table
-                $output[] = sprintf('%s->create();', $this->ind3);
+                if (!empty($this->options['foreign_keys'])) {
+                    $output = $this->getForeignKeysMigrations($output, $tableName, $new, $old);
+                }
+
+                if (isset($old['tables'][$tableName])) {
+                    // Update existing table
+                    $output[] = sprintf('%s->save();', $this->ind3);
+                } else {
+                    // Create new table
+                    $output[] = sprintf('%s->create();', $this->ind3);
+                }
             }
         }
 
@@ -313,6 +314,37 @@ class PhinxMySqlGenerator
         $output = $this->getTableMigrationDropTables($output, $new, $old);
 
         return $output;
+    }
+
+    /**
+     * Intersect of recursive arrays.
+     *
+     * @param array $array1
+     * @param array $array2
+     *
+     * @return array
+     */
+    protected function diff(array $array1, array $array2): array
+    {
+        $difference = [];
+        foreach ($array1 as $key => $value) {
+            if (is_array($value)) {
+                if (!isset($array2[$key]) || !is_array($array2[$key])) {
+                    $difference[$key] = $value;
+                } else {
+                    $new_diff = $this->diff($value, $array2[$key]);
+                    if (!empty($new_diff)) {
+                        $difference[$key] = $new_diff;
+                    }
+                }
+            } else {
+                if (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
+                    $difference[$key] = $value;
+                }
+            }
+        }
+
+        return $difference;
     }
 
     /**
