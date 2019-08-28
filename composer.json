@@ -14,7 +14,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.2",
-        "robmorgan/phinx": "^0.10",
+        "robmorgan/phinx": "^0.11",
         "riimu/kit-phpencoder": "^2.4",
         "symfony/console": "^2.8|^3.0|^4.0"
     },
