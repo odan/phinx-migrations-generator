@@ -98,9 +98,11 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     /**
      * Load current database schema.
      *
+     * @param array|null $tableNames
+     *
      * @return array
      */
-    public function getSchema(): array
+    public function getSchema($tableNames = null): array
     {
         $this->output->writeln('Load current database schema.');
 
@@ -109,7 +111,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         $result['database'] = $this->getDatabaseSchemata($this->dbName);
 
         // processing by chunks for better speed when we have hundreds of tables
-        $tables = $this->getTables();
+        $tables = $this->getTables($tableNames);
 
         $tableNameChunks = array_chunk(array_column($tables, 'table_name'), 300);
         foreach ($tableNameChunks as $tablesInChunk) {
@@ -184,9 +186,11 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     /**
      * Get all tables.
      *
+     * @param array|null $tableNames
+     *
      * @return array
      */
-    protected function getTables(): array
+    protected function getTables($tableNames = null): array
     {
         $result = [];
         $sql = "SELECT *
@@ -197,6 +201,14 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
                 ccsa.collation_name = t.table_collation
                 AND t.table_schema=database()
                 AND t.table_type = 'BASE TABLE'";
+
+        if ($tableNames !== null) {
+            if (empty($tableNames)) {
+                return [];
+            }
+            $quotedNames = $this->quoteArray($tableNames);
+            $sql .= ' AND t.table_name in (' . implode(',', $quotedNames) . ')';
+        }
 
         $rows = $this->queryFetchAll($sql);
 
