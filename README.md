@@ -74,6 +74,7 @@ The phinx-migrations-generator uses the configuration of phinx.
 Parameter | Values | Default | Description
 --- | --- | --- | ---
 foreign_keys | bool | false | Enable or disable foreign key migrations.
+default_migration_prefix | string | null | If specified, in the absence of the name parameter, the default migration name will be offered with this prefix and a random hash at the end.
 
 ### Example configuration
 
@@ -103,6 +104,7 @@ return [
         'migrations' => $migrationPath,
     ],
     'foreign_keys' => false,
+    'default_migration_prefix' => 'db_change_',
     'environments' => [
         'default_database' => 'local',
         'local' => [
