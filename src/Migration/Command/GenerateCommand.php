@@ -102,13 +102,13 @@ class GenerateCommand extends AbstractCommand
     }
 
     /**
-     * @param string $adapter_name
+     * @param string $adapterName
      *
      * @return bool true if adapter with specified name is supported
      */
-    protected function isAdapterSupported($adapter_name)
+    protected function isAdapterSupported(string $adapterName): bool
     {
-        return $adapter_name === 'mysql';
+        return $adapterName === 'mysql';
     }
 
     /**
@@ -116,7 +116,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return string Schema file path
      */
-    protected function getSchemaFilePath($migrationsPath)
+    protected function getSchemaFilePath(string $migrationsPath): string
     {
         return $migrationsPath . DIRECTORY_SEPARATOR . 'schema.php';
     }
@@ -131,7 +131,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return MigrationGenerator
      */
-    protected function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, $environment)
+    protected function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, string $environment): MigrationGenerator
     {
         $manager = $this->getManager();
         
@@ -153,7 +153,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return SchemaAdapterInterface
      */
-    protected function getSchemaAdapter(PDO $pdo, OutputInterface $output)
+    protected function getSchemaAdapter(PDO $pdo, OutputInterface $output): SchemaAdapterInterface
     {
         return new MySqlSchemaAdapter($pdo, $output);
     }
@@ -162,13 +162,12 @@ class GenerateCommand extends AbstractCommand
      * Get settings array
      *
      * @param InputInterface $input
-     * @param OutputInterface $input
      * @param string $environment
      * @return array
      *
      * @throws Exception On error
      */
-    protected function getGeneratorSettings(InputInterface $input, $environment)
+    protected function getGeneratorSettings(InputInterface $input, string $environment): array
     {
         $envOptions = $this->getConfig()->getEnvironment($environment);
         
@@ -241,7 +240,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return PDO PDO object
      */
-    protected function getPdo(Manager $manager, $environment): PDO
+    protected function getPdo(Manager $manager, string $environment): PDO
     {
         /* @var AdapterWrapper $dbAdapter */
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
