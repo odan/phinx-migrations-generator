@@ -128,7 +128,7 @@ class MigrationGenerator
     protected function generateDefaultMigrationName(): string
     {
         if (isset($this->settings['default_migration_prefix'])) {
-            return $this->settings['default_migration_prefix'] . uniqid(mt_rand(), false);
+            return $this->settings['default_migration_prefix'] . uniqid((string) mt_rand(), false);
         }
         
         return '';
