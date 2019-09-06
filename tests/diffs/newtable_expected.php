@@ -1,9 +1,8 @@
 <?php
 
-use Phinx\Migration\AbstractMigration;
 use Phinx\Db\Adapter\MysqlAdapter;
 
-class MyNewMigration extends AbstractMigration
+class MyNewMigration extends Phinx\Migration\AbstractMigration
 {
     public function change()
     {

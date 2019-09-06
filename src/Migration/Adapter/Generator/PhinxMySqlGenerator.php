@@ -87,13 +87,14 @@ class PhinxMySqlGenerator
      */
     public function createMigration($name, $newSchema, $oldSchema): string
     {
+        $className = $this->options['migration_base_class'] ?? 'Phinx\Migration\AbstractMigration';
+
         $output = [];
         $output[] = '<?php';
         $output[] = '';
-        $output[] = 'use Phinx\Migration\AbstractMigration;';
         $output[] = 'use Phinx\Db\Adapter\MysqlAdapter;';
         $output[] = '';
-        $output[] = sprintf('class %s extends AbstractMigration', $name);
+        $output[] = sprintf('class %s extends ' . $className, $name);
         $output[] = '{';
         $output = $this->addChangeMethod($output, $newSchema, $oldSchema);
         $output[] = '}';
