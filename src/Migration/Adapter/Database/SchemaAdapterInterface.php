@@ -10,9 +10,11 @@ interface SchemaAdapterInterface
     /**
      * Load current database schema.
      *
+     * @param array|null $tableNames
+     *
      * @return array
      */
-    public function getSchema(): array;
+    public function getSchema($tableNames = null): array;
 
     /**
      * Quote value.
