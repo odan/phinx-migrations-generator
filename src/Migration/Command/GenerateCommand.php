@@ -129,6 +129,7 @@ class GenerateCommand extends AbstractCommand
 
         $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
         $defaultMigrationPrefix = $config->offsetExists('default_migration_prefix') ? $config->offsetGet('default_migration_prefix') : null;
+        $markMigration = $config->offsetExists('mark_generated_migration') ? $config->offsetGet('mark_generated_migration') : true;
 
         $defaultMigrationTable = $envOptions['default_migration_table'] ?? 'phinxlog';
 
@@ -146,9 +147,10 @@ class GenerateCommand extends AbstractCommand
             'config_file' => $configFilePath,
             'name' => $name,
             'overwrite' => $overwrite,
-            'mark_migration' => true,
+            'mark_migration' => $markMigration,
             'default_migration_table' => $defaultMigrationTable,
             'default_migration_prefix' => $defaultMigrationPrefix,
+            'migration_base_class' => $config->getMigrationBaseClassName(false),
         ];
 
         $dba = new MySqlSchemaAdapter($pdo, $output);
