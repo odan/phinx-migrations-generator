@@ -180,7 +180,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     {
         return array_map(function ($value) {
             return $this->quote($value);
-        }, (array) $values);
+        }, (array)$values);
     }
 
     /**
@@ -236,6 +236,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     protected function getColumns($tableName): array
     {
         $rows = $this->getColumnHash([$tableName]);
+
         return $rows[$tableName] ?? [];
     }
 
@@ -251,7 +252,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         if (empty($tableNames)) {
             return [];
         }
-        
+
         $quotedNames = $this->quoteArray($tableNames);
         $sql = sprintf('SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
@@ -279,6 +280,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     protected function getIndexes($tableName): array
     {
         $rows = $this->getIndexHash([$tableName]);
+
         return $rows[$tableName] ?? [];
     }
 
@@ -294,7 +296,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         if (empty($tableNames)) {
             return [];
         }
-        
+
         $quotedNames = $this->quoteArray($tableNames);
         $sql = sprintf("SELECT 
                 `TABLE_NAME` as 'Table',
@@ -359,6 +361,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
     protected function getForeignKeys(string $tableName): ?array
     {
         $rows = $this->getForeignKeysHash([$tableName]);
+
         return $rows[$tableName] ?? [];
     }
 
@@ -374,7 +377,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
         if (empty($tableNames)) {
             return [];
         }
-        
+
         $quotedNames = $this->quoteArray($tableNames);
         $sql = sprintf("SELECT
                 cols.TABLE_NAME,

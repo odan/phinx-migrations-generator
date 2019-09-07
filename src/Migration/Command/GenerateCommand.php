@@ -91,7 +91,7 @@ class GenerateCommand extends AbstractCommand
         }
 
         $settings = $this->getGeneratorSettings($input, $environment);
-        
+
         $output->writeln('<info>using config file</info> ' . ($settings['config_file'] ?? null));
         $output->writeln('<info>using migration path</info> ' . ($settings['migration_path'] ?? null));
         $output->writeln('<info>using schema file</info> ' . ($settings['schema_file'] ?? null));
@@ -134,14 +134,14 @@ class GenerateCommand extends AbstractCommand
     protected function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, string $environment): MigrationGenerator
     {
         $manager = $this->getManager();
-        
+
         if (!$manager) {
             throw new RuntimeException('Manager not found');
         }
-        
+
         $pdo = $this->getPdo($manager, $environment);
         $schemaAdapter = $this->getSchemaAdapter($pdo, $output);
-        
+
         return new MigrationGenerator($settings, $input, $output, $schemaAdapter);
     }
 
@@ -159,18 +159,19 @@ class GenerateCommand extends AbstractCommand
     }
 
     /**
-     * Get settings array
+     * Get settings array.
      *
      * @param InputInterface $input
      * @param string $environment
-     * @return array
      *
      * @throws Exception On error
+     *
+     * @return array
      */
     protected function getGeneratorSettings(InputInterface $input, string $environment): array
     {
         $envOptions = $this->getConfig()->getEnvironment($environment);
-        
+
         // Load config and database adapter
         $manager = $this->getManager();
 
