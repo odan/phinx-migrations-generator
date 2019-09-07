@@ -15,6 +15,10 @@ Phinx creates "only" a class with empty `up`, `down` or `change` functions. You 
 
 In reality, you should rarely have to write migrations manually because the migration library should automatically generate migration classes by comparing your schema mapping information (i.e. how your database should look like) with your current database structure.
 
+## Requirements
+
+* PHP 7.1+
+
 ## Features
 
 * Framework independent
