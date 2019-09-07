@@ -33,7 +33,13 @@
         "lint": "phplint ./ --exclude=vendor --no-interaction --no-cache",
         "install-cs": "php -r \"@mkdir('build'); copy('https://cs.symfony.com/download/php-cs-fixer-v2.phar', 'build/php-cs-fixer-v2.phar');\"",
         "fix-cs": "php build/php-cs-fixer-v2.phar fix --config=.cs.php",
-        "check-cs": "php build/php-cs-fixer-v2.phar fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php"
+        "check-cs": "php build/php-cs-fixer-v2.phar fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php",
+        "check-all": [
+            "@lint",
+            "@check-style",
+            "@phpstan",
+            "@test-coverage"
+        ]
     },
     "autoload": {
         "psr-4": {
@@ -47,5 +53,8 @@
     },
     "bin": [
         "./bin/phinx-migrations"
-    ]
+    ],
+    "config": {
+        "sort-packages": true
+    }
 }

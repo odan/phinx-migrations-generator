@@ -20,7 +20,4 @@ before_script:
   - cd $TRAVIS_BUILD_DIR
 
 script:
-  - composer lint
-  - composer check-style
-  - composer phpstan
-  - composer test-coverage
+  - composer check-all
