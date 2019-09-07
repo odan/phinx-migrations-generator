@@ -121,6 +121,20 @@ class MigrationGenerator
     }
 
     /**
+     * Generates random name, based on "default_migration_prefix" setting.
+     *
+     * @return string
+     */
+    protected function generateDefaultMigrationName(): string
+    {
+        if (isset($this->settings['default_migration_prefix'])) {
+            return $this->settings['default_migration_prefix'] . uniqid((string) mt_rand(), false);
+        }
+        
+        return '';
+    }
+    
+    /**
      * Load current database schema.
      *
      * @return array
@@ -150,7 +164,8 @@ class MigrationGenerator
         }
 
         if (empty($this->settings['name'])) {
-            $name = $this->io->ask('Enter migration name', '');
+            $defaultMigrationName = $this->generateDefaultMigrationName();
+            $name = $this->io->ask('Enter migration name', $defaultMigrationName);
         } else {
             $name = $this->settings['name'];
         }
