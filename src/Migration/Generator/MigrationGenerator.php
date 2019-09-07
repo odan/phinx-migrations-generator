@@ -135,6 +135,16 @@ class MigrationGenerator
     }
     
     /**
+     * Load current database schema.
+     *
+     * @return array
+     */
+    public function getSchema()
+    {
+        return $this->dba->getSchema();
+    }
+
+    /**
      * Generate.
      *
      * @throws Exception
@@ -143,7 +153,7 @@ class MigrationGenerator
      */
     public function generate(): int
     {
-        $schema = $this->dba->getSchema();
+        $schema = $this->getSchema();
         $oldSchema = $this->getOldSchema($this->settings);
         $diffs = $this->compareSchema($schema, $oldSchema);
 
