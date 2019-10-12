@@ -2,7 +2,7 @@
 
 use Phinx\Db\Adapter\MysqlAdapter;
 
-class MyNewMigration extends Phinx\Migration\AbstractMigration
+class MyNewMigration extends \Phinx\Migration\AbstractMigration
 {
     public function change()
     {
