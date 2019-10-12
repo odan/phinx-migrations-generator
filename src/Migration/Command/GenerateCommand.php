@@ -208,6 +208,7 @@ class GenerateCommand extends AbstractCommand
 
         $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
         $defaultMigrationPrefix = $config->offsetExists('default_migration_prefix') ? $config->offsetGet('default_migration_prefix') : null;
+        $generateMigrationName = $config->offsetExists('generate_migration_name') ? $config->offsetGet('generate_migration_name') : false;
         $markMigration = $config->offsetExists('mark_generated_migration') ? $config->offsetGet('mark_generated_migration') : true;
 
         $defaultMigrationTable = $envOptions['default_migration_table'] ?? 'phinxlog';
@@ -229,6 +230,7 @@ class GenerateCommand extends AbstractCommand
             'mark_migration' => $markMigration,
             'default_migration_table' => $defaultMigrationTable,
             'default_migration_prefix' => $defaultMigrationPrefix,
+            'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),
         ];
 

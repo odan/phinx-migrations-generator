@@ -163,17 +163,14 @@ class MigrationGenerator
             return 1;
         }
 
-        if (empty($this->settings['name'])) {
-            $defaultMigrationName = $this->generateDefaultMigrationName();
-            $name = $this->io->ask('Enter migration name', $defaultMigrationName);
-        } else {
-            $name = $this->settings['name'];
-        }
+        $name = $this->getMigrationName();
+
         if (empty($name)) {
             $this->output->writeln('Aborted');
 
             return 1;
         }
+
         $path = $this->settings['migration_path'];
         $className = $this->createClassName($name);
 
@@ -420,5 +417,26 @@ class MigrationGenerator
         }
 
         file_put_contents($schemaFile, $content);
+    }
+
+    /**
+     * Get migration name from prompt or a generated migration name.
+     *
+     * @return string The migration name
+     */
+    private function getMigrationName(): string
+    {
+        if ($this->settings['generate_migration_name'] === true) {
+            return $this->generateDefaultMigrationName();
+        }
+
+        if (empty($this->settings['name'])) {
+            $defaultMigrationName = $this->generateDefaultMigrationName();
+            $name = $this->io->ask('Enter migration name', $defaultMigrationName);
+        } else {
+            $name = $this->settings['name'];
+        }
+
+        return (string)$name;
     }
 }
