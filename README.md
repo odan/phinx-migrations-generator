@@ -60,7 +60,8 @@ Parameter | Values | Default | Description
 --overwrite | bool |  | Overwrite schema.php file.
 --path <path> | string | (from phinx) | Specify the path in which to generate this migration.
 --environment or -e | string | (from phinx) | The target environment.
-
+--configuration or -c | string | (from phinx) | The configuration file e.g. `config/phinx.php`
+    
 ### Running migrations
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
