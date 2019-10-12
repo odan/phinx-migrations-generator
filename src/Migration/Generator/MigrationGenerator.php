@@ -83,8 +83,12 @@ class MigrationGenerator
      * @param OutputInterface $output
      * @param SchemaAdapterInterface $dba
      */
-    public function __construct(array $settings, InputInterface $input, OutputInterface $output, SchemaAdapterInterface $dba)
-    {
+    public function __construct(
+        array $settings,
+        InputInterface $input,
+        OutputInterface $output,
+        SchemaAdapterInterface $dba
+    ) {
         $this->settings = $settings;
         $this->pdo = $this->getPdo($settings);
         $this->dba = $dba;
@@ -426,15 +430,14 @@ class MigrationGenerator
      */
     private function getMigrationName(): string
     {
-        if ($this->settings['generate_migration_name'] === true) {
-            return $this->generateDefaultMigrationName();
+        if (!empty($this->settings['name'])) {
+            return (string)$this->settings['name'];
         }
 
-        if (empty($this->settings['name'])) {
-            $defaultMigrationName = $this->generateDefaultMigrationName();
-            $name = $this->io->ask('Enter migration name', $defaultMigrationName);
-        } else {
-            $name = $this->settings['name'];
+        $name = $this->generateDefaultMigrationName();
+
+        if ($this->settings['generate_migration_name'] === false) {
+            $name = $this->io->ask('Enter migration name', $name);
         }
 
         return (string)$name;
