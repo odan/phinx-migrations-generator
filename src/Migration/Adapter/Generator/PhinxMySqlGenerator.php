@@ -704,6 +704,11 @@ class PhinxMySqlGenerator
             $attributes['default'] = $columnData['COLUMN_DEFAULT'];
         }
 
+        // MariaDB contains 'NULL' as string to define null as default
+        if ($columnData['COLUMN_DEFAULT'] === 'NULL') {
+            $attributes['default'] = null;
+        }
+
         return $attributes;
     }
 
