@@ -1015,7 +1015,7 @@ class PhinxMySqlGenerator
 
         $phinxType = $this->getPhinxColumnType($columnData);
         $columnAttributes = $this->getPhinxColumnOptions($phinxType, $columnData, $columns);
-        $result = sprintf("%s->changeColumn('%s', '%s', $columnAttributes)", $this->ind2, $columnName, $phinxType, $columnAttributes);
+        $result = sprintf("%s->changeColumn('%s', '%s', $columnAttributes)", $this->ind3, $columnName, $phinxType, $columnAttributes);
 
         return $result;
     }
@@ -1119,7 +1119,7 @@ class PhinxMySqlGenerator
         $indexFields = $this->getIndexFields($indexSequences);
         $indexOptions = $this->getIndexOptions(array_values($indexSequences)[0]);
 
-        $output[] = sprintf('%s->addIndex(%s, %s)', $this->ind2, $indexFields, $indexOptions);
+        $output[] = sprintf('%s->addIndex(%s, %s)', $this->ind3, $indexFields, $indexOptions);
 
         return $output;
     }
@@ -1245,7 +1245,7 @@ class PhinxMySqlGenerator
      */
     protected function getForeignKeyRemove(array $output, string $indexName): array
     {
-        $output[] = sprintf("%s->dropForeignKey('%s')", $this->ind2, $indexName);
+        $output[] = sprintf("%s->dropForeignKey('%s')", $this->ind3, $indexName);
 
         return $output;
     }
@@ -1266,7 +1266,7 @@ class PhinxMySqlGenerator
         $referencedColumns = "'" . $fkData['REFERENCED_COLUMN_NAME'] . "'";
         $options = $this->getForeignKeyOptions($fkData, $fkName);
 
-        $output[] = sprintf('%s->addForeignKey(%s, %s, %s, %s)', $this->ind2, $columns, $referencedTable, $referencedColumns, $options);
+        $output[] = sprintf('%s->addForeignKey(%s, %s, %s, %s)', $this->ind3, $columns, $referencedTable, $referencedColumns, $options);
 
         return $output;
     }
