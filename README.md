@@ -61,7 +61,7 @@ Parameter | Values | Default | Description
 --path <path> | string | (from phinx) | Specify the path in which to generate this migration.
 --environment or -e | string | (from phinx) | The target environment.
 --configuration or -c | string | (from phinx) | The configuration file e.g. `config/phinx.php`
-    
+
 ### Running migrations
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) runs all of the available migrations.
@@ -83,6 +83,7 @@ default_migration_prefix | string | null | If specified, in the absence of the n
 generate_migration_name | bool | false | If enabled, a random migration name will be generated. The user will not be prompted for a migration name anymore. The parameter `default_migration_prefix` must be specified. The `--name` parameter can overwrite this setting.
 mark_generated_migration | bool | true | Enable or disable marking the migration as applied after creation.
 migration_base_class | string | '\Phinx\Migration\AbstractMigration' | Sets up base class of created migration.
+schema_file | string | `%%PHINX_CONFIG_DIR%%/db/migrations/schema.php` | Specifies the location for saving the schema file.
 
 ### Example configuration
 

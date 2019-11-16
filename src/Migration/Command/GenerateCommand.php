@@ -45,7 +45,7 @@ class GenerateCommand extends AbstractCommand
             'Specify the name of the migration for this migration'
         );
 
-        $this->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite schema.php file');
+        $this->addOption('overwrite', null, InputOption::VALUE_NONE, 'Overwrite schema file');
     }
 
     /**
@@ -116,7 +116,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return string Schema file path
      */
-    protected function getSchemaFilePath(string $migrationsPath): string
+    protected function getDefaultSchemaFilePath(string $migrationsPath): string
     {
         return $migrationsPath . DIRECTORY_SEPARATOR . 'schema.php';
     }
@@ -199,7 +199,10 @@ class GenerateCommand extends AbstractCommand
         $migrationsPath = (string)$migrationsPaths[0];
         $this->verifyMigrationDirectory($migrationsPath);
 
-        $schemaFile = $this->getSchemaFilePath($migrationsPath);
+        $schemaFile = $config->offsetExists('schema_file') ? $config->offsetGet('schema_file') : false;
+        if (!$schemaFile) {
+            $schemaFile = $this->getDefaultSchemaFilePath($migrationsPath);
+        }
 
         // Gets the database adapter.
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
