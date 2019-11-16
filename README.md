@@ -83,7 +83,7 @@ default_migration_prefix | string | null | If specified, in the absence of the n
 generate_migration_name | bool | false | If enabled, a random migration name will be generated. The user will not be prompted for a migration name anymore. The parameter `default_migration_prefix` must be specified. The `--name` parameter can overwrite this setting.
 mark_generated_migration | bool | true | Enable or disable marking the migration as applied after creation.
 migration_base_class | string | '\Phinx\Migration\AbstractMigration' | Sets up base class of created migration.
-schema_file | string | `%%PHINX_CONFIG_DIR%%/db/migrations/schema.php` | Specifies the location for saving the schema file.
+schema_file | string | `schema.php` | Specifies the location for saving the schema file.
 
 ### Example configuration
 
@@ -116,6 +116,7 @@ return [
     'default_migration_prefix' => 'db_change_',
     'mark_generated_migration' => true,
     'migration_base_class' => \Phinx\Migration\AbstractMigration::class,
+    'schema_file' => 'schema.php',
     'environments' => [
         'default_database' => 'local',
         'local' => [
