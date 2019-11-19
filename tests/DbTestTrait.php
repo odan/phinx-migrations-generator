@@ -133,14 +133,13 @@ trait DbTestTrait
      */
     public function dropTables()
     {
-        $sql = 'SELECT table_name
+        $sql = 'SELECT TABLE_NAME
                 FROM information_schema.tables
                 WHERE table_schema = database()';
 
         $db = $this->getPdo();
 
-        $db->exec('SET UNIQUE_CHECKS=0;');
-        $db->exec('SET FOREIGN_KEY_CHECKS=0;');
+        $db->exec('SET unique_checks=0; SET foreign_key_checks=0; SET information_schema_stats_expiry=0');
 
         $statement = $db->query($sql);
 
@@ -151,21 +150,20 @@ trait DbTestTrait
         $statement->execute();
 
         while ($row = $statement->fetch(PDO::FETCH_ASSOC)) {
-            $db->exec(sprintf('DROP TABLE `%s`;', $row['table_name']));
+            $db->exec(sprintf('DROP TABLE `%s`;', $row['TABLE_NAME']));
         }
 
-        $db->exec('SET UNIQUE_CHECKS=1;');
-        $db->exec('SET FOREIGN_KEY_CHECKS=1;');
+        $db->exec('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 
     protected function existsTable(string $table): bool
     {
         $pdo = $this->getPdo();
 
-        $sql = 'SELECT table_name
+        $sql = 'SELECT TABLE_NAME
                 FROM information_schema.tables
                 WHERE table_schema = database()
-                AND table_name = :table_name';
+                AND TABLE_NAME = :table_name';
 
         $statement = $pdo->prepare($sql);
         $statement->execute(['table_name' => $table]);
@@ -234,7 +232,6 @@ trait DbTestTrait
 
         if ($this->existsTable('phinxlog')) {
             // wait because the phinxlog.id must be unique (format: YmdHis)
-            //fwrite(STDERR, "sleep(1)\n");
             sleep(1);
         }
 
