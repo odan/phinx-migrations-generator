@@ -80,8 +80,8 @@ foreign_keys | bool | false | Enable or disable foreign key migrations.
 default_migration_prefix | string | null | If specified, in the absence of the name parameter, the default migration name will be offered with this prefix and a random hash at the end.
 generate_migration_name | bool | false | If enabled, a random migration name will be generated. The user will not be prompted for a migration name anymore. The parameter `default_migration_prefix` must be specified. The `--name` parameter can overwrite this setting.
 mark_generated_migration | bool | true | Enable or disable marking the migration as applied after creation.
-migration_base_class | string | '\Phinx\Migration\AbstractMigration' | Sets up base class of created migration.
-schema_file | string | `%%PHINX_CONFIG_DIR%%/db/migrations/schema.php` | Specifies the location for saving the schema file.
+migration_base_class | string | `\Phinx\Migration\AbstractMigration` | Sets up base class of created migration.
+schema_file | string | `%%PHINX_CONFIG_DIR%%/db/` `migrations/schema.php` | Specifies the location for saving the schema file.
 
 ### Example configuration
 
