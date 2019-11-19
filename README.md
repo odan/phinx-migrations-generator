@@ -25,8 +25,6 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 * Indexes: create, remove
 * Foreign keys: create, remove, constraint name
 
-> **Warning:** You should not use [Phinx](https://phinx.org/) with MySQL 8, as it may cause unexpected results.
-
 ## Install
 
 Via Composer
