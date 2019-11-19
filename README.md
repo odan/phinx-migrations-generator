@@ -40,7 +40,7 @@ $ composer require odan/phinx-migrations-generator --dev
 ### Generating migrations
 
 The first run generates an initial schema and a migration class.
-The file `schema.php` contains the previous database schema and is being compared with the current schema.
+The file `schema.php` contains the previous database schema and is compared with the current schema.
 Based on the difference, a Phinx migration class is generated.
 
 ```
