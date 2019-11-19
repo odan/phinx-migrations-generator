@@ -16,7 +16,7 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 ## Features
 
 * Framework independent
-* DBMS: MySQL 5.7+
+* DBMS: MySQL 5.7+, MySQL 8, MariaDB is only partially supported
 * Initial schema 
 * Schema difference
 * Database: character set, collation
