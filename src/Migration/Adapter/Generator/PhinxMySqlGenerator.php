@@ -119,16 +119,14 @@ class PhinxMySqlGenerator
         $output[] = $this->ind . '{';
 
         if (!empty($this->options['foreign_keys'])) {
-            $output[] = $this->getSetUniqueChecks(0);
-            $output[] = $this->getSetForeignKeyCheck(0);
+            $output[] = $this->getSetIntegrityChecks(0);
         }
 
         $output = $this->getTableMigrationNewDatabase($output, $new, $old);
         $output = $this->getTableMigrationTables($output, $new, $old);
 
         if (!empty($this->options['foreign_keys'])) {
-            $output[] = $this->getSetForeignKeyCheck(1);
-            $output[] = $this->getSetUniqueChecks(1);
+            $output[] = $this->getSetIntegrityChecks(1);
         }
 
         $output[] = $this->ind . '}';
@@ -137,27 +135,15 @@ class PhinxMySqlGenerator
     }
 
     /**
-     * Generate Set Unique Checks.
+     * Enable or disable the unique and foreign key checks.
      *
-     * @param int $value 0 or 1
+     * @param int $value The value (0 or 1)
      *
-     * @return string
+     * @return string The code
      */
-    protected function getSetUniqueChecks($value): string
+    private function getSetIntegrityChecks(int $value): string
     {
-        return sprintf('%s$this->execute("SET UNIQUE_CHECKS = %s;");', $this->ind2, $value);
-    }
-
-    /**
-     * Generate SetForeignKeyCheck.
-     *
-     * @param int $value
-     *
-     * @return string
-     */
-    protected function getSetForeignKeyCheck($value): string
-    {
-        return sprintf('%s$this->execute("SET FOREIGN_KEY_CHECKS = %s;");', $this->ind2, $value);
+        return sprintf('%s$this->execute(\'SET unique_checks=%s; SET foreign_key_checks=%s;\');', $this->ind2, $value, $value);
     }
 
     /**
