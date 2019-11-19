@@ -30,6 +30,8 @@ In reality, you should rarely have to write migrations manually because the migr
 * Indexes: create, remove
 * Foreign keys: create, remove, constraint name
 
+> **Warning:** You should not use [Phinx](https://phinx.org/) with MySQL 8, as it may cause unexpected results.
+
 ## Install
 
 Via Composer
