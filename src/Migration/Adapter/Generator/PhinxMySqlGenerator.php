@@ -1367,6 +1367,8 @@ class PhinxMySqlGenerator
             'array.inline' => true,
             'array.indent' => 4,
             'array.eol' => "\n",
+            'string.escape' => false,
+            'string.utf8'   => true,
         ]);
     }
 }
