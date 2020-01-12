@@ -1,0 +1,55 @@
+name: PHP
+
+on: [push]
+
+jobs:
+  run:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: ['7.1', '7.2', '7.3', '7.4']
+    name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: phinx_test
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
+        ports:
+          - 33306:3306
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v1
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mbstring, pdo, pdo_mysql, intl, zip
+          coverage: none
+          pecl: false
+
+      - name: Check PHP Version
+        run: php -v
+
+      - name: Check Composer Version
+        run: composer -V
+
+      - name: Check PHP Extensions
+        run: php -m
+
+      - name: Create test table
+        run: mysql -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-suggest
+
+      - name: Run test suite
+        run: composer check-all
