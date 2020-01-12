@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\NullOutput;
 /**
  * Test.
  */
-class MySqlSchemaAdapterTest extends TestCase
+final class MySqlSchemaAdapterTest extends TestCase
 {
     use DbTestTrait;
 

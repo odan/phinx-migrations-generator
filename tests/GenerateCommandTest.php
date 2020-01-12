@@ -2,6 +2,7 @@
 
 namespace Odan\Migration\Test;
 
+use Exception;
 use Odan\Migration\Command\GenerateCommand;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
@@ -15,12 +16,12 @@ class GenerateCommandTest extends TestCase
     /**
      * Test.
      *
-     * @expectedException \Exception
-     *
      * @return void
      */
     public function testGenerate()
     {
+        $this->getExpectedException(Exception::class);
+
         $application = new Application();
         $application->add(new GenerateCommand());
 

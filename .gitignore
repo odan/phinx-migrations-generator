@@ -18,3 +18,4 @@ tests/*_test1.php
 tests/schema.php
 bin/phinx.php
 tests/diffs/actual.php
+.phpunit.result.cache

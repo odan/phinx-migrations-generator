@@ -33,7 +33,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->dropTables();
         $this->deleteTestFiles();
