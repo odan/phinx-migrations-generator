@@ -113,12 +113,15 @@ class MigrationGenerator
 
             return $settings['pdo'];
         }
-        $options = array_replace_recursive($settings['options'], [
-            // Enable exceptions
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            // Set default fetch mode
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
+        $options = array_replace_recursive(
+            $settings['options'],
+            [
+                // Enable exceptions
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                // Set default fetch mode
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
+        );
         $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
 
         return $pdo;
@@ -179,17 +182,21 @@ class MigrationGenerator
         $className = $this->createClassName($name);
 
         if (!Util::isValidPhinxClassName($className)) {
-            throw new InvalidArgumentException(sprintf(
-                'The migration class name "%s" is invalid. Please use CamelCase format.',
-                $className
-            ));
+            throw new InvalidArgumentException(
+                sprintf(
+                    'The migration class name "%s" is invalid. Please use CamelCase format.',
+                    $className
+                )
+            );
         }
 
         if (!Util::isUniqueMigrationClassName($className, $path)) {
-            throw new InvalidArgumentException(sprintf(
-                'The migration class name "%s" already exists',
-                $className
-            ));
+            throw new InvalidArgumentException(
+                sprintf(
+                    'The migration class name "%s" already exists',
+                    $className
+                )
+            );
         }
 
         // Compute the file path
@@ -197,10 +204,12 @@ class MigrationGenerator
         $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
 
         if (is_file($filePath)) {
-            throw new InvalidArgumentException(sprintf(
-                'The file "%s" already exists',
-                $filePath
-            ));
+            throw new InvalidArgumentException(
+                sprintf(
+                    'The file "%s" already exists',
+                    $filePath
+                )
+            );
         }
 
         $migration = $this->generator->createMigration($className, $schema, $oldSchema);
