@@ -25,10 +25,10 @@ final class PhinxGeneratorTest extends TestCase
         $output = new NullOutput();
         $pdo = $this->getPdo();
         $dba = new MySqlSchemaAdapter($pdo, $output);
-        $gen = new PhinxMySqlGenerator($dba, $output, $settings);
+        $generator = new PhinxMySqlGenerator($dba, $settings);
 
         $diff = $this->read(__DIR__ . '/diffs/newtable.php');
-        $actual = $gen->createMigration('MyNewMigration', $diff, []);
+        $actual = $generator->createMigration('MyNewMigration', $diff, []);
         file_put_contents(__DIR__ . '/diffs/actual.php', $actual);
 
         $expected = file_get_contents(__DIR__ . '/diffs/newtable_expected.php');

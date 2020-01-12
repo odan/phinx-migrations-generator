@@ -37,6 +37,7 @@ final class ArrayUtil
     public function diff(array $array1, array $array2): array
     {
         $difference = [];
+
         foreach ($array1 as $key => $value) {
             if (is_array($value)) {
                 if (!isset($array2[$key]) || !is_array($array2[$key])) {
@@ -47,10 +48,8 @@ final class ArrayUtil
                         $difference[$key] = $new_diff;
                     }
                 }
-            } else {
-                if (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
-                    $difference[$key] = $value;
-                }
+            } elseif (!array_key_exists($key, $array2) || $array2[$key] !== $value) {
+                $difference[$key] = $value;
             }
         }
 
