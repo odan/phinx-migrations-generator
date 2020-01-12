@@ -1,4 +1,4 @@
-name: PHP
+name: php
 
 on: [push]
 
@@ -39,6 +39,9 @@ jobs:
 
       - name: Check PHP Extensions
         run: php -m
+
+      - name: Create test database
+        run: mysql -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
 
       - name: Validate composer.json and composer.lock
         run: composer validate
