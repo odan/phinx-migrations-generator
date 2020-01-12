@@ -7,7 +7,6 @@ use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use Odan\Migration\Utility\ArrayUtil;
-use PDO;
 use Phinx\Db\Adapter\AdapterInterface;
 use Phinx\Util\Util;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,7 +23,7 @@ final class MigrationGenerator
      *
      * @var array
      */
-    private $settings = [];
+    private $settings;
 
     /**
      * Database adapter.
@@ -41,32 +40,11 @@ final class MigrationGenerator
     private $generator;
 
     /**
-     * PDO.
-     *
-     * @var PDO
-     */
-    private $pdo;
-
-    /**
-     * Database name.
-     *
-     * @var string
-     */
-    private $dbName;
-
-    /**
      * Console output.
      *
      * @var OutputInterface
      */
     private $output;
-
-    /**
-     * Console input.
-     *
-     * @var InputInterface
-     */
-    private $input;
 
     /**
      * Console style.
@@ -90,41 +68,10 @@ final class MigrationGenerator
         SchemaAdapterInterface $dba
     ) {
         $this->settings = $settings;
-        $this->pdo = $this->getPdo($settings);
         $this->dba = $dba;
-        $this->generator = new PhinxMySqlGenerator($this->dba, $output, $settings);
+        $this->generator = new PhinxMySqlGenerator($this->dba, $settings);
         $this->output = $output;
-        $this->input = $input;
         $this->io = new SymfonyStyle($input, $output);
-    }
-
-    /**
-     * Get Db.
-     *
-     * @param array $settings
-     *
-     * @return PDO
-     */
-    private function getPdo(array $settings): PDO
-    {
-        if (isset($settings['pdo']) && $settings['pdo'] instanceof PDO) {
-            $settings['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $settings['pdo']->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-            return $settings['pdo'];
-        }
-        $options = array_replace_recursive(
-            $settings['options'],
-            [
-                // Enable exceptions
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                // Set default fetch mode
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            ]
-        );
-        $pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
-
-        return $pdo;
     }
 
     /**
@@ -146,7 +93,7 @@ final class MigrationGenerator
      *
      * @return array
      */
-    public function getSchema()
+    public function getSchema(): array
     {
         return $this->dba->getSchema();
     }
@@ -227,7 +174,7 @@ final class MigrationGenerator
         } else {
             $overwrite = $this->io->ask('Overwrite schema file? (y, n)', 'n');
         }
-        if ($overwrite == 'y') {
+        if ($overwrite === 'y') {
             $this->saveSchemaFile($schema, $this->settings);
         }
         $this->output->writeln('');
@@ -268,9 +215,9 @@ final class MigrationGenerator
             return [];
         }
 
-        if ($fileExt == 'php') {
+        if ($fileExt === 'php') {
             $data = $this->read($schemaFile);
-        } elseif ($fileExt == 'json') {
+        } elseif ($fileExt === 'json') {
             $content = file_get_contents($schemaFile) ?: '';
             $data = json_decode($content, true);
         } else {
@@ -369,13 +316,10 @@ final class MigrationGenerator
     {
         $this->output->writeln('Mark migration');
 
-        /* @var $adapter AdapterInterface */
-        $adapter = $this->settings['adapter'];
-
         $schemaTableName = $this->settings['default_migration_table'];
 
-        /* @var $pdo \PDO */
-        $pdo = $this->settings['adapter'];
+        /** @var AdapterInterface $adapter */
+        $adapter = $this->settings['adapter'];
 
         // Get version from filename prefix
         $version = explode('_', $fileName)[0];
@@ -401,7 +345,7 @@ final class MigrationGenerator
             $breakpoint
         );
 
-        $pdo->query($sql);
+        $adapter->query($sql);
     }
 
     /**
@@ -420,10 +364,10 @@ final class MigrationGenerator
         $this->output->writeln(sprintf('Save schema file: %s', basename($schemaFile)));
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
 
-        if ($fileExt == 'php') {
+        if ($fileExt === 'php') {
             $content = var_export($schema, true);
             $content = "<?php\n\nreturn " . $content . ';';
-        } elseif ($fileExt == 'json') {
+        } elseif ($fileExt === 'json') {
             $content = json_encode($schema, JSON_PRETTY_PRINT);
         } else {
             throw new InvalidArgumentException(sprintf('Invalid schema file extension: %s', $fileExt));

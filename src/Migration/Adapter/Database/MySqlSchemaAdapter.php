@@ -5,8 +5,8 @@ namespace Odan\Migration\Adapter\Database;
 use Odan\Migration\Utility\ArrayUtil;
 use PDO;
 use PDOStatement;
-use RuntimeException;
 use Symfony\Component\Console\Output\OutputInterface;
+use UnexpectedValueException;
 
 /**
  * MySqlSchemaAdapter.
@@ -63,6 +63,8 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @param string $sql The sql
      *
+     * @throws UnexpectedValueException
+     *
      * @return PDOStatement The statement
      */
     private function createQueryStatement(string $sql): PDOStatement
@@ -70,7 +72,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
         $statement = $this->pdo->query($sql);
 
         if (!$statement instanceof PDOStatement) {
-            throw new RuntimeException('Invalid statement');
+            throw new UnexpectedValueException('Invalid statement');
         }
 
         return $statement;
@@ -114,16 +116,18 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
         $tables = $this->getTables($tableNames);
 
         $tableNameChunks = array_chunk(array_column($tables, 'table_name'), 300);
+
         foreach ($tableNameChunks as $tablesInChunk) {
             $columns = $this->getColumnHash($tablesInChunk);
             $indexes = $this->getIndexHash($tablesInChunk);
-            $foreign_keys = $this->getForeignKeysHash($tablesInChunk);
+            $foreignKeys = $this->getForeignKeysHash($tablesInChunk);
+
             foreach ($tablesInChunk as $tableName) {
                 $this->output->writeln(sprintf('Table: <info>%s</info>', $tableName), OutputInterface::VERBOSITY_VERBOSE);
                 $result['tables'][$tableName]['table'] = $tables[$tableName];
                 $result['tables'][$tableName]['columns'] = $columns[$tableName] ?? [];
                 $result['tables'][$tableName]['indexes'] = $indexes[$tableName] ?? [];
-                $result['tables'][$tableName]['foreign_keys'] = $foreign_keys[$tableName] ?? null;
+                $result['tables'][$tableName]['foreign_keys'] = $foreignKeys[$tableName] ?? null;
             }
         }
 
@@ -148,9 +152,8 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
             FROM information_schema.SCHEMATA
             WHERE schema_name = %s;';
         $sql = sprintf($sql, $this->quote($dbName));
-        $row = $this->createQueryStatement($sql)->fetch();
 
-        return $row;
+        return $this->createQueryStatement($sql)->fetch();
     }
 
     /**
@@ -176,7 +179,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return string[]
      */
-    public function quoteArray($values)
+    public function quoteArray($values): array
     {
         return array_map(function ($value) {
             return $this->quote($value);
@@ -227,27 +230,13 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     }
 
     /**
-     * Get table columns.
-     *
-     * @param string $tableName
-     *
-     * @return array
-     */
-    private function getColumns($tableName): array
-    {
-        $rows = $this->getColumnHash([$tableName]);
-
-        return $rows[$tableName] ?? [];
-    }
-
-    /**
      * Get columns, grouped by table name.
      *
      * @param array $tableNames
      *
-     * @return array[]
+     * @return array
      */
-    private function getColumnHash(array $tableNames)
+    private function getColumnHash(array $tableNames): array
     {
         if (empty($tableNames)) {
             return [];
@@ -262,26 +251,12 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
 
         $result = [];
         foreach ($rows as $row) {
-            $table_name = $row['TABLE_NAME'];
-            $column_name = $row['COLUMN_NAME'];
-            $result[$table_name][$column_name] = $row;
+            $tableName = $row['TABLE_NAME'];
+            $columnName = $row['COLUMN_NAME'];
+            $result[$tableName][$columnName] = $row;
         }
 
         return $result;
-    }
-
-    /**
-     * Get indexes.
-     *
-     * @param string $tableName
-     *
-     * @return array
-     */
-    private function getIndexes($tableName): array
-    {
-        $rows = $this->getIndexHash([$tableName]);
-
-        return $rows[$tableName] ?? [];
     }
 
     /**
@@ -291,7 +266,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    private function getIndexHash($tableNames)
+    private function getIndexHash($tableNames): array
     {
         if (empty($tableNames)) {
             return [];
@@ -338,7 +313,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      */
     public function ident(string $value, $quote = '`'): string
     {
-        $value = preg_replace('/[^A-Za-z0-9_\.]+/', '', $value);
+        $value = preg_replace('/[^A-Za-z0-9_.]+/', '', $value);
         $value = is_scalar($value) ? (string)$value : '';
 
         if (strpos($value, '.') !== false) {
@@ -352,27 +327,13 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     }
 
     /**
-     * Get foreign keys.
-     *
-     * @param string $tableName
-     *
-     * @return array|null
-     */
-    private function getForeignKeys(string $tableName): ?array
-    {
-        $rows = $this->getForeignKeysHash([$tableName]);
-
-        return $rows[$tableName] ?? [];
-    }
-
-    /**
      * Get foreign keys, grouped by table name.
      *
      * @param array $tableNames
      *
      * @return array|null
      */
-    private function getForeignKeysHash($tableNames)
+    private function getForeignKeysHash($tableNames): ?array
     {
         if (empty($tableNames)) {
             return [];
@@ -434,8 +395,6 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
             return 'NULL';
         }
 
-        $value = substr($this->pdo->quote($value), 1, -1);
-
-        return $value;
+        return substr($this->pdo->quote($value), 1, -1);
     }
 }

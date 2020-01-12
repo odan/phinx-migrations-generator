@@ -2,7 +2,7 @@
 
 namespace Odan\Migration\Command;
 
-use Exception;
+use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Generator\MigrationGenerator;
@@ -11,11 +11,14 @@ use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterWrapper;
 use Phinx\Db\Adapter\PdoAdapter;
 use Phinx\Migration\Manager;
-use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use UnexpectedValueException;
 
+/**
+ * Generate Command.
+ */
 final class GenerateCommand extends AbstractCommand
 {
     /**
@@ -56,7 +59,7 @@ final class GenerateCommand extends AbstractCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      *
-     * @throws RuntimeException On Error
+     * @throws InvalidArgumentException
      *
      * @return int integer 0 on success, or an error code
      */
@@ -75,7 +78,7 @@ final class GenerateCommand extends AbstractCommand
         }
 
         if (!is_string($environment)) {
-            throw new RuntimeException('Invalid or missing environment');
+            throw new InvalidArgumentException('Invalid or missing environment');
         }
 
         $envOptions = $this->getConfig()->getEnvironment($environment);
@@ -131,6 +134,8 @@ final class GenerateCommand extends AbstractCommand
      * @param OutputInterface $output
      * @param string $environment
      *
+     * @throws UnexpectedValueException
+     *
      * @return MigrationGenerator
      */
     private function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, string $environment): MigrationGenerator
@@ -138,7 +143,7 @@ final class GenerateCommand extends AbstractCommand
         $manager = $this->getManager();
 
         if (!$manager) {
-            throw new RuntimeException('Manager not found');
+            throw new UnexpectedValueException('Manager not found');
         }
 
         $pdo = $this->getPdo($manager, $environment);
@@ -166,7 +171,7 @@ final class GenerateCommand extends AbstractCommand
      * @param InputInterface $input
      * @param string $environment
      *
-     * @throws Exception On error
+     * @throws UnexpectedValueException On error
      *
      * @return array
      */
@@ -178,7 +183,7 @@ final class GenerateCommand extends AbstractCommand
         $manager = $this->getManager();
 
         if (!$manager) {
-            throw new RuntimeException('Manager not found');
+            throw new UnexpectedValueException('Manager not found');
         }
 
         $config = $manager->getConfig();
@@ -195,7 +200,7 @@ final class GenerateCommand extends AbstractCommand
 
         // No paths? That's a problem.
         if (empty($migrationsPaths[0])) {
-            throw new RuntimeException('No migration paths set in your Phinx configuration file.');
+            throw new UnexpectedValueException('No migration paths set in your Phinx configuration file.');
         }
 
         $migrationsPath = (string)$migrationsPaths[0];
@@ -221,7 +226,7 @@ final class GenerateCommand extends AbstractCommand
         $name = $input->getOption('name');
         $overwrite = $input->getOption('overwrite');
 
-        $settings = [
+        return [
             'pdo' => $pdo,
             'manager' => $manager,
             'environment' => $environment,
@@ -238,8 +243,6 @@ final class GenerateCommand extends AbstractCommand
             'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),
         ];
-
-        return $settings;
     }
 
     /**
@@ -248,12 +251,14 @@ final class GenerateCommand extends AbstractCommand
      * @param Manager $manager Manager
      * @param string $environment Environment name
      *
-     * @throws Exception On error
+     * @throws UnexpectedValueException On error
      *
      * @return PDO PDO object
      */
     private function getPdo(Manager $manager, string $environment): PDO
     {
+        $pdo = null;
+
         /* @var AdapterWrapper $dbAdapter */
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
 
@@ -262,14 +267,14 @@ final class GenerateCommand extends AbstractCommand
         } elseif ($dbAdapter instanceof AdapterWrapper) {
             $dbAdapter->connect();
             $pdo = $dbAdapter->getAdapter()->getConnection();
-        } else {
-            throw new RuntimeException('Adapter not found');
         }
-        if (empty($pdo)) {
+
+        if ($pdo === null) {
             $pdo = $dbAdapter->getOption('connection');
         }
+
         if (!$pdo instanceof PDO) {
-            throw new RuntimeException('PDO database connection not found.');
+            throw new UnexpectedValueException('PDO database connection not found.');
         }
 
         return $pdo;
