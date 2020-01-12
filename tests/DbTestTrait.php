@@ -86,7 +86,7 @@ trait DbTestTrait
         echo $_SERVER['GITHUB_ACTIONS'] ?? 'not defined';
 
         return [
-            'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
+            'dsn' => 'mysql:host=localhost;dbname=phinx_test;charset=utf8',
             'username' => 'root',
             'password' => 'root',
             'options' => [
