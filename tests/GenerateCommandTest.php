@@ -16,6 +16,8 @@ class GenerateCommandTest extends TestCase
      * Test.
      *
      * @expectedException \Exception
+     *
+     * @return void
      */
     public function testGenerate()
     {

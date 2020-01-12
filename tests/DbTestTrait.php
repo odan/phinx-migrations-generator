@@ -11,6 +11,7 @@ use Phinx\Console\Command\Migrate;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use UnexpectedValueException;
 
 /**
  * Trait DbTestTrait.
@@ -38,13 +39,23 @@ trait DbTestTrait
         $this->deleteTestFiles();
     }
 
-    protected function tearDown()
+    /**
+     * Tear down.
+     *
+     * @return void
+     */
+    protected function tearDown(): void
     {
         $this->dropTables();
         $this->deleteTestFiles();
     }
 
-    protected function deleteTestFiles()
+    /**
+     * Delete all temporary test files.
+     *
+     * @return void
+     */
+    protected function deleteTestFiles(): void
     {
         $files = glob(__DIR__ . '/*_test*.php');
         foreach ($files ?: [] as $file) {
@@ -57,7 +68,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function setUpDatabase()
+    protected function setUpDatabase(): void
     {
         $this->dropDatabase();
         $this->createDatabase();
@@ -68,7 +79,7 @@ trait DbTestTrait
      *
      * @return array
      */
-    public function getSettings()
+    public function getSettings(): array
     {
         return [
             'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
@@ -88,9 +99,9 @@ trait DbTestTrait
     }
 
     /**
-     * Get Db.
+     * Get PDO connection.
      *
-     * @return PDO
+     * @return PDO The connection
      */
     public function getPdo(): PDO
     {
@@ -117,21 +128,33 @@ trait DbTestTrait
         return $this->pdo;
     }
 
-    protected function createDatabase()
+    /**
+     * Create database.
+     *
+     * @return void
+     */
+    protected function createDatabase(): void
     {
         $this->execSql('CREATE DATABASE `phinx_test` CHARACTER SET utf8 COLLATE utf8_unicode_ci;');
         $this->execSql('USE `phinx_test`');
     }
 
-    protected function dropDatabase()
+    /**
+     * Drop test database.
+     *
+     * @return void
+     */
+    protected function dropDatabase(): void
     {
         $this->execSql('DROP DATABASE IF EXISTS `phinx_test`;');
     }
 
     /**
-     * 2. Clean-Up Database. Truncate tables.
+     * Clean-Up Database. Truncate tables.
+     *
+     * @return void
      */
-    public function dropTables()
+    public function dropTables(): void
     {
         $sql = 'SELECT TABLE_NAME
                 FROM information_schema.tables
@@ -156,6 +179,13 @@ trait DbTestTrait
         $db->exec('SET unique_checks=1; SET foreign_key_checks=1;');
     }
 
+    /**
+     * Check whether table exists.
+     *
+     * @param string $table The table name
+     *
+     * @return bool The status
+     */
     protected function existsTable(string $table): bool
     {
         $pdo = $this->getPdo();
@@ -172,6 +202,13 @@ trait DbTestTrait
         return !empty($row);
     }
 
+    /**
+     * Get table schema.
+     *
+     * @param string $table The table name
+     *
+     * @return string The schema sql
+     */
     protected function getTableSchema(string $table): string
     {
         $sql = sprintf('SHOW CREATE TABLE `%s`;', $table);
@@ -190,6 +227,8 @@ trait DbTestTrait
      *
      * @param string $sql The sql
      *
+     * @throws UnexpectedValueException
+     *
      * @return PDOStatement The statement
      */
     protected function createQueryStatement(string $sql): PDOStatement
@@ -197,13 +236,20 @@ trait DbTestTrait
         $statement = $this->getPdo()->query($sql);
 
         if (!$statement instanceof PDOStatement) {
-            throw new RuntimeException('Invalid statement');
+            throw new UnexpectedValueException('Invalid statement');
         }
 
         return $statement;
     }
 
-    protected function execSql(string $sql)
+    /**
+     * Execute sql.
+     *
+     * @param string $sql The sql
+     *
+     * @return void
+     */
+    protected function execSql(string $sql): void
     {
         $pdo = $this->getPdo();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

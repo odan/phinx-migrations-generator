@@ -15,6 +15,8 @@ class MySqlSchemaAdapterTest extends TestCase
 
     /**
      * Test.
+     *
+     * @return void
      */
     public function testEsc(): void
     {
@@ -28,6 +30,8 @@ class MySqlSchemaAdapterTest extends TestCase
 
     /**
      * Test.
+     *
+     * @return void
      */
     public function testQuote(): void
     {
@@ -41,6 +45,8 @@ class MySqlSchemaAdapterTest extends TestCase
 
     /**
      * Test.
+     *
+     * @return void
      */
     public function testIdent(): void
     {
