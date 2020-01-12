@@ -20,7 +20,7 @@ class GenerateCommandTest extends TestCase
      */
     public function testGenerate()
     {
-        $this->getExpectedException(Exception::class);
+        $this->expectException(Exception::class);
 
         $application = new Application();
         $application->add(new GenerateCommand());
