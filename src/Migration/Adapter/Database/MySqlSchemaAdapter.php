@@ -118,7 +118,10 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
             $foreignKeys = $this->getForeignKeysHash($tablesInChunk);
 
             foreach ($tablesInChunk as $tableName) {
-                $this->output->writeln(sprintf('Table: <info>%s</info>', $tableName), OutputInterface::VERBOSITY_VERBOSE);
+                $this->output->writeln(
+                    sprintf('Table: <info>%s</info>', $tableName),
+                    OutputInterface::VERBOSITY_VERBOSE
+                );
                 $result['tables'][$tableName]['table'] = $tables[$tableName];
                 $result['tables'][$tableName]['columns'] = $columns[$tableName] ?? [];
                 $result['tables'][$tableName]['indexes'] = $indexes[$tableName] ?? [];
@@ -309,7 +312,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     public function ident(string $value, string $quote = '`'): string
     {
         $value = preg_replace('/[^A-Za-z0-9_.]+/', '', $value);
-        $value = is_scalar($value) ? (string)$value : '';
+        $value = is_string($value) ? $value : '';
 
         if (strpos($value, '.') !== false) {
             $values = explode('.', $value);

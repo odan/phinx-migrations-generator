@@ -77,7 +77,7 @@ final class GenerateCommand extends AbstractCommand
             $output->writeln('<info>using environment</info> ' . $environment);
         }
 
-        if (!is_string($environment)) {
+        if (!$environment) {
             throw new InvalidArgumentException('Invalid or missing environment');
         }
 

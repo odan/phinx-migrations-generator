@@ -10,7 +10,7 @@
     <file>./tests</file>
 
     <exclude-pattern>*/tests/diffs/*$</exclude-pattern>
-
+	<exclude-pattern>*/tests/schema.php</exclude-pattern>
     <rule ref="PSR2"></rule>
     <rule ref="PSR12"></rule>
 
