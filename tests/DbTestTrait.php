@@ -82,12 +82,12 @@ trait DbTestTrait
     public function getSettings(): array
     {
         print_r($_ENV);
-        echo getenv('MYSQL_PASSWORD'). "\n";
+        echo getenv('MYSQL_ROOT_PASSWORD'). "\n";
 
         return [
             'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
             'username' => 'root',
-            'password' => getenv('MYSQL_PASSWORD') ?: '',
+            'password' => getenv('MYSQL_ROOT_PASSWORD') ?: '',
             'options' => [
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
                 // Enable exceptions
