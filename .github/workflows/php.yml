@@ -16,7 +16,8 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_DATABASE: phinx_test
-          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_ROOT_PASSWORD:
+          MYSQL_ALLOW_EMPTY_PASSWORD: true
         ports:
           - 33306:3306
 
