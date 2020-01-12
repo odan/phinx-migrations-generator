@@ -42,9 +42,6 @@ jobs:
       - name: Check PHP Extensions
         run: php -m
 
-      - name: Create test table
-        run: mysql -uroot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
-
       - name: Validate composer.json and composer.lock
         run: composer validate
 
