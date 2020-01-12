@@ -21,7 +21,7 @@ trait DbTestTrait
     /**
      * @var PDO
      */
-    protected $pdo;
+    private $pdo;
 
     /**
      * @var int Counter
@@ -55,7 +55,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function deleteTestFiles(): void
+    private function deleteTestFiles(): void
     {
         $files = glob(__DIR__ . '/*_test*.php');
         foreach ($files ?: [] as $file) {
@@ -68,7 +68,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function setUpDatabase(): void
+    private function setUpDatabase(): void
     {
         $this->dropDatabase();
         $this->createDatabase();
@@ -133,7 +133,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function createDatabase(): void
+    private function createDatabase(): void
     {
         $this->execSql('CREATE DATABASE `phinx_test` CHARACTER SET utf8 COLLATE utf8_unicode_ci;');
         $this->execSql('USE `phinx_test`');
@@ -144,7 +144,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function dropDatabase(): void
+    private function dropDatabase(): void
     {
         $this->execSql('DROP DATABASE IF EXISTS `phinx_test`;');
     }
@@ -186,7 +186,7 @@ trait DbTestTrait
      *
      * @return bool The status
      */
-    protected function existsTable(string $table): bool
+    private function existsTable(string $table): bool
     {
         $pdo = $this->getPdo();
 
@@ -209,7 +209,7 @@ trait DbTestTrait
      *
      * @return string The schema sql
      */
-    protected function getTableSchema(string $table): string
+    private function getTableSchema(string $table): string
     {
         $sql = sprintf('SHOW CREATE TABLE `%s`;', $table);
         $statement = $this->createQueryStatement($sql);
@@ -231,7 +231,7 @@ trait DbTestTrait
      *
      * @return PDOStatement The statement
      */
-    protected function createQueryStatement(string $sql): PDOStatement
+    private function createQueryStatement(string $sql): PDOStatement
     {
         $statement = $this->getPdo()->query($sql);
 
@@ -249,7 +249,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    protected function execSql(string $sql): void
+    private function execSql(string $sql): void
     {
         $pdo = $this->getPdo();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -263,12 +263,12 @@ trait DbTestTrait
         }
     }
 
-    protected function generateAgain(): bool
+    private function generateAgain(): bool
     {
         return $this->generate(false);
     }
 
-    protected function generate(bool $deleteSchema = true): bool
+    private function generate(bool $deleteSchema = true): bool
     {
         chdir(__DIR__);
 
@@ -347,7 +347,7 @@ trait DbTestTrait
      *
      * @return string RFC 4122 UUID
      */
-    protected function uuid(): string
+    private function uuid(): string
     {
         return sprintf(
             '%04x%04x%04x%04x%04x%04x%04x%04x',

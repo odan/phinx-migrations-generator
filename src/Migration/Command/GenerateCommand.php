@@ -16,7 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GenerateCommand extends AbstractCommand
+final class GenerateCommand extends AbstractCommand
 {
     /**
      * Configure.
@@ -56,7 +56,7 @@ class GenerateCommand extends AbstractCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      *
-     * @throws Exception On Error
+     * @throws RuntimeException On Error
      *
      * @return int integer 0 on success, or an error code
      */
@@ -108,7 +108,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return bool true if adapter with specified name is supported
      */
-    protected function isAdapterSupported(string $adapterName): bool
+    private function isAdapterSupported(string $adapterName): bool
     {
         return $adapterName === 'mysql';
     }
@@ -118,7 +118,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return string Schema file path
      */
-    protected function getDefaultSchemaFilePath(string $migrationsPath): string
+    private function getDefaultSchemaFilePath(string $migrationsPath): string
     {
         return $migrationsPath . DIRECTORY_SEPARATOR . 'schema.php';
     }
@@ -133,7 +133,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return MigrationGenerator
      */
-    protected function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, string $environment): MigrationGenerator
+    private function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, string $environment): MigrationGenerator
     {
         $manager = $this->getManager();
 
@@ -155,7 +155,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return SchemaAdapterInterface
      */
-    protected function getSchemaAdapter(PDO $pdo, OutputInterface $output): SchemaAdapterInterface
+    private function getSchemaAdapter(PDO $pdo, OutputInterface $output): SchemaAdapterInterface
     {
         return new MySqlSchemaAdapter($pdo, $output);
     }
@@ -170,7 +170,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return array
      */
-    protected function getGeneratorSettings(InputInterface $input, string $environment): array
+    private function getGeneratorSettings(InputInterface $input, string $environment): array
     {
         $envOptions = $this->getConfig()->getEnvironment($environment);
 
@@ -252,7 +252,7 @@ class GenerateCommand extends AbstractCommand
      *
      * @return PDO PDO object
      */
-    protected function getPdo(Manager $manager, string $environment): PDO
+    private function getPdo(Manager $manager, string $environment): PDO
     {
         /* @var AdapterWrapper $dbAdapter */
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();

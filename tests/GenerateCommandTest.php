@@ -11,7 +11,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @coversDefaultClass \Odan\Migration\Command\GenerateCommand
  */
-class GenerateCommandTest extends TestCase
+final class GenerateCommandTest extends TestCase
 {
     /**
      * Test.

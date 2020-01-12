@@ -10,7 +10,7 @@ use Symfony\Component\Console\Output\NullOutput;
 /**
  * @coversDefaultClass \Odan\Migration\Adapter\Generator\PhinxMySqlGenerator
  */
-class PhinxGeneratorTest extends TestCase
+final class PhinxGeneratorTest extends TestCase
 {
     use DbTestTrait;
 
@@ -42,7 +42,7 @@ class PhinxGeneratorTest extends TestCase
      *
      * @return mixed
      */
-    protected function read($filename)
+    private function read($filename)
     {
         return require $filename;
     }

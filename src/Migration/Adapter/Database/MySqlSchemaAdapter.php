@@ -11,28 +11,28 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * MySqlSchemaAdapter.
  */
-class MySqlSchemaAdapter implements SchemaAdapterInterface
+final class MySqlSchemaAdapter implements SchemaAdapterInterface
 {
     /**
      * PDO.
      *
      * @var PDO
      */
-    protected $pdo;
+    private $pdo;
 
     /**
      * Console Output Interface.
      *
      * @var OutputInterface
      */
-    protected $output;
+    private $output;
 
     /**
      * Current database name.
      *
      * @var string
      */
-    protected $dbName;
+    private $dbName;
 
     /**
      * Constructor.
@@ -53,7 +53,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return string
      */
-    protected function getDbName(): string
+    private function getDbName(): string
     {
         return (string)$this->createQueryStatement('select database()')->fetchColumn();
     }
@@ -65,7 +65,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return PDOStatement The statement
      */
-    protected function createQueryStatement(string $sql): PDOStatement
+    private function createQueryStatement(string $sql): PDOStatement
     {
         $statement = $this->pdo->query($sql);
 
@@ -83,7 +83,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array The rows
      */
-    protected function queryFetchAll(string $sql): array
+    private function queryFetchAll(string $sql): array
     {
         $statement = $this->createQueryStatement($sql);
         $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
@@ -140,7 +140,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    protected function getDatabaseSchemata(string $dbName): array
+    private function getDatabaseSchemata(string $dbName): array
     {
         $sql = 'SELECT
             default_character_set_name,
@@ -190,7 +190,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    protected function getTables($tableNames = null): array
+    private function getTables($tableNames = null): array
     {
         $result = [];
         $sql = "SELECT *
@@ -233,7 +233,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    protected function getColumns($tableName): array
+    private function getColumns($tableName): array
     {
         $rows = $this->getColumnHash([$tableName]);
 
@@ -247,7 +247,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array[]
      */
-    protected function getColumnHash(array $tableNames)
+    private function getColumnHash(array $tableNames)
     {
         if (empty($tableNames)) {
             return [];
@@ -277,7 +277,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    protected function getIndexes($tableName): array
+    private function getIndexes($tableName): array
     {
         $rows = $this->getIndexHash([$tableName]);
 
@@ -291,14 +291,14 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    protected function getIndexHash($tableNames)
+    private function getIndexHash($tableNames)
     {
         if (empty($tableNames)) {
             return [];
         }
 
         $quotedNames = $this->quoteArray($tableNames);
-        $sql = sprintf("SELECT 
+        $sql = sprintf("SELECT
                 `TABLE_NAME` as 'Table',
                 `NON_UNIQUE` as 'Non_unique',
                 `INDEX_NAME` as 'Key_name',
@@ -358,7 +358,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array|null
      */
-    protected function getForeignKeys(string $tableName): ?array
+    private function getForeignKeys(string $tableName): ?array
     {
         $rows = $this->getForeignKeysHash([$tableName]);
 
@@ -372,7 +372,7 @@ class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array|null
      */
-    protected function getForeignKeysHash($tableNames)
+    private function getForeignKeysHash($tableNames)
     {
         if (empty($tableNames)) {
             return [];

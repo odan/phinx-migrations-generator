@@ -5,7 +5,7 @@ namespace Odan\Migration\Utility;
 /**
  * Class ArrayUtil.
  */
-class ArrayUtil
+final class ArrayUtil
 {
     /**
      * Unset array keys.

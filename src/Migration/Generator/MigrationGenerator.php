@@ -17,63 +17,63 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * MigrationGenerator.
  */
-class MigrationGenerator
+final class MigrationGenerator
 {
     /**
      * Settings.
      *
      * @var array
      */
-    protected $settings = [];
+    private $settings = [];
 
     /**
      * Database adapter.
      *
      * @var SchemaAdapterInterface
      */
-    protected $dba;
+    private $dba;
 
     /**
      * Generator.
      *
      * @var PhinxMySqlGenerator
      */
-    protected $generator;
+    private $generator;
 
     /**
      * PDO.
      *
      * @var PDO
      */
-    protected $pdo;
+    private $pdo;
 
     /**
      * Database name.
      *
      * @var string
      */
-    protected $dbName;
+    private $dbName;
 
     /**
      * Console output.
      *
      * @var OutputInterface
      */
-    protected $output;
+    private $output;
 
     /**
      * Console input.
      *
      * @var InputInterface
      */
-    protected $input;
+    private $input;
 
     /**
      * Console style.
      *
      * @var SymfonyStyle
      */
-    protected $io;
+    private $io;
 
     /**
      * Constructor.
@@ -105,7 +105,7 @@ class MigrationGenerator
      *
      * @return PDO
      */
-    protected function getPdo(array $settings): PDO
+    private function getPdo(array $settings): PDO
     {
         if (isset($settings['pdo']) && $settings['pdo'] instanceof PDO) {
             $settings['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -132,7 +132,7 @@ class MigrationGenerator
      *
      * @return string
      */
-    protected function generateDefaultMigrationName(): string
+    private function generateDefaultMigrationName(): string
     {
         if (isset($this->settings['default_migration_prefix'])) {
             return $this->settings['default_migration_prefix'] . uniqid((string)mt_rand(), false);
@@ -245,7 +245,7 @@ class MigrationGenerator
      *
      * @return mixed
      */
-    protected function getOldSchema(array $settings)
+    private function getOldSchema(array $settings)
     {
         return $this->getSchemaFileData($settings);
     }
@@ -259,7 +259,7 @@ class MigrationGenerator
      *
      * @return array
      */
-    protected function getSchemaFileData(array $settings): array
+    private function getSchemaFileData(array $settings): array
     {
         $schemaFile = $this->getSchemaFilename($settings);
         $fileExt = pathinfo($schemaFile, PATHINFO_EXTENSION);
@@ -287,7 +287,7 @@ class MigrationGenerator
      *
      * @return string Schema filename
      */
-    protected function getSchemaFilename(array $settings): string
+    private function getSchemaFilename(array $settings): string
     {
         // Default
         $schemaFile = sprintf('%s/%s', getcwd(), 'schema.php');
@@ -305,7 +305,7 @@ class MigrationGenerator
      *
      * @return mixed
      */
-    protected function read(string $filename)
+    private function read(string $filename)
     {
         return require $filename;
     }
@@ -318,7 +318,7 @@ class MigrationGenerator
      *
      * @return array Difference
      */
-    protected function compareSchema(array $newSchema, array $oldSchema): array
+    private function compareSchema(array $newSchema, array $oldSchema): array
     {
         $this->output->writeln('Comparing schema file to the database.');
 
@@ -340,7 +340,7 @@ class MigrationGenerator
      *
      * @return string Class name
      */
-    protected function createClassName(string $name): string
+    private function createClassName(string $name): string
     {
         $result = str_replace('_', ' ', $name);
 
@@ -353,7 +353,7 @@ class MigrationGenerator
      * @param string $filePath Name of migration file
      * @param string $migration Migration code
      */
-    protected function saveMigrationFile(string $filePath, string $migration): void
+    private function saveMigrationFile(string $filePath, string $migration): void
     {
         $this->output->writeln(sprintf('Generate migration file: %s', $filePath));
         file_put_contents($filePath, $migration);
@@ -365,7 +365,7 @@ class MigrationGenerator
      * @param string $migrationName migrationName
      * @param string $fileName fileName
      */
-    protected function markMigration(string $migrationName, string $fileName): void
+    private function markMigration(string $migrationName, string $fileName): void
     {
         $this->output->writeln('Mark migration');
 
@@ -414,7 +414,7 @@ class MigrationGenerator
      *
      * @return void
      */
-    protected function saveSchemaFile(array $schema, array $settings): void
+    private function saveSchemaFile(array $schema, array $settings): void
     {
         $schemaFile = $this->getSchemaFilename($settings);
         $this->output->writeln(sprintf('Save schema file: %s', basename($schemaFile)));

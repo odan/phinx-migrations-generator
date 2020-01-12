@@ -5,12 +5,12 @@ namespace Odan\Migration\Adapter\Generator;
 /**
  * Class RawPhpValue.
  */
-class RawPhpValue
+final class RawPhpValue
 {
     /**
      * @var string
      */
-    protected $value;
+    private $value;
 
     /**
      * Constructor.
