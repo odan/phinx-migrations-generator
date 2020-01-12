@@ -84,7 +84,7 @@ trait DbTestTrait
         return [
             'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
             'username' => 'root',
-            'password' => '',
+            'password' => getenv('GITHUB_ACTION') ? 'root' : '',
             'options' => [
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
                 // Enable exceptions
@@ -290,7 +290,8 @@ trait DbTestTrait
 
         $command = $application->find('generate');
         $commandTester = new CommandTester($command);
-        $commandTester->execute(['command' => $command->getName(),
+        $commandTester->execute([
+            'command' => $command->getName(),
             '--name' => 'Test' . $number,
             '--overwrite' => '1',
             '--path' => __DIR__,
