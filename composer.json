@@ -14,32 +14,18 @@
     "license": "MIT",
     "require": {
         "php": "^7.1",
-        "robmorgan/phinx": "^0.11",
         "riimu/kit-phpencoder": "^2.4",
-        "symfony/console": "^2.8|^3.0|^4.0|^5.0"
+        "robmorgan/phinx": "^0.11",
+        "symfony/console": "^2.8 || ^3.0 || ^4.0 || ^5.0"
     },
     "require-dev": {
         "overtrue/phplint": "^1.1",
-        "phpstan/phpstan-shim": "^0.11",
+        "phpstan/phpstan": "^0.12",
         "phpunit/phpunit": "^7.0",
         "squizlabs/php_codesniffer": "^3.4"
     },
-    "scripts": {
-        "test": "phpunit --configuration phpunit.xml",
-        "test-coverage": "phpunit --configuration phpunit.xml --coverage-clover build/logs/clover.xml --coverage-html build/coverage",
-        "check-style": "phpcs --standard=phpcs.xml",
-        "fix-style": "phpcbf --standard=phpcs.xml",
-        "phpstan": "phpstan analyse src tests --level=max -c phpstan.neon --no-progress",
-        "lint": "phplint ./ --exclude=vendor --no-interaction --no-cache",
-        "install-cs": "php -r \"@mkdir('build'); copy('https://cs.symfony.com/download/php-cs-fixer-v2.phar', 'build/php-cs-fixer-v2.phar');\"",
-        "fix-cs": "php build/php-cs-fixer-v2.phar fix --config=.cs.php",
-        "check-cs": "php build/php-cs-fixer-v2.phar fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php",
-        "check-all": [
-            "@lint",
-            "@check-style",
-            "@phpstan",
-            "@test-coverage"
-        ]
+    "config": {
+        "sort-packages": true
     },
     "autoload": {
         "psr-4": {
@@ -54,7 +40,21 @@
     "bin": [
         "./bin/phinx-migrations"
     ],
-    "config": {
-        "sort-packages": true
+    "scripts": {
+        "check-all": [
+            "@lint",
+            "@check-style",
+            "@phpstan",
+            "@test-coverage"
+        ],
+        "check-cs": "php build/php-cs-fixer-v2.phar fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php",
+        "check-style": "phpcs --standard=phpcs.xml",
+        "fix-cs": "php build/php-cs-fixer-v2.phar fix --config=.cs.php",
+        "fix-style": "phpcbf --standard=phpcs.xml",
+        "install-cs": "php -r \"@mkdir('build'); copy('https://cs.symfony.com/download/php-cs-fixer-v2.phar', 'build/php-cs-fixer-v2.phar');\"",
+        "lint": "phplint ./ --exclude=vendor --no-interaction --no-cache",
+        "phpstan": "phpstan analyse src tests --level=max -c phpstan.neon --no-progress",
+        "test": "phpunit --configuration phpunit.xml",
+        "test-coverage": "phpunit --configuration phpunit.xml --coverage-clover build/logs/clover.xml --coverage-html build/coverage"
     }
 }
