@@ -81,10 +81,14 @@ trait DbTestTrait
      */
     public function getSettings(): array
     {
+        print_r($_SERVER);
+
+        echo $_SERVER['GITHUB_ACTIONS'] ?? 'not defined';
+
         return [
             'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
             'username' => 'root',
-            'password' => isset($_SERVER['GITHUB_ACTIONS']) ? 'root' : '',
+            'password' => 'root',
             'options' => [
                 PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
                 // Enable exceptions
