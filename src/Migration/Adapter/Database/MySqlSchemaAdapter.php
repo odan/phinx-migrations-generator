@@ -88,13 +88,8 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     private function queryFetchAll(string $sql): array
     {
         $statement = $this->createQueryStatement($sql);
-        $rows = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-        if (!$rows) {
-            return [];
-        }
-
-        return $rows;
+        return $statement->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     /**
@@ -306,12 +301,12 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @see: http://dev.mysql.com/doc/refman/5.0/en/identifiers.html
      *
-     * @param string $value
-     * @param string $quote
+     * @param string $value The value
+     * @param string $quote The quote character
      *
      * @return string identifier escaped string
      */
-    public function ident(string $value, $quote = '`'): string
+    public function ident(string $value, string $quote = '`'): string
     {
         $value = preg_replace('/[^A-Za-z0-9_.]+/', '', $value);
         $value = is_scalar($value) ? (string)$value : '';
