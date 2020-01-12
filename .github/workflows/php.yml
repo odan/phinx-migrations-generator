@@ -48,10 +48,5 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-suggest
 
-      - name: Set environment variables
-        run: echo Set environment variables
-        env:
-          MYSQL_ROOT_PASSWORD: root
-
       - name: Run test suite
         run: composer check-all
