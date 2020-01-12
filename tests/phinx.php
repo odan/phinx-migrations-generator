@@ -5,7 +5,7 @@
 
 // Get PDO object
 $pdo = new PDO(
-    'mysql:host=localhost;dbname=phinx_test;charset=utf8',
+    'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
     'root',
     isset($_SERVER['GITHUB_ACTION']) ? 'root' : '',
     [

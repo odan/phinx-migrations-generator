@@ -82,7 +82,7 @@ trait DbTestTrait
     public function getSettings(): array
     {
         return [
-            'dsn' => 'mysql:host=localhost;dbname=phinx_test;charset=utf8',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
             'username' => 'root',
             'password' => isset($_SERVER['GITHUB_ACTION']) ? 'root' : '',
             'options' => [
