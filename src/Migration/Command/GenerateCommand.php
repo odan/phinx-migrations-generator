@@ -20,6 +20,8 @@ class GenerateCommand extends AbstractCommand
 {
     /**
      * Configure.
+     *
+     * @return void
      */
     protected function configure()
     {

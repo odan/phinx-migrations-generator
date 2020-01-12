@@ -16,6 +16,8 @@ class PhinxGeneratorTest extends TestCase
 
     /**
      * Test.
+     *
+     * @return void
      */
     public function testGenerate()
     {
@@ -272,10 +274,10 @@ class PhinxGeneratorTest extends TestCase
      */
     public function testEnum(): void
     {
-        $this->execSql("CREATE TABLE `test`( 
-            `id` INT(11) NOT NULL AUTO_INCREMENT, 
-            `simple_value` ENUM('1'), 
-            `multiple_values` ENUM('1','2','3','abc'), 
+        $this->execSql("CREATE TABLE `test`(
+            `id` INT(11) NOT NULL AUTO_INCREMENT,
+            `simple_value` ENUM('1'),
+            `multiple_values` ENUM('1','2','3','abc'),
             PRIMARY KEY (`id`)) ROW_FORMAT=COMPACT;");
 
         $this->generate();
@@ -315,8 +317,8 @@ class PhinxGeneratorTest extends TestCase
         // 1. migration
         $this->generate();
 
-        $this->execSql('ALTER TABLE `table1` ADD CONSTRAINT `table2_id` 
-            FOREIGN KEY (`table2_id`) 
+        $this->execSql('ALTER TABLE `table1` ADD CONSTRAINT `table2_id`
+            FOREIGN KEY (`table2_id`)
             REFERENCES `table2`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION; ');
 
         $oldSchema = $this->getTableSchema('table1');
