@@ -14,6 +14,8 @@
     "license": "MIT",
     "require": {
         "php": "^7.2",
+        "ext-json": "*",
+        "ext-pdo": "*",
         "riimu/kit-phpencoder": "^2.4",
         "robmorgan/phinx": "^0.11",
         "symfony/console": "^2.8 || ^3.0 || ^4.0 || ^5.0"
