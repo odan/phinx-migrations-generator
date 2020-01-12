@@ -2,7 +2,6 @@
 
 namespace Odan\Migration\Generator;
 
-use Exception;
 use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
@@ -101,7 +100,7 @@ final class MigrationGenerator
     /**
      * Generate.
      *
-     * @throws Exception
+     * @throws InvalidArgumentException
      *
      * @return int Status
      */
@@ -188,8 +187,6 @@ final class MigrationGenerator
      *
      * @param array $settings
      *
-     * @throws Exception
-     *
      * @return mixed
      */
     private function getOldSchema(array $settings)
@@ -202,7 +199,7 @@ final class MigrationGenerator
      *
      * @param array $settings
      *
-     * @throws Exception
+     * @throws InvalidArgumentException
      *
      * @return array
      */
@@ -354,7 +351,7 @@ final class MigrationGenerator
      * @param array $schema
      * @param array $settings
      *
-     * @throws Exception
+     * @throws InvalidArgumentException
      *
      * @return void
      */
