@@ -15,9 +15,8 @@ jobs:
       mysql:
         image: mysql:5.7
         env:
-          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: phinx_test
-          MYSQL_ALLOW_EMPTY_PASSWORD: true
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
         ports:
           - 33306:3306
 
@@ -43,7 +42,7 @@ jobs:
         run: php -m
 
       - name: Create test table
-        run: mysql -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
+        run: mysql -uroot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
 
       - name: Validate composer.json and composer.lock
         run: composer validate
