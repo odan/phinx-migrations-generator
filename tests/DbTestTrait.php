@@ -123,7 +123,7 @@ trait DbTestTrait
             $options = array_replace_recursive($settings['options'], $options);
         }
 
-        $this->pdo = new PDO($settings['dsn'], 'root', 'root', $options);
+        $this->pdo = new PDO($settings['dsn'], $settings['username'], $settings['password'], $options);
 
         return $this->pdo;
     }

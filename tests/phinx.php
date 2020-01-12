@@ -5,9 +5,9 @@
 
 // Get PDO object
 $pdo = new PDO(
-    'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
+    'mysql:host=localhost;dbname=phinx_test;charset=utf8',
     'root',
-    '',
+    isset($_SERVER['GITHUB_ACTION']) ? 'root' : '',
     [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_PERSISTENT => false,
