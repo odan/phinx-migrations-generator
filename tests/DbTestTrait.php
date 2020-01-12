@@ -82,7 +82,8 @@ trait DbTestTrait
     public function getSettings(): array
     {
         print_r($_ENV);
-        echo getenv('MYSQL_ROOT_PASSWORD'). "\n";
+        print_r($_SERVER);
+        echo getenv('MYSQL_ROOT_PASSWORD') . "\n";
 
         return [
             'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
