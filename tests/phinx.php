@@ -27,7 +27,7 @@ return [
     'foreign_keys' => true,
     'environments' => [
         //'default_migration_table' => 'my_migration_table',
-        'default_database' => 'local',
+        'default_environment' => 'local',
         'local' => [
             // Database name
             'name' => $pdo->query('select database()')->fetchColumn(),
