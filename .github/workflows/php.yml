@@ -42,7 +42,7 @@ jobs:
         run: php -m
 
       - name: Start MySQL service
-        run: sudo /etc/init.d/mysql start
+        run: sudo systemctl start mysql
 
       - name: Create test database
         run: mysql -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
