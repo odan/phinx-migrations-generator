@@ -41,6 +41,9 @@ jobs:
       - name: Check PHP Extensions
         run: php -m
 
+      - name: Start MySQL service
+        run: sudo /etc/init.d/mysql start
+
       - name: Create test database
         run: mysql -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS phinx_test;'
 
