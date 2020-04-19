@@ -297,6 +297,38 @@ final class PhinxGeneratorTest extends TestCase
     }
 
     /**
+     * Test #81.
+     *
+     * @return void
+     */
+    public function testSetValues(): void
+    {
+        $this->execSql("CREATE TABLE `test`(
+            `id` INT NOT NULL AUTO_INCREMENT,
+            `myset` SET('1','abc'),
+            PRIMARY KEY (`id`))
+            ENGINE=INNODB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;");
+
+        $this->generate();
+
+        $this->execSql("ALTER TABLE `test` CHANGE `myset` `myset` SET('1','abc','new')");
+        $oldSchema = $this->getTableSchema('test');
+        $this->generateAgain();
+
+        // Reset
+        $this->dropTables();
+
+        // Run all generated migrations
+        $this->migrate();
+
+        $newSchema = $this->getTableSchema('test');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
+
+    //
+
+    /**
      * Test. #46.
      *
      * @return void

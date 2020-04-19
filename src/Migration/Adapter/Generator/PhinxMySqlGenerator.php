@@ -618,9 +618,9 @@ final class PhinxMySqlGenerator
         // Numeric attributes
         $attributes = $this->getPhinxColumnOptionsNumeric($attributes, $columnData);
 
-        // Enum values
-        if ($phinxType === 'enum') {
-            $attributes = $this->getOptionEnumValue($attributes, $columnData);
+        // Enum and set values
+        if ($phinxType === 'enum' || $phinxType === 'set') {
+            $attributes = $this->getOptionEnumAndSetValues($attributes, $columnData);
         }
 
         // Collation
@@ -841,12 +841,12 @@ final class PhinxMySqlGenerator
      *
      * @return array Attributes
      */
-    private function getOptionEnumValue(array $attributes, array $columnData): array
+    private function getOptionEnumAndSetValues(array $attributes, array $columnData): array
     {
         $match = null;
-        $pattern = '/enum\((.*)\)/';
+        $pattern = '/(enum|set)\((.*)\)/';
         if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-            $values = str_getcsv($match[1], ',', "'", '\\');
+            $values = str_getcsv($match[2], ',', "'", '\\');
             $attributes['values'] = $values;
         }
 
