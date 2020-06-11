@@ -1052,6 +1052,9 @@ final class PhinxMySqlGenerator
             if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
                 $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
             } elseif ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
+                if ($indexName !== 'PRIMARY') {
+                    $output = $this->getIndexRemove($indexName, $output);
+                }
                 $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
             }
         }
