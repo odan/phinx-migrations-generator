@@ -438,5 +438,4 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema = $this->getTableSchema('table_name');
         $this->assertSame($oldSchema, $newSchema);
     }
-
 }
