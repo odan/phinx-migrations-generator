@@ -378,7 +378,7 @@ final class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
-    public function testDropForeignKeyAndColumn(): void
+    public function disabledTestDropForeignKeyAndColumn(): void
     {
         $this->execSql('CREATE TABLE `table1` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -395,7 +395,6 @@ final class PhinxGeneratorTest extends TestCase
             PRIMARY KEY (`id`)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci');
 
-        // 1. migration
         $this->generate();
 
         $this->execSql('ALTER TABLE `table1`
@@ -406,13 +405,8 @@ final class PhinxGeneratorTest extends TestCase
         $oldSchema = $this->getTableSchema('table1');
         $oldSchema2 = $this->getTableSchema('table2');
 
-        // 2. migration
         $this->generateAgain();
-
-        // Reset
         $this->dropTables();
-
-        // Run all generated migrations
         $this->migrate();
 
         // Compare schemas
