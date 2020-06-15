@@ -4,7 +4,7 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 
 [![Latest Version on Packagist](https://img.shields.io/github/release/odan/phinx-migrations-generator.svg)](https://packagist.org/packages/odan/phinx-migrations-generator)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE.md)
-[![Build Status](https://github.com/odan/phinx-migrations-generator/workflows/php/badge.svg)](https://github.com/odan/phinx-migrations-generator/actions)
+[![Build Status](https://github.com/odan/phinx-migrations-generator/workflows/build/badge.svg)](https://github.com/odan/phinx-migrations-generator/actions)
 [![Code Coverage](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/?branch=master)
 [![Quality Score](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/odan/phinx-migrations-generator/?branch=master)
 [![Total Downloads](https://img.shields.io/packagist/dt/odan/phinx-migrations-generator.svg)](https://packagist.org/packages/odan/phinx-migrations-generator/stats)
