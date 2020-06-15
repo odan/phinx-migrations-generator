@@ -372,4 +372,54 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema2 = $this->getTableSchema('table2');
         $this->assertSame($oldSchema2, $newSchema2);
     }
+
+    /**
+     * Test.
+     *
+     * @return void
+     */
+    public function testDropForeignKeyAndColumn(): void
+    {
+        $this->execSql('CREATE TABLE `table1` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `table2_id` int(11) DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        KEY `table1_table2_id` (`table2_id`),
+        CONSTRAINT `table1_table2_id` FOREIGN KEY (`table2_id`) REFERENCES `table1` (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+      ');
+
+        $this->execSql('
+          CREATE TABLE `table2` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            PRIMARY KEY (`id`)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci');
+
+        // 1. migration
+        $this->generate();
+
+        $this->execSql('ALTER TABLE `table1`
+                    DROP COLUMN `table2_id`,
+                    DROP INDEX `table1_table2_id`,
+                    DROP FOREIGN KEY `table1_table2_id`;');
+
+        $oldSchema = $this->getTableSchema('table1');
+        $oldSchema2 = $this->getTableSchema('table2');
+
+        // 2. migration
+        $this->generateAgain();
+
+        // Reset
+        $this->dropTables();
+
+        // Run all generated migrations
+        $this->migrate();
+
+        // Compare schemas
+        $newSchema = $this->getTableSchema('table1');
+        $this->assertSame($oldSchema, $newSchema);
+
+        $newSchema2 = $this->getTableSchema('table2');
+        $this->assertSame($oldSchema2, $newSchema2);
+    }
 }
