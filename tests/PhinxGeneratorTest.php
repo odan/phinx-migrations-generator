@@ -325,9 +325,6 @@ final class PhinxGeneratorTest extends TestCase
         $this->assertSame($oldSchema, $newSchema);
     }
 
-
-    //
-
     /**
      * Test. #46.
      *
@@ -416,4 +413,30 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema2 = $this->getTableSchema('table2');
         $this->assertSame($oldSchema2, $newSchema2);
     }
+
+    /**
+     * Test #84.
+     *
+     * @return void
+     */
+    public function testDuplicateKeyName(): void
+    {
+        $this->execSql('create table table_name(id int not null) ROW_FORMAT=DYNAMIC;');
+        $this->execSql('create index table_name_id_index on table_name (id);');
+
+        $this->generate();
+
+        $this->execSql('drop index table_name_id_index on table_name;');
+        $this->execSql('create unique index table_name_id_index on table_name (id);');
+
+        $oldSchema = $this->getTableSchema('table_name');
+        $this->generateAgain();
+
+        $this->dropTables();
+        $this->migrate();
+
+        $newSchema = $this->getTableSchema('table_name');
+        $this->assertSame($oldSchema, $newSchema);
+    }
+
 }
