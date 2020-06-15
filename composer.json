@@ -24,7 +24,7 @@
         "friendsofphp/php-cs-fixer": "^2.16",
         "overtrue/phplint": "^1.1",
         "phpstan/phpstan": "^0.12",
-        "phpunit/phpunit": "^8",
+        "phpunit/phpunit": "^8 || ^9",
         "squizlabs/php_codesniffer": "^3.4"
     },
     "config": {
@@ -44,19 +44,20 @@
         "./bin/phinx-migrations"
     ],
     "scripts": {
-        "check-all": [
+        "check": [
             "@lint",
-            "@check-style",
+            "@cs:check",
+            "@sniffer:check",
             "@phpstan",
-            "@test-coverage"
+            "@test:coverage"
         ],
-        "check-cs": "php-cs-fixer fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php",
-        "check-style": "phpcs --standard=phpcs.xml",
-        "fix-cs": "php-cs-fixer fix --config=.cs.php",
-        "fix-style": "phpcbf --standard=phpcs.xml",
+        "cs:check": "php-cs-fixer fix --dry-run --format=txt --verbose --diff --diff-format=udiff --config=.cs.php",
+        "cs:fix": "php-cs-fixer fix --config=.cs.php",
         "lint": "phplint ./ --exclude=vendor --no-interaction --no-cache",
-        "phpstan": "phpstan analyse src tests --level=max -c phpstan.neon --no-progress",
+        "phpstan": "phpstan analyse src tests --level=max -c phpstan.neon --no-progress --ansi",
+        "sniffer:check": "phpcs --standard=phpcs.xml",
+        "sniffer:fix": "phpcbf --standard=phpcs.xml",
         "test": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always",
-        "test-coverage": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always --coverage-clover build/logs/clover.xml --coverage-html build/coverage"
+        "test:coverage": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always --coverage-clover build/logs/clover.xml --coverage-html build/coverage"
     }
 }
