@@ -83,6 +83,10 @@ final class PhinxMySqlGenerator
 
         $output = [];
         $output[] = '<?php';
+        if (!empty($this->options['namespace'])) {
+            $output[] = '';
+            $output[] = 'namespace ' . $this->options['namespace'] . ';';
+        }
         $output[] = '';
         $output[] = 'use Phinx\Db\Adapter\MysqlAdapter;';
         $output[] = '';

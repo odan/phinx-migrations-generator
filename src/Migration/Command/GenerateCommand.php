@@ -7,6 +7,7 @@ use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Generator\MigrationGenerator;
 use PDO;
+use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterWrapper;
 use Phinx\Db\Adapter\PdoAdapter;
@@ -199,11 +200,13 @@ final class GenerateCommand extends AbstractCommand
         $migrationsPaths = is_array($migrationsPaths) ? $migrationsPaths : (array)$migrationsPaths;
 
         // No paths? That's a problem.
-        if (empty($migrationsPaths[0])) {
+        if (empty($migrationsPaths)) {
             throw new UnexpectedValueException('No migration paths set in your Phinx configuration file.');
         }
 
-        $migrationsPath = (string)$migrationsPaths[0];
+        $key = array_key_first($migrationsPaths);
+
+        $migrationsPath = (string)$migrationsPaths[$key];
         $this->verifyMigrationDirectory($migrationsPath);
 
         $schemaFile = $config->offsetExists('schema_file') ? $config->offsetGet('schema_file') : false;
@@ -232,7 +235,7 @@ final class GenerateCommand extends AbstractCommand
             'environment' => $environment,
             'adapter' => $dbAdapter,
             'schema_file' => $schemaFile,
-            'migration_path' => $migrationsPaths[0],
+            'migration_path' => $migrationsPaths[$key],
             'foreign_keys' => $foreignKeys,
             'config_file' => $configFilePath,
             'name' => $name,
@@ -242,6 +245,7 @@ final class GenerateCommand extends AbstractCommand
             'default_migration_prefix' => $defaultMigrationPrefix,
             'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),
+            'namespace' => $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath($migrationsPaths[$key]) : null
         ];
     }
 
