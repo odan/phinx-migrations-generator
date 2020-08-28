@@ -200,7 +200,7 @@ final class GenerateCommand extends AbstractCommand
         $migrationsPaths = is_array($migrationsPaths) ? $migrationsPaths : (array)$migrationsPaths;
 
         // No paths? That's a problem.
-        if (count($migrationsPaths) === 0) {
+        if (empty($migrationsPaths)) {
             throw new UnexpectedValueException('No migration paths set in your Phinx configuration file.');
         }
 

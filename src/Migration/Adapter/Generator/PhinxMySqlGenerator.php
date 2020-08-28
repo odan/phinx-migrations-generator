@@ -83,7 +83,7 @@ final class PhinxMySqlGenerator
 
         $output = [];
         $output[] = '<?php';
-        if (!is_null($this->options['namespace'])) {
+        if (!empty($this->options['namespace'])) {
             $output[] = '';
             $output[] = 'namespace ' . $this->options['namespace'] . ';';
         }
