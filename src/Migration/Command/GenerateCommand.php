@@ -7,6 +7,7 @@ use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Generator\MigrationGenerator;
 use PDO;
+use Phinx\Config\ConfigInterface;
 use Phinx\Config\NamespaceAwareInterface;
 use Phinx\Console\Command\AbstractCommand;
 use Phinx\Db\Adapter\AdapterWrapper;
@@ -57,17 +58,43 @@ final class GenerateCommand extends AbstractCommand
     /**
      * Generate migration.
      *
-     * @param InputInterface $input
-     * @param OutputInterface $output
+     * @param InputInterface $input The input
+     * @param OutputInterface $output The output
      *
      * @throws InvalidArgumentException
      *
-     * @return int integer 0 on success, or an error code
+     * @return int The value 0 on success, or an error code
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->bootstrap($input, $output);
 
+        $environmentName = $this->getEnvironmentName($input, $output);
+        if (!$this->checkEnvironmentSettings($environmentName, $output)) {
+            return 1;
+        }
+
+        $settings = $this->getGeneratorSettings($input, $environmentName);
+
+        $output->writeln('<info>using config file</info> ' . ($settings['config_file'] ?? null));
+        $output->writeln('<info>using migration path</info> ' . ($settings['migration_path'] ?? null));
+        $output->writeln('<info>using schema file</info> ' . ($settings['schema_file'] ?? null));
+
+        $generator = $this->getMigrationGenerator($settings, $input, $output, $environmentName);
+
+        return $generator->generate();
+    }
+
+    /**
+     * Get invironment name.
+     *
+     * @param InputInterface $input The input
+     * @param OutputInterface $output The output
+     *
+     * @return string The name
+     */
+    private function getEnvironmentName(InputInterface $input, OutputInterface $output): string
+    {
         $environment = $input->getOption('environment');
         $environment = is_scalar($environment) ? (string)$environment : null;
 
@@ -82,35 +109,44 @@ final class GenerateCommand extends AbstractCommand
             throw new InvalidArgumentException('Invalid or missing environment');
         }
 
-        $envOptions = $this->getConfig()->getEnvironment($environment);
-        if (isset($envOptions['adapter']) && !$this->isAdapterSupported($envOptions['adapter'])) {
-            $output->writeln('<error>adapter not supported</error> ' . $envOptions['adapter']);
-
-            return 1;
-        }
-        if (isset($envOptions['name'])) {
-            $output->writeln('<info>using database</info> ' . $envOptions['name']);
-        } else {
-            $output->writeln('<error>Could not determine database name! Please specify a database name in your config file.</error>');
-
-            return 1;
-        }
-
-        $settings = $this->getGeneratorSettings($input, $environment);
-
-        $output->writeln('<info>using config file</info> ' . ($settings['config_file'] ?? null));
-        $output->writeln('<info>using migration path</info> ' . ($settings['migration_path'] ?? null));
-        $output->writeln('<info>using schema file</info> ' . ($settings['schema_file'] ?? null));
-
-        $generator = $this->getMigrationGenerator($settings, $input, $output, $environment);
-
-        return $generator->generate();
+        return $environment;
     }
 
     /**
-     * @param string $adapterName
+     * Check settings.
      *
-     * @return bool true if adapter with specified name is supported
+     * @param string $environmentName The env name
+     * @param OutputInterface $output The output
+     *
+     * @return bool The status
+     */
+    private function checkEnvironmentSettings(string $environmentName, OutputInterface $output): bool
+    {
+        $environmentOptions = $this->getConfig()->getEnvironment($environmentName);
+
+        if (isset($environmentOptions['adapter']) && !$this->isAdapterSupported($environmentOptions['adapter'])) {
+            $output->writeln('<error>adapter not supported</error> ' . $environmentOptions['adapter']);
+
+            return false;
+        }
+
+        if (isset($environmentOptions['name'])) {
+            $output->writeln('<info>using database</info> ' . $environmentOptions['name']);
+        } else {
+            $output->writeln('<error>Could not determine database name! Please specify a database name in your config file.</error>');
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Is adapter supported.
+     *
+     * @param string $adapterName The adapter name
+     *
+     * @return bool The value true if adapter with specified name is supported
      */
     private function isAdapterSupported(string $adapterName): bool
     {
@@ -118,9 +154,11 @@ final class GenerateCommand extends AbstractCommand
     }
 
     /**
-     * @param string $migrationsPath
+     * Get default schema path.
      *
-     * @return string Schema file path
+     * @param string $migrationsPath The path
+     *
+     * @return string The schema file path
      */
     private function getDefaultSchemaFilePath(string $migrationsPath): string
     {
@@ -130,14 +168,14 @@ final class GenerateCommand extends AbstractCommand
     /**
      * Get MigrationGenerator instance.
      *
-     * @param array $settings
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @param string $environment
+     * @param array $settings The settings
+     * @param InputInterface $input The input
+     * @param OutputInterface $output The output
+     * @param string $environment The env
      *
      * @throws UnexpectedValueException
      *
-     * @return MigrationGenerator
+     * @return MigrationGenerator The generator
      */
     private function getMigrationGenerator(
         array $settings,
@@ -160,10 +198,10 @@ final class GenerateCommand extends AbstractCommand
     /**
      * Get SchemaAdapter instance.
      *
-     * @param PDO $pdo
-     * @param OutputInterface $output
+     * @param PDO $pdo The database connection
+     * @param OutputInterface $output The output
      *
-     * @return SchemaAdapterInterface
+     * @return SchemaAdapterInterface The schema
      */
     private function getSchemaAdapter(PDO $pdo, OutputInterface $output): SchemaAdapterInterface
     {
@@ -178,12 +216,10 @@ final class GenerateCommand extends AbstractCommand
      *
      * @throws UnexpectedValueException On error
      *
-     * @return array
+     * @return array The settings
      */
     private function getGeneratorSettings(InputInterface $input, string $environment): array
     {
-        $envOptions = $this->getConfig()->getEnvironment($environment);
-
         // Load config and database adapter
         $manager = $this->getManager();
 
@@ -192,42 +228,20 @@ final class GenerateCommand extends AbstractCommand
         }
 
         $config = $manager->getConfig();
-
+        $envOptions = $config->getEnvironment($environment);
         $configFilePath = $config->getConfigFilePath();
-
-        // First, try the non-interactive option:
-        $migrationsPaths = $input->getOption('path');
-        if (empty($migrationsPaths)) {
-            $migrationsPaths = $config->getMigrationPaths();
-        }
-
-        $migrationsPaths = is_array($migrationsPaths) ? $migrationsPaths : (array)$migrationsPaths;
-
-        // No paths? That's a problem.
-        if (empty($migrationsPaths)) {
-            throw new UnexpectedValueException('No migration paths set in your Phinx configuration file.');
-        }
-
-        $key = array_key_first($migrationsPaths);
-
-        $migrationsPath = (string)$migrationsPaths[$key];
-        $this->verifyMigrationDirectory($migrationsPath);
-
-        $schemaFile = $config->offsetExists('schema_file') ? $config->offsetGet('schema_file') : false;
-        if (!$schemaFile) {
-            $schemaFile = $this->getDefaultSchemaFilePath($migrationsPath);
-        }
-
-        // Gets the database adapter.
+        $migrationsPath = $this->getMigrationPath($input, $config);
+        $schemaFile = $config['schema_file'] ?? $this->getDefaultSchemaFilePath($migrationsPath);
         $dbAdapter = $manager->getEnvironment($environment)->getAdapter();
-
         $pdo = $this->getPdo($manager, $environment);
-
-        $foreignKeys = $config->offsetExists('foreign_keys') ? $config->offsetGet('foreign_keys') : false;
-        $defaultMigrationPrefix = $config->offsetExists('default_migration_prefix') ? $config->offsetGet('default_migration_prefix') : null;
-        $generateMigrationName = $config->offsetExists('generate_migration_name') ? $config->offsetGet('generate_migration_name') : false;
-        $markMigration = $config->offsetExists('mark_generated_migration') ? $config->offsetGet('mark_generated_migration') : true;
+        $foreignKeys = $config['foreign_keys'] ?? false;
+        $defaultMigrationPrefix = $config['default_migration_prefix'] ?? null;
+        $generateMigrationName = $config['generate_migration_name'] ?? false;
+        $markMigration = $config['mark_generated_migration'] ?? true;
         $defaultMigrationTable = $envOptions['default_migration_table'] ?? 'phinxlog';
+        $namespace = $config instanceof NamespaceAwareInterface ?
+            $config->getMigrationNamespaceByPath($migrationsPath) :
+            null;
 
         return [
             'pdo' => $pdo,
@@ -236,7 +250,7 @@ final class GenerateCommand extends AbstractCommand
             'adapter' => $dbAdapter,
             'schema_file' => $schemaFile,
             'migration_path' => $migrationsPath,
-            'foreign_keys' => $foreignKeys,
+            'foreign_keys' => (bool)$foreignKeys,
             'config_file' => $configFilePath,
             'name' => $input->getOption('name'),
             'overwrite' => $input->getOption('overwrite'),
@@ -245,8 +259,40 @@ final class GenerateCommand extends AbstractCommand
             'default_migration_prefix' => $defaultMigrationPrefix,
             'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),
-            'namespace' => $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath($migrationsPath) : null,
+            'namespace' => $namespace,
         ];
+    }
+
+    /**
+     * Get migration path.
+     *
+     * @param InputInterface $input The input
+     * @param ConfigInterface $config The config
+     *
+     * @throws UnexpectedValueException
+     *
+     * @return string The path
+     */
+    private function getMigrationPath(InputInterface $input, ConfigInterface $config): string
+    {
+        // First, try the non-interactive option:
+        $migrationsPaths = $input->getOption('path');
+        if (empty($migrationsPaths)) {
+            $migrationsPaths = $config->getMigrationPaths();
+        }
+
+        $migrationsPaths = (array)$migrationsPaths;
+
+        // No paths? That's a problem.
+        if (empty($migrationsPaths)) {
+            throw new UnexpectedValueException('No migration paths set in your Phinx configuration file.');
+        }
+
+        $key = array_key_first($migrationsPaths);
+        $migrationsPath = (string)$migrationsPaths[$key];
+        $this->verifyMigrationDirectory($migrationsPath);
+
+        return $migrationsPath;
     }
 
     /**
