@@ -114,13 +114,13 @@ final class PhinxMySqlGenerator
 
         if (!empty($this->options['namespace'])) {
             $output[] = '';
-            $output[] = 'namespace ' . $this->options['namespace'] . ';';
+            $output[] = sprintf('namespace %s;', $this->options['namespace']);
         }
 
         $output[] = '';
         $output[] = 'use Phinx\Db\Adapter\MysqlAdapter;';
         $output[] = '';
-        $output[] = sprintf('class %s extends ' . $className, $name);
+        $output[] = sprintf('class %s extends %s', $name, $className);
         $output[] = '{';
         $output = $this->addChangeMethod($output, $newSchema, $oldSchema);
         $output[] = '}';
