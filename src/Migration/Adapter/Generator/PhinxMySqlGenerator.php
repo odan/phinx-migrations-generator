@@ -5,7 +5,6 @@ namespace Odan\Migration\Adapter\Generator;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Utility\ArrayUtil;
 use Phinx\Db\Adapter\AdapterInterface;
-use Riimu\Kit\PHPEncoder\PHPEncoder;
 
 /**
  * PhinxMySqlGenerator.
@@ -18,6 +17,11 @@ final class PhinxMySqlGenerator
      * @var SchemaAdapterInterface
      */
     private $dba;
+
+    /**
+     * @var ArrayUtil
+     */
+    private $array;
 
     /**
      * Options.
@@ -49,14 +53,15 @@ final class PhinxMySqlGenerator
     private $ind3 = '            ';
 
     /**
-     * Constructor.
+     * The constructor.
      *
-     * @param SchemaAdapterInterface $dba
-     * @param mixed $options Options
+     * @param SchemaAdapterInterface $dba The schema adapter
+     * @param array $options The options
      */
-    public function __construct(SchemaAdapterInterface $dba, $options = [])
+    public function __construct(SchemaAdapterInterface $dba, array $options = [])
     {
         $this->dba = $dba;
+        $this->array = new ArrayUtil();
 
         $default = [
             // Experimental foreign key support.
@@ -72,12 +77,12 @@ final class PhinxMySqlGenerator
      * Create migration.
      *
      * @param string $name Name of the migration
-     * @param array $newSchema
-     * @param array $oldSchema
+     * @param array $newSchema The new schema
+     * @param array $oldSchema The old schema
      *
-     * @return string PHP code
+     * @return string The PHP code
      */
-    public function createMigration($name, $newSchema, $oldSchema): string
+    public function createMigration(string $name, array $newSchema, array $oldSchema): string
     {
         $className = $this->options['migration_base_class'] ?? '\Phinx\Migration\AbstractMigration';
 
@@ -108,7 +113,7 @@ final class PhinxMySqlGenerator
      *
      * @return string[] Output
      */
-    private function addChangeMethod($output, $new, $old): array
+    private function addChangeMethod(array $output, array $new, array $old): array
     {
         $output[] = $this->ind . 'public function change()';
         $output[] = $this->ind . '{';
@@ -149,21 +154,21 @@ final class PhinxMySqlGenerator
     /**
      * Get table migration (new database).
      *
-     * @param array $output
-     * @param array $new
-     * @param array $old
+     * @param array $output The outout
+     * @param array $new The new schema
+     * @param array $old The old schema
      *
-     * @return array
+     * @return array The new outout
      */
-    private function getTableMigrationNewDatabase($output, $new, $old): array
+    private function getTableMigrationNewDatabase(array $output, array $new, array $old): array
     {
         if (empty($new['database'])) {
             return $output;
         }
-        if ($this->neq($new, $old, ['database', 'default_character_set_name'])) {
+        if ($this->array->neq($new, $old, ['database', 'default_character_set_name'])) {
             $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
         }
-        if ($this->neq($new, $old, ['database', 'default_collation_name'])) {
+        if ($this->array->neq($new, $old, ['database', 'default_collation_name'])) {
             $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
         }
 
@@ -171,65 +176,14 @@ final class PhinxMySqlGenerator
     }
 
     /**
-     * Compare array (not).
-     *
-     * @param array $arr
-     * @param array $arr2
-     * @param array $keys
-     *
-     * @return bool
-     */
-    private function neq($arr, $arr2, $keys): bool
-    {
-        return !$this->eq($arr, $arr2, $keys);
-    }
-
-    /**
-     * Compare array.
-     *
-     * @param array $arr
-     * @param array $arr2
-     * @param array $keys
-     *
-     * @return bool
-     */
-    private function eq($arr, $arr2, $keys): bool
-    {
-        $val1 = $this->find($arr, $keys);
-        $val2 = $this->find($arr2, $keys);
-
-        return $val1 === $val2;
-    }
-
-    /**
-     * Get array value by keys.
-     *
-     * @param array $array
-     * @param array $parts
-     *
-     * @return mixed
-     */
-    private function find($array, $parts)
-    {
-        foreach ($parts as $part) {
-            if (!array_key_exists($part, $array)) {
-                return null;
-            }
-            $array = $array[$part];
-        }
-
-        return $array;
-    }
-
-    /**
      * Generate alter database charset.
      *
-     * @param string $charset
-     * @param string $database
+     * @param string $charset The charset
+     * @param string|null $database The database name
      *
-     * @return string
+     * @return string The sql
      */
-    private function getAlterDatabaseCharset($charset, $database = null): string
+    private function getAlterDatabaseCharset(string $charset, string $database = null): string
     {
         if ($database !== null) {
             $database = ' ' . $this->dba->ident($database);
@@ -242,12 +196,12 @@ final class PhinxMySqlGenerator
     /**
      * Generate alter database collate.
      *
-     * @param string $collate
-     * @param string $database
+     * @param string $collate The collate
+     * @param string|null $database The database name
      *
-     * @return string
+     * @return string The sql
      */
-    private function getAlterDatabaseCollate($collate, $database = null): string
+    private function getAlterDatabaseCollate(string $collate, string $database = null): string
     {
         if ($database) {
             $database = ' ' . $this->dba->ident($database);
@@ -268,15 +222,13 @@ final class PhinxMySqlGenerator
      */
     private function getTableMigrationTables(array $output, array $new, array $old): array
     {
-        $arrayUtil = new ArrayUtil();
-
         foreach ($new['tables'] ?? [] as $tableName => $table) {
             if ($tableName === $this->options['default_migration_table']) {
                 continue;
             }
 
-            $tableDiffs = $arrayUtil->diff($new['tables'][$tableName] ?? [], $old['tables'][$tableName] ?? []);
-            $tableDiffsRemove = $arrayUtil->diff($old['tables'][$tableName] ?? [], $new['tables'][$tableName] ?? []);
+            $tableDiffs = $this->array->diff($new['tables'][$tableName] ?? [], $old['tables'][$tableName] ?? []);
+            $tableDiffsRemove = $this->array->diff($old['tables'][$tableName] ?? [], $new['tables'][$tableName] ?? []);
 
             if ($tableDiffs || $tableDiffsRemove) {
                 $output[] = $this->getTableVariable($table, $tableName);
@@ -307,10 +259,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate create table variable.
      *
-     * @param array $table
-     * @param string $tableName
+     * @param array $table The table
+     * @param string $tableName The table name
      *
-     * @return string
+     * @return string The code
      */
     private function getTableVariable(array $table, string $tableName): string
     {
@@ -322,9 +274,9 @@ final class PhinxMySqlGenerator
     /**
      * Get table options.
      *
-     * @param array $table
+     * @param array $table The table
      *
-     * @return string
+     * @return string The code
      */
     private function getTableOptions(array $table): string
     {
@@ -347,16 +299,16 @@ final class PhinxMySqlGenerator
         // row_format
         $attributes = $this->getPhinxTableRowFormat($attributes, $table);
 
-        return $this->prettifyArray($attributes, 3);
+        return $this->array->prettifyArray($attributes, 3);
     }
 
     /**
      * Define table id value.
      *
-     * @param array $attributes
-     * @param array $table
+     * @param array $attributes The attributes
+     * @param array $table The table
      *
-     * @return array Attributes
+     * @return array The new attributes
      */
     private function getPhinxTablePrimaryKey(array $attributes, array $table): array
     {
@@ -373,9 +325,9 @@ final class PhinxMySqlGenerator
     /**
      * Collect alternate primary keys.
      *
-     * @param array $table
+     * @param array $table The table
      *
-     * @return array
+     * @return array The keys
      */
     private function getPrimaryKeys(array $table): array
     {
@@ -395,10 +347,10 @@ final class PhinxMySqlGenerator
     /**
      * Define table engine (defaults to InnoDB).
      *
-     * @param array $attributes
-     * @param array $table
+     * @param array $attributes The attributes
+     * @param array $table The table
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxTableEngine(array $attributes, array $table): array
     {
@@ -414,10 +366,10 @@ final class PhinxMySqlGenerator
     /**
      * Define table character set (defaults to utf8).
      *
-     * @param array $attributes
-     * @param array $table
+     * @param array $attributes The attributes
+     * @param array $table The table
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxTableEncoding(array $attributes, array $table): array
     {
@@ -433,10 +385,10 @@ final class PhinxMySqlGenerator
     /**
      * Define table collation (defaults to `utf8_general_ci`).
      *
-     * @param array $attributes
-     * @param array $table
+     * @param array $attributes The attributes
+     * @param array $table The table
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxTableCollation(array $attributes, array $table): array
     {
@@ -452,10 +404,10 @@ final class PhinxMySqlGenerator
     /**
      * Set a text comment on the table.
      *
-     * @param array $attributes
-     * @param array $table
+     * @param array $attributes The attributes
+     * @param array $table The table
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxTableComment(array $attributes, array $table): array
     {
@@ -471,10 +423,10 @@ final class PhinxMySqlGenerator
     /**
      * Get table for format.
      *
-     * @param array $attributes
-     * @param array $table
+     * @param array $attributes The attributes
+     * @param array $table The table
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxTableRowFormat(array $attributes, array $table): array
     {
@@ -507,16 +459,14 @@ final class PhinxMySqlGenerator
             return $output;
         }
 
-        $array = new ArrayUtil();
-
         // Remove not used keys
-        $array->unsetArrayKeys($new, 'COLUMN_KEY');
-        $array->unsetArrayKeys($old, 'COLUMN_KEY');
+        $this->array->unsetArrayKeys($new, 'COLUMN_KEY');
+        $this->array->unsetArrayKeys($old, 'COLUMN_KEY');
 
         foreach ($table['columns'] as $columnName => $columnData) {
             if (!isset($old['tables'][$tableName]['columns'][$columnName])) {
                 $output[] = $this->getColumnCreateAddNoUpdate($new, $tableName, $columnName);
-            } elseif ($this->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
+            } elseif ($this->array->neq($new, $old, ['tables', $tableName, 'columns', $columnName])) {
                 $output[] = $this->getColumnUpdate($new, $tableName, $columnName);
             }
         }
@@ -527,11 +477,11 @@ final class PhinxMySqlGenerator
     /**
      * Generate column create.
      *
-     * @param array $schema
-     * @param string $tableName
-     * @param string $columnName
+     * @param array $schema The schema
+     * @param string $tableName The table name
+     * @param string $columnName The column name
      *
-     * @return string[]
+     * @return string[] The table specification
      */
     private function getColumnCreate(array $schema, string $tableName, string $columnName): array
     {
@@ -546,9 +496,9 @@ final class PhinxMySqlGenerator
     /**
      * Map MySql data type to Phinx\Db\Adapter\AdapterInterface::PHINX_TYPE_*.
      *
-     * @param array $columnData
+     * @param array $columnData The column type
      *
-     * @return string
+     * @return string The type
      */
     private function getPhinxColumnType(array $columnData): string
     {
@@ -579,16 +529,14 @@ final class PhinxMySqlGenerator
     /**
      * Get column type.
      *
-     * @param array $columnData
+     * @param array $columnData The column data
      *
-     * @return string
+     * @return string The type
      */
     private function getMySQLColumnType(array $columnData): string
     {
-        $type = $columnData['COLUMN_TYPE'];
-        $pattern = '/^[a-z]+/';
         $match = null;
-        preg_match($pattern, $type, $match);
+        preg_match('/^[a-z]+/', $columnData['COLUMN_TYPE'], $match);
 
         return $match[0];
     }
@@ -598,11 +546,11 @@ final class PhinxMySqlGenerator
      *
      * https://media.readthedocs.org/pdf/phinx/latest/phinx.pdf
      *
-     * @param string $phinxType
-     * @param array $columnData
-     * @param array $columns
+     * @param string $phinxType The phinx type
+     * @param array $columnData The column data
+     * @param array $columns The columns
      *
-     * @return string
+     * @return string THe code
      */
     private function getPhinxColumnOptions(string $phinxType, array $columnData, array $columns): string
     {
@@ -639,16 +587,16 @@ final class PhinxMySqlGenerator
         // After: specify the column that a new column should be placed after
         $attributes = $this->getPhinxColumnOptionsAfter($attributes, $columnData, $columns);
 
-        return $this->prettifyArray($attributes, 3);
+        return $this->array->prettifyArray($attributes, 3);
     }
 
     /**
      * Generate phinx column options (null).
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return string[] Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnOptionsNull(array $attributes, array $columnData): array
     {
@@ -665,10 +613,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate phinx column options (default value).
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnOptionsDefault(array $attributes, array $columnData): array
     {
@@ -687,10 +635,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate phinx column options (update).
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnOptionsTimestamp(array $attributes, array $columnData): array
     {
@@ -706,10 +654,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate phinx column options (update).
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnOptionsLimit(array $attributes, array $columnData): array
     {
@@ -733,52 +681,29 @@ final class PhinxMySqlGenerator
         $limit = '0';
         $type = $this->getMySQLColumnType($columnData);
 
-        switch ($type) {
-            case 'int':
-                $limit = 'MysqlAdapter::INT_REGULAR';
-                break;
-            case 'tinyint':
-                $limit = 'MysqlAdapter::INT_TINY';
-                break;
-            case 'smallint':
-                $limit = 'MysqlAdapter::INT_SMALL';
-                break;
-            case 'mediumint':
-                $limit = 'MysqlAdapter::INT_MEDIUM';
-                break;
-            case 'bigint':
-                $limit = 'MysqlAdapter::INT_BIG';
-                break;
-            case 'tinytext':
-                $limit = 'MysqlAdapter::TEXT_TINY';
-                break;
-            case 'mediumtext':
-                $limit = 'MysqlAdapter::TEXT_MEDIUM';
-                break;
-            case 'longtext':
-                $limit = 'MysqlAdapter::TEXT_LONG';
-                break;
-            case 'longblob':
-                $limit = 'MysqlAdapter::BLOB_LONG';
-                break;
-            case 'mediumblob':
-                $limit = 'MysqlAdapter::BLOB_MEDIUM';
-                break;
-            case 'blob':
-                $limit = 'MysqlAdapter::BLOB_REGULAR';
-                break;
-            case 'tinyblob':
-                $limit = 'MysqlAdapter::BLOB_TINY';
-                break;
-            default:
-                if (!empty($columnData['CHARACTER_MAXIMUM_LENGTH'])) {
-                    $limit = $columnData['CHARACTER_MAXIMUM_LENGTH'];
-                } else {
-                    $pattern = '/\((\d+)\)/';
-                    if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-                        $limit = $match[1];
-                    }
-                }
+        $mappings = [
+            'int' => 'MysqlAdapter::INT_REGULAR',
+            'tinyint' => 'MysqlAdapter::INT_TINY',
+            'smallint' => 'MysqlAdapter::INT_SMALL',
+            'mediumint' => 'MysqlAdapter::INT_MEDIUM',
+            'bigint' => 'MysqlAdapter::INT_BIG',
+            'tinytext' => 'MysqlAdapter::TEXT_TINY',
+            'mediumtext' => 'MysqlAdapter::TEXT_MEDIUM',
+            'longtext' => 'MysqlAdapter::TEXT_LONG',
+            'longblob' => 'MysqlAdapter::BLOB_LONG',
+            'mediumblob' => 'MysqlAdapter::BLOB_MEDIUM',
+            'blob' => 'MysqlAdapter::BLOB_REGULAR',
+            'tinyblob' => 'MysqlAdapter::BLOB_TINY',
+        ];
+
+        $adapterConst = $mappings[$type] ?? null;
+
+        if ($adapterConst) {
+            $limit = $adapterConst;
+        } elseif (!empty($columnData['CHARACTER_MAXIMUM_LENGTH'])) {
+            $limit = $columnData['CHARACTER_MAXIMUM_LENGTH'];
+        } elseif (preg_match('/\((\d+)\)/', $columnData['COLUMN_TYPE'], $match) === 1) {
+            $limit = $match[1];
         }
 
         return $limit;
@@ -787,10 +712,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate phinx column options (default value).
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnOptionsNumeric(array $attributes, array $columnData): array
     {
@@ -840,10 +765,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate option enum values.
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getOptionEnumAndSetValues(array $attributes, array $columnData): array
     {
@@ -860,11 +785,11 @@ final class PhinxMySqlGenerator
     /**
      * Set collation that differs from table defaults (only applies to MySQL).
      *
-     * @param string $phinxType
-     * @param array $attributes
-     * @param array $columnData
+     * @param string $phinxType The phinx type
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnCollation(string $phinxType, array $attributes, array $columnData): array
     {
@@ -887,11 +812,11 @@ final class PhinxMySqlGenerator
     /**
      * Set character set that differs from table defaults *(only applies to MySQL)* (only applies to MySQL).
      *
-     * @param string $phinxType
-     * @param array $attributes
-     * @param array $columnData
+     * @param string $phinxType The phinx type
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnEncoding(string $phinxType, array $attributes, array $columnData): array
     {
@@ -914,10 +839,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate phinx column options (comment).
      *
-     * @param array $attributes
-     * @param array $columnData
+     * @param array $attributes The attributes
+     * @param array $columnData The column data
      *
-     * @return array Attributes
+     * @return array The attributes
      */
     private function getPhinxColumnOptionsComment(array $attributes, array $columnData): array
     {
@@ -1055,7 +980,7 @@ final class PhinxMySqlGenerator
         foreach ($table['indexes'] as $indexName => $indexSequences) {
             if (!isset($old['tables'][$tableName]['indexes'][$indexName])) {
                 $output = $this->getIndexCreate($output, $new, $tableName, $indexName);
-            } elseif ($this->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
+            } elseif ($this->array->neq($new, $old, ['tables', $tableName, 'indexes', $indexName])) {
                 if ($indexName !== 'PRIMARY') {
                     $output = $this->getIndexRemove($indexName, $output);
                 }
@@ -1106,7 +1031,7 @@ final class PhinxMySqlGenerator
      *
      * @param array $indexSequences
      *
-     * @return string
+     * @return string The code
      */
     private function getIndexFields(array $indexSequences): string
     {
@@ -1115,7 +1040,7 @@ final class PhinxMySqlGenerator
             $indexFields[] = $indexData['Column_name'];
         }
 
-        return $this->prettifyArray($indexFields, 3);
+        return $this->array->prettifyArray($indexFields, 3);
     }
 
     /**
@@ -1123,7 +1048,7 @@ final class PhinxMySqlGenerator
      *
      * @param array $indexData
      *
-     * @return string
+     * @return string The code
      */
     private function getIndexOptions(array $indexData): string
     {
@@ -1150,7 +1075,7 @@ final class PhinxMySqlGenerator
 
         $result = '';
         if (!empty($tableOptions)) {
-            $result = $this->prettifyArray($tableOptions, 3);
+            $result = $this->array->prettifyArray($tableOptions, 3);
         }
 
         return $result;
@@ -1256,10 +1181,10 @@ final class PhinxMySqlGenerator
     /**
      * Generate foreign key options.
      *
-     * @param array $fkData
-     * @param string $fkName
+     * @param array $fkData The foreign key data
+     * @param string|null $fkName The foreign key name
      *
-     * @return string
+     * @return string The code
      */
     private function getForeignKeyOptions(array $fkData, string $fkName = null): string
     {
@@ -1274,7 +1199,7 @@ final class PhinxMySqlGenerator
             $tableOptions['delete'] = $this->getForeignKeyRuleValue($fkData['DELETE_RULE']);
         }
 
-        return $this->prettifyArray($tableOptions, 3);
+        return $this->array->prettifyArray($tableOptions, 3);
     }
 
     /**
@@ -1286,21 +1211,14 @@ final class PhinxMySqlGenerator
      */
     private function getForeignKeyRuleValue(string $value): string
     {
-        $value = strtolower($value);
-        if ($value === 'no action') {
-            return 'NO_ACTION';
-        }
-        if ($value === 'cascade') {
-            return 'CASCADE';
-        }
-        if ($value === 'restrict') {
-            return 'RESTRICT';
-        }
-        if ($value === 'set null') {
-            return 'SET_NULL';
-        }
+        $mappings = [
+            'no action' => 'NO_ACTION',
+            'cascade' => 'CASCADE',
+            'restrict' => 'RESTRICT',
+            'set null' => 'SET_NULL',
+        ];
 
-        return 'NO_ACTION';
+        return $mappings[strtolower($value)] ?? 'NO_ACTION';
     }
 
     /**
@@ -1334,34 +1252,12 @@ final class PhinxMySqlGenerator
     /**
      * Generate drop table.
      *
-     * @param string $table
+     * @param string $table The table
      *
-     * @return string
+     * @return string The code
      */
     private function getDropTable(string $table): string
     {
         return sprintf('%s$this->table(\'%s\')->drop()->save();', $this->ind2, $table);
-    }
-
-    /**
-     * Prettify array.
-     *
-     * @param array $variable Array to prettify
-     * @param int $tabCount Initial tab count
-     *
-     * @return string
-     */
-    private function prettifyArray(array $variable, int $tabCount): string
-    {
-        $encoder = new PHPEncoder();
-
-        return $encoder->encode($variable, [
-            'array.base' => $tabCount * 4,
-            'array.inline' => true,
-            'array.indent' => 4,
-            'array.eol' => "\n",
-            'string.escape' => false,
-            'string.utf8' => true,
-        ]);
     }
 }

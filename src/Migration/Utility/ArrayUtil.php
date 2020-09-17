@@ -2,6 +2,8 @@
 
 namespace Odan\Migration\Utility;
 
+use Riimu\Kit\PHPEncoder\PHPEncoder;
+
 /**
  * Class ArrayUtil.
  */
@@ -54,5 +56,78 @@ final class ArrayUtil
         }
 
         return $difference;
+    }
+
+    /**
+     * Compare array (not).
+     *
+     * @param array $arr
+     * @param array $arr2
+     * @param array $keys
+     *
+     * @return bool
+     */
+    public function neq($arr, $arr2, $keys): bool
+    {
+        return !$this->eq($arr, $arr2, $keys);
+    }
+
+    /**
+     * Compare array.
+     *
+     * @param array $arr
+     * @param array $arr2
+     * @param array $keys
+     *
+     * @return bool
+     */
+    private function eq($arr, $arr2, $keys): bool
+    {
+        $val1 = $this->find($arr, $keys);
+        $val2 = $this->find($arr2, $keys);
+
+        return $val1 === $val2;
+    }
+
+    /**
+     * Get array value by keys.
+     *
+     * @param array $array
+     * @param array $parts
+     *
+     * @return mixed
+     */
+    private function find($array, $parts)
+    {
+        foreach ($parts as $part) {
+            if (!array_key_exists($part, $array)) {
+                return null;
+            }
+            $array = $array[$part];
+        }
+
+        return $array;
+    }
+
+    /**
+     * Prettify array.
+     *
+     * @param array $variable Array to prettify
+     * @param int $tabCount Initial tab count
+     *
+     * @return string
+     */
+    public function prettifyArray(array $variable, int $tabCount): string
+    {
+        $encoder = new PHPEncoder();
+
+        return $encoder->encode($variable, [
+            'array.base' => $tabCount * 4,
+            'array.inline' => true,
+            'array.indent' => 4,
+            'array.eol' => "\n",
+            'string.escape' => false,
+            'string.utf8' => true,
+        ]);
     }
 }
