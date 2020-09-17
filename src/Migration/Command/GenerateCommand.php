@@ -139,8 +139,12 @@ final class GenerateCommand extends AbstractCommand
      *
      * @return MigrationGenerator
      */
-    private function getMigrationGenerator(array $settings, InputInterface $input, OutputInterface $output, string $environment): MigrationGenerator
-    {
+    private function getMigrationGenerator(
+        array $settings,
+        InputInterface $input,
+        OutputInterface $output,
+        string $environment
+    ): MigrationGenerator {
         $manager = $this->getManager();
 
         if (!$manager) {
@@ -223,11 +227,7 @@ final class GenerateCommand extends AbstractCommand
         $defaultMigrationPrefix = $config->offsetExists('default_migration_prefix') ? $config->offsetGet('default_migration_prefix') : null;
         $generateMigrationName = $config->offsetExists('generate_migration_name') ? $config->offsetGet('generate_migration_name') : false;
         $markMigration = $config->offsetExists('mark_generated_migration') ? $config->offsetGet('mark_generated_migration') : true;
-
         $defaultMigrationTable = $envOptions['default_migration_table'] ?? 'phinxlog';
-
-        $name = $input->getOption('name');
-        $overwrite = $input->getOption('overwrite');
 
         return [
             'pdo' => $pdo,
@@ -235,17 +235,17 @@ final class GenerateCommand extends AbstractCommand
             'environment' => $environment,
             'adapter' => $dbAdapter,
             'schema_file' => $schemaFile,
-            'migration_path' => $migrationsPaths[$key],
+            'migration_path' => $migrationsPath,
             'foreign_keys' => $foreignKeys,
             'config_file' => $configFilePath,
-            'name' => $name,
-            'overwrite' => $overwrite,
+            'name' => $input->getOption('name'),
+            'overwrite' => $input->getOption('overwrite'),
             'mark_migration' => $markMigration,
             'default_migration_table' => $defaultMigrationTable,
             'default_migration_prefix' => $defaultMigrationPrefix,
             'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),
-            'namespace' => $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath($migrationsPaths[$key]) : null,
+            'namespace' => $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath($migrationsPath) : null,
         ];
     }
 
