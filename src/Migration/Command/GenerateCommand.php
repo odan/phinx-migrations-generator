@@ -245,7 +245,7 @@ final class GenerateCommand extends AbstractCommand
             'default_migration_prefix' => $defaultMigrationPrefix,
             'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),
-            'namespace' => $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath($migrationsPaths[$key]) : null
+            'namespace' => $config instanceof NamespaceAwareInterface ? $config->getMigrationNamespaceByPath($migrationsPaths[$key]) : null,
         ];
     }
 
