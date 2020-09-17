@@ -140,7 +140,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @param string $dbName
      *
-     * @return array
+     * @return array The schema
      */
     private function getDatabaseSchemata(string $dbName): array
     {
@@ -157,9 +157,9 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     /**
      * Quote value.
      *
-     * @param string|null $value
+     * @param string|null $value The value
      *
-     * @return string
+     * @return string The quotes string
      */
     public function quote(?string $value): string
     {
@@ -173,15 +173,15 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     /**
      * Quote array of values.
      *
-     * @param array|string|null $values
+     * @param array $values The values
      *
-     * @return string[]
+     * @return string[] The quotes values
      */
-    public function quoteArray($values): array
+    public function quoteArray(array $values): array
     {
         return array_map(function ($value) {
             return $this->quote($value);
-        }, (array)$values);
+        }, $values);
     }
 
     /**
@@ -191,7 +191,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    private function getTables($tableNames = null): array
+    private function getTables(array $tableNames = null): array
     {
         $result = [];
         $sql = "SELECT *
@@ -265,7 +265,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    private function getIndexHash($tableNames): array
+    private function getIndexHash(array $tableNames): array
     {
         if (empty($tableNames)) {
             return [];
@@ -288,8 +288,10 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
                 FROM information_schema.statistics
                     WHERE table_schema=database()
                     AND table_name in (%s)", implode(',', $quotedNames));
+
         $rows = $this->queryFetchAll($sql);
         $result = [];
+
         foreach ($rows as $row) {
             $tableName = $row['Table'];
             $name = $row['Key_name'];
@@ -332,7 +334,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array|null
      */
-    private function getForeignKeysHash($tableNames): ?array
+    private function getForeignKeysHash(array $tableNames): ?array
     {
         if (empty($tableNames)) {
             return [];

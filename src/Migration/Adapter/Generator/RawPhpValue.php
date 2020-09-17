@@ -3,7 +3,7 @@
 namespace Odan\Migration\Adapter\Generator;
 
 /**
- * Class RawPhpValue.
+ * A raw PHP value.
  */
 final class RawPhpValue
 {
@@ -13,7 +13,7 @@ final class RawPhpValue
     private $value;
 
     /**
-     * Constructor.
+     * The constructor.
      *
      * @param string $value
      */
