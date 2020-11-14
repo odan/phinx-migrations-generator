@@ -438,4 +438,26 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema = $this->getTableSchema('table_name');
         $this->assertSame($oldSchema, $newSchema);
     }
+
+    /**
+     * Test #90.
+     *
+     * @return void
+     */
+    public function testCreateTableWithDefaultColumn(): void
+    {
+        $this->execSql("CREATE TABLE `table` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `version` varchar (255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'v1.0.0',
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+
+        $oldSchema = $this->getTableSchema('table');
+        $this->generate();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table');
+        $this->assertSame($oldSchema, $newSchema);
+    }
 }
