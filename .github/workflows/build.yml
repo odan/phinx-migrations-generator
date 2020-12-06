@@ -60,11 +60,7 @@ jobs:
 
       - name: Run test suite for PHP 7.2
         if: matrix.php-versions == '7.2'
-        - run: composer lint
-        - run: cs:check
-        - run: sniffer:check
-        - run: phpstan
-        - run: test:scrutinizer
+        run: composer lint && cs:check && sniffer:check && phpstan && test:scrutinizer
 
       - name: Run test suite
         if: matrix.php-versions > '7.2'
