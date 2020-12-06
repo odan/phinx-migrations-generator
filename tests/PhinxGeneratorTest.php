@@ -19,7 +19,7 @@ final class PhinxGeneratorTest extends TestCase
      *
      * @return void
      */
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $settings = $this->getSettings();
         $output = new NullOutput();
@@ -38,11 +38,11 @@ final class PhinxGeneratorTest extends TestCase
     /**
      * Read php file.
      *
-     * @param string $filename
+     * @param string $filename The filename
      *
-     * @return mixed
+     * @return mixed The value
      */
-    private function read($filename)
+    private function read(string $filename)
     {
         return require $filename;
     }

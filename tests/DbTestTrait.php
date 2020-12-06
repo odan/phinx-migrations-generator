@@ -188,14 +188,12 @@ trait DbTestTrait
      */
     private function existsTable(string $table): bool
     {
-        $pdo = $this->getPdo();
-
         $sql = 'SELECT TABLE_NAME
                 FROM information_schema.tables
                 WHERE table_schema = database()
                 AND TABLE_NAME = :table_name';
 
-        $statement = $pdo->prepare($sql);
+        $statement = $this->createPreparedStatement($sql);
         $statement->execute(['table_name' => $table]);
         $row = $statement->fetch();
 
@@ -234,6 +232,26 @@ trait DbTestTrait
     private function createQueryStatement(string $sql): PDOStatement
     {
         $statement = $this->getPdo()->query($sql);
+
+        if (!$statement instanceof PDOStatement) {
+            throw new UnexpectedValueException('Invalid statement');
+        }
+
+        return $statement;
+    }
+
+    /**
+     * Create a new PDO statement.
+     *
+     * @param string $sql The sql
+     *
+     * @throws UnexpectedValueException
+     *
+     * @return PDOStatement The statement
+     */
+    private function createPreparedStatement(string $sql): PDOStatement
+    {
+        $statement = $this->getPdo()->prepare($sql);
 
         if (!$statement instanceof PDOStatement) {
             throw new UnexpectedValueException('Invalid statement');

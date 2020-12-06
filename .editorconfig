@@ -16,19 +16,12 @@ end_of_line = crlf
 
 [*.xml]
 indent_style = tab
-indent_size = 4
 
 [*.neon]
 indent_style = tab
-indent_size = 4
 
-[*.{yaml,yml}]
-indent_style = space
+[*.{yaml, yml}]
 indent_size = 2
-
-[composer.json]
-indent_style = space
-indent_size = 4
 
 [*.md]
 trim_trailing_whitespace = false

@@ -18,7 +18,7 @@ final class GenerateCommandTest extends TestCase
      *
      * @return void
      */
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $this->expectException(Exception::class);
 
@@ -29,6 +29,6 @@ final class GenerateCommandTest extends TestCase
         $commandTester = new CommandTester($command);
         $commandTester->execute(['command' => $command->getName()]);
 
-        $this->assertRegExp('/.../', $commandTester->getDisplay());
+        $this->assertMatchesRegularExpression('/.../', $commandTester->getDisplay());
     }
 }
