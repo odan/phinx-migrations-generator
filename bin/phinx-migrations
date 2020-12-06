@@ -9,7 +9,7 @@ if (!(class_exists('Composer\\Autoload\\ClassLoader', false))) {
     } elseif (file_exists(__DIR__ . '/../vendor/autoload.php')) {
         require_once __DIR__ . '/../vendor/autoload.php';
     } else {
-        throw new Exception('No autoloader found');
+        throw new UnexpectedValueException('No autoloader found');
     }
 }
 
