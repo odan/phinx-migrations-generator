@@ -13,7 +13,7 @@
     "homepage": "https://github.com/odan/phinx-migrations-generator",
     "license": "MIT",
     "require": {
-        "php": "^7.2",
+        "php": "^7.2 || ^8.0",
         "ext-json": "*",
         "ext-pdo": "*",
         "riimu/kit-phpencoder": "^2.4",
