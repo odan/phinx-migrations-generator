@@ -60,7 +60,7 @@ Parameter | Values | Default | Description
 ### Running migrations
 
 The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-migrate-command) 
-runs all of the available migrations.
+runs all the available migrations.
 
 ```
 $ vendor/bin/phinx migrate
