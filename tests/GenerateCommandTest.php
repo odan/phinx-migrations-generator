@@ -29,6 +29,6 @@ final class GenerateCommandTest extends TestCase
         $commandTester = new CommandTester($command);
         $commandTester->execute(['command' => $command->getName()]);
 
-        $this->assertMatchesRegularExpression('/.../', $commandTester->getDisplay());
+        $this->assertRegExp('/.../', $commandTester->getDisplay());
     }
 }
