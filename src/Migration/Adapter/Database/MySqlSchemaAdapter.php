@@ -167,7 +167,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
             return 'NULL';
         }
 
-        return $this->pdo->quote($value);
+        return (string)$this->pdo->quote($value);
     }
 
     /**
@@ -396,7 +396,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
             return 'NULL';
         }
 
-        return substr($this->pdo->quote($value), 1, -1);
+        return (string)substr((string)$this->pdo->quote($value), 1, -1);
     }
 
     /**

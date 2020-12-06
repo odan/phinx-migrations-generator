@@ -27,6 +27,7 @@ final class PhinxMySqlColumnGenerator
 
     /**
      * The constructor.
+     *
      * @param SchemaAdapterInterface $dba
      */
     public function __construct(SchemaAdapterInterface $dba)
