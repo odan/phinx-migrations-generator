@@ -67,7 +67,7 @@ final class ArrayUtil
      *
      * @return bool
      */
-    public function neq($arr, $arr2, $keys): bool
+    public function neq(array $arr, array $arr2, array $keys): bool
     {
         return !$this->eq($arr, $arr2, $keys);
     }
@@ -81,7 +81,7 @@ final class ArrayUtil
      *
      * @return bool
      */
-    private function eq($arr, $arr2, $keys): bool
+    private function eq(array $arr, array $arr2, array $keys): bool
     {
         $val1 = $this->find($arr, $keys);
         $val2 = $this->find($arr2, $keys);
