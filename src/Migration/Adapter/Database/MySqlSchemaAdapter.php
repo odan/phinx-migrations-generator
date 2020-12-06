@@ -398,4 +398,16 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
 
         return substr($this->pdo->quote($value), 1, -1);
     }
+
+    /**
+     * Get version.
+     *
+     * @return string The version
+     */
+    public function getVersion(): string
+    {
+        $row = $this->createQueryStatement('SHOW VARIABLES LIKE "version";')->fetch();
+
+        return (string)$row['Value'];
+    }
 }

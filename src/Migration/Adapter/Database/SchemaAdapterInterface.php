@@ -17,6 +17,13 @@ interface SchemaAdapterInterface
     public function getSchema($tableNames = null): array;
 
     /**
+     * Get database version.
+     *
+     * @return string The database version
+     */
+    public function getVersion(): string;
+
+    /**
      * Quote value.
      *
      * @param string|null $value

@@ -82,7 +82,7 @@ final class PhinxMySqlGenerator
         $this->dba = $dba;
         $this->array = new ArrayUtil();
         $this->tableOptionGenerator = new PhinxMySqlTableOptionGenerator();
-        $this->columnGenerator = new PhinxMySqlColumnGenerator();
+        $this->columnGenerator = new PhinxMySqlColumnGenerator($dba);
         $this->indexOptionGenerator = new PhinxMySqlIndexGenerator();
         $this->foreignKeyCreator = new PhinxMySqlForeignKeyGenerator();
 

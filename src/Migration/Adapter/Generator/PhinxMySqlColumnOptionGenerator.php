@@ -2,6 +2,7 @@
 
 namespace Odan\Migration\Adapter\Generator;
 
+use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Utility\ArrayUtil;
 use Phinx\Db\Adapter\AdapterInterface;
 
@@ -11,15 +12,23 @@ use Phinx\Db\Adapter\AdapterInterface;
 final class PhinxMySqlColumnOptionGenerator
 {
     /**
+     * @var SchemaAdapterInterface
+     */
+    private $dba;
+
+    /**
      * @var ArrayUtil
      */
     private $array;
 
     /**
      * The constructor.
+     *
+     * @param SchemaAdapterInterface $dba
      */
-    public function __construct()
+    public function __construct(SchemaAdapterInterface $dba)
     {
+        $this->dba = $dba;
         $this->array = new ArrayUtil();
     }
 
@@ -36,12 +45,14 @@ final class PhinxMySqlColumnOptionGenerator
      */
     public function getPhinxColumnOptions(string $phinxType, array $columnData, array $columns): string
     {
+        $dbVersion = $this->dba->getVersion();
+
         $attributes = [];
 
         $attributes = $this->getPhinxColumnOptionsNull($attributes, $columnData);
 
         // Default value
-        $attributes = $this->getPhinxColumnOptionsDefault($attributes, $columnData);
+        $attributes = $this->getPhinxColumnOptionsDefault($attributes, $columnData, $dbVersion);
 
         // For timestamp columns
         $attributes = $this->getPhinxColumnOptionsTimestamp($attributes, $columnData);
@@ -112,10 +123,11 @@ final class PhinxMySqlColumnOptionGenerator
      *
      * @param array $attributes The attributes
      * @param array $columnData The column data
+     * @param string $dbVersion The database version
      *
      * @return array The attributes
      */
-    private function getPhinxColumnOptionsDefault(array $attributes, array $columnData): array
+    private function getPhinxColumnOptionsDefault(array $attributes, array $columnData, string $dbVersion): array
     {
         if ($columnData['COLUMN_DEFAULT'] !== null) {
             $attributes['default'] = $columnData['COLUMN_DEFAULT'];
@@ -126,7 +138,22 @@ final class PhinxMySqlColumnOptionGenerator
             $attributes['default'] = null;
         }
 
+        // MariaDB quotes the the values
+        if (isset($attributes['default']) && $this->isMariaDb()) {
+            $attributes['default'] = trim($attributes['default'], "'");
+        }
+
         return $attributes;
+    }
+
+    /**
+     * Is MariaDB.
+     *
+     * @return bool True if it's a MaraDB database
+     */
+    private function isMariaDb(): bool
+    {
+        return stripos($this->dba->getVersion(), 'maria') !== false;
     }
 
     /**
@@ -272,7 +299,7 @@ final class PhinxMySqlColumnOptionGenerator
         $match = null;
         $pattern = '/(enum|set)\((.*)\)/';
         if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-            $values = str_getcsv($match[2], ',', "'", '\\');
+            $values = str_getcsv($match[2], ',', "'");
             $attributes['values'] = $values;
         }
 
