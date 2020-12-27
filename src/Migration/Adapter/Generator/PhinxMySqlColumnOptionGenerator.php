@@ -261,7 +261,7 @@ final class PhinxMySqlColumnOptionGenerator
 
             // signed enable or disable the unsigned option (only applies to MySQL)
             $match = null;
-            $pattern = '/\(\d+\) unsigned$/';
+            $pattern = '/unsigned$/';
             if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
                 $attributes['signed'] = false;
             }
