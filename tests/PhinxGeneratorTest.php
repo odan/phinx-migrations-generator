@@ -54,8 +54,10 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTable(): void
     {
-        $this->execSql('CREATE TABLE `table1` (`id` int(11) NOT NULL AUTO_INCREMENT,
-              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+        $this->execSql(
+            'CREATE TABLE `table1` (`id` int(11) NOT NULL AUTO_INCREMENT,
+              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
         $oldSchema = $this->getTableSchema('table1');
         $this->generate();
 
@@ -72,8 +74,10 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTable2(): void
     {
-        $this->execSql('CREATE TABLE `table2` (`id` int(11) NOT NULL AUTO_INCREMENT,
-              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+        $this->execSql(
+            'CREATE TABLE `table2` (`id` int(11) NOT NULL AUTO_INCREMENT,
+              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
         $oldSchema = $this->getTableSchema('table2');
         $this->generate();
 
@@ -90,12 +94,14 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithNonNullColumnAsDefault(): void
     {
-        $this->execSql("CREATE TABLE `table3` (
+        $this->execSql(
+            "CREATE TABLE `table3` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `email_verified` char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
           `password` char(60) COLLATE utf8_unicode_ci NOT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT"
+        );
 
         $oldSchema = $this->getTableSchema('table3');
         $this->generate();
@@ -113,13 +119,15 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithDecimalColumn(): void
     {
-        $this->execSql('CREATE TABLE `table3` (
+        $this->execSql(
+            'CREATE TABLE `table3` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `value1` decimal(10,0) DEFAULT NULL,
           `value2` decimal(15,2) DEFAULT NULL,
           `value3` decimal(19,4) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
         $oldSchema = $this->getTableSchema('table3');
         $this->generate();
@@ -137,7 +145,8 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithIntColumns(): void
     {
-        $this->execSql('CREATE TABLE `table_int` (
+        $this->execSql(
+            'CREATE TABLE `table_int` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `value1` int(10) DEFAULT NULL,
             `value2` int(1) DEFAULT NULL,
@@ -148,7 +157,8 @@ final class PhinxGeneratorTest extends TestCase
             # `value6` bigint(19) DEFAULT NULL,
             # `value7` bigint(21) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
         $oldSchema = $this->getTableSchema('table_int');
         $this->generate();
@@ -166,10 +176,12 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testRemoveColumn(): void
     {
-        $this->execSql('CREATE TABLE `table1` (
+        $this->execSql(
+            'CREATE TABLE `table1` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `field2` INT,
-            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
         $this->generate();
 
         $this->execSql('ALTER TABLE `table1` DROP COLUMN `field2`; ');
@@ -189,12 +201,14 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testRemoveIndex(): void
     {
-        $this->execSql('CREATE TABLE `table3` (
+        $this->execSql(
+            'CREATE TABLE `table3` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `field` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`),
               KEY `field` (`field`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
         $oldSchema = $this->getTableSchema('table3');
         $this->generate();
@@ -212,12 +226,14 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testIndexWithMultipleFields(): void
     {
-        $this->execSql('CREATE TABLE `table4` (
+        $this->execSql(
+            'CREATE TABLE `table4` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `field` int(11) DEFAULT NULL,
               `field2` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
         $this->generate();
 
@@ -238,11 +254,13 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testIndexWithMultiplePkFields(): void
     {
-        $this->execSql('CREATE TABLE `test` (
+        $this->execSql(
+            'CREATE TABLE `test` (
             `pk1` int(11) unsigned NOT NULL,
             `pk2` int(11) unsigned NOT NULL,
             PRIMARY KEY (`pk1`,`pk2`)
-            ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;');
+            ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;'
+        );
 
         $this->generate();
 
@@ -274,11 +292,13 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testEnum(): void
     {
-        $this->execSql("CREATE TABLE `test`(
+        $this->execSql(
+            "CREATE TABLE `test`(
             `id` INT(11) NOT NULL AUTO_INCREMENT,
             `simple_value` ENUM('1'),
             `multiple_values` ENUM('1','2','3','abc'),
-            PRIMARY KEY (`id`)) ROW_FORMAT=COMPACT;");
+            PRIMARY KEY (`id`)) ROW_FORMAT=COMPACT;"
+        );
 
         $this->generate();
 
@@ -303,11 +323,13 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testSetValues(): void
     {
-        $this->execSql("CREATE TABLE `test`(
+        $this->execSql(
+            "CREATE TABLE `test`(
             `id` INT NOT NULL AUTO_INCREMENT,
             `myset` SET('1','abc'),
             PRIMARY KEY (`id`))
-            ENGINE=INNODB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;");
+            ENGINE=INNODB CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC;"
+        );
 
         $this->generate();
 
@@ -332,23 +354,29 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testForeignKey(): void
     {
-        $this->execSql('CREATE TABLE `table1` (
+        $this->execSql(
+            'CREATE TABLE `table1` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `table2_id` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
-        $this->execSql('CREATE TABLE `table2` (
+        $this->execSql(
+            'CREATE TABLE `table2` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT');
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
         // 1. migration
         $this->generate();
 
-        $this->execSql('ALTER TABLE `table1` ADD CONSTRAINT `table2_id`
+        $this->execSql(
+            'ALTER TABLE `table1` ADD CONSTRAINT `table2_id`
             FOREIGN KEY (`table2_id`)
-            REFERENCES `table2`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION; ');
+            REFERENCES `table2`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION; '
+        );
 
         $oldSchema = $this->getTableSchema('table1');
         $oldSchema2 = $this->getTableSchema('table2');
@@ -377,27 +405,33 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function disabledTestDropForeignKeyAndColumn(): void
     {
-        $this->execSql('CREATE TABLE `table1` (
+        $this->execSql(
+            'CREATE TABLE `table1` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `table2_id` int(11) DEFAULT NULL,
         PRIMARY KEY (`id`),
         KEY `table1_table2_id` (`table2_id`),
         CONSTRAINT `table1_table2_id` FOREIGN KEY (`table2_id`) REFERENCES `table1` (`id`)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
-      ');
+      '
+        );
 
-        $this->execSql('
+        $this->execSql(
+            '
           CREATE TABLE `table2` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             PRIMARY KEY (`id`)
-          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci');
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci'
+        );
 
         $this->generate();
 
-        $this->execSql('ALTER TABLE `table1`
+        $this->execSql(
+            'ALTER TABLE `table1`
                     DROP COLUMN `table2_id`,
                     DROP INDEX `table1_table2_id`,
-                    DROP FOREIGN KEY `table1_table2_id`;');
+                    DROP FOREIGN KEY `table1_table2_id`;'
+        );
 
         $oldSchema = $this->getTableSchema('table1');
         $oldSchema2 = $this->getTableSchema('table2');
@@ -446,11 +480,13 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithDefaultColumn(): void
     {
-        $this->execSql("CREATE TABLE `table` (
+        $this->execSql(
+            "CREATE TABLE `table` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `version` varchar (255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'v1.0.0',
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT");
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT"
+        );
 
         $oldSchema = $this->getTableSchema('table');
         $this->generate();
