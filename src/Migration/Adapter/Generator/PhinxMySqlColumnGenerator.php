@@ -146,7 +146,7 @@ final class PhinxMySqlColumnGenerator
             'smallint' => 'integer',
             'int' => 'integer',
             'mediumint' => 'integer',
-            'bigint' => 'biginteger',
+            'bigint' => 'integer',
             'tinytext' => 'text',
             'mediumtext' => 'text',
             'longtext' => 'text',
