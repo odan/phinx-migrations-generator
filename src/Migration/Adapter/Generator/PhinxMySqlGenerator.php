@@ -179,11 +179,11 @@ final class PhinxMySqlGenerator
     /**
      * Get table migration (new database).
      *
-     * @param array $output The outout
+     * @param array $output The output
      * @param array $new The new schema
      * @param array $old The old schema
      *
-     * @return array The new outout
+     * @return array The new output
      */
     private function getTableMigrationNewDatabase(array $output, array $new, array $old): array
     {
