@@ -101,17 +101,14 @@ $pdo = new PDO(
     )
 );
 
-// Get migration path for phinx classes
-$migrationPath = __DIR__ . '/resources/migrations';
-
 return [
     'paths' => [
-        'migrations' => $migrationPath,
+        'migrations' => __DIR__ . '/../resources/migrations',
     ],
+    'schema_file' => __DIR__ . '/../resources/schema/schema.php',
     'foreign_keys' => false,
-    'default_migration_prefix' => 'db_change_',
+    'default_migration_prefix' => '',
     'mark_generated_migration' => true,
-    'migration_base_class' => \Phinx\Migration\AbstractMigration::class,
     'environments' => [
         'default_environment' => 'local',
         'local' => [
