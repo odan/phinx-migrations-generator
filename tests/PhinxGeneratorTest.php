@@ -148,11 +148,14 @@ final class PhinxGeneratorTest extends TestCase
         $this->execSql(
             'CREATE TABLE `table_int` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
-            `value1` int(10) DEFAULT NULL,
-            `value2` int(1) DEFAULT NULL,
-            `value3` tinyint(4) DEFAULT 0,
-            `value4` tinyint(1) DEFAULT 0,
-            `value5` bigint(20) DEFAULT NULL,
+            `value_int_10` int(10) DEFAULT NULL,
+            `value_int_1` int(1) DEFAULT NULL,
+            `value_tinyint_1` tinyint(1) DEFAULT 0,
+            # not supported in phinx
+            # `value_tinyint_2` tinyint(2) DEFAULT 0,
+            #`value_tinyint_3` tinyint(3) DEFAULT 0,
+            `value_tinyint_4` tinyint(4) DEFAULT 0,
+            `value_bigint_20` bigint(20) DEFAULT NULL,
             # not supported in phinx
             # `value6` bigint(19) DEFAULT NULL,
             # `value7` bigint(21) DEFAULT NULL,
