@@ -90,7 +90,7 @@ final class PhinxMySqlIndexGenerator
         $indexSequences = $indexes[$indexName];
 
         $indexFields = $this->getIndexFields($indexSequences);
-        $indexOptions = $this->getIndexOptions(array_values($indexSequences)[0]);
+        $indexOptions = $this->getIndexOptions(array_values($indexSequences));
 
         $output[] = sprintf('%s->addIndex(%s, %s)', $this->ind3, $indexFields, $indexOptions);
 
@@ -138,30 +138,32 @@ final class PhinxMySqlIndexGenerator
      */
     private function getIndexOptions(array $indexData): string
     {
-        $tableOptions = [];
+        $indexOptions = [];
 
-        if (isset($indexData['Key_name'])) {
-            $tableOptions['name'] = $indexData['Key_name'];
-        }
-        if (isset($indexData['Non_unique']) && (int)$indexData['Non_unique'] === 1) {
-            $tableOptions['unique'] = false;
-        } else {
-            $tableOptions['unique'] = true;
-        }
+        foreach ($indexData as $indexPerColumn) {
+            if (isset($indexPerColumn['Key_name'])) {
+                $indexOptions['name'] = $indexPerColumn['Key_name'];
+            }
+            if (isset($indexPerColumn['Non_unique']) && (int)$indexPerColumn['Non_unique'] === 1) {
+                $indexOptions['unique'] = false;
+            } else {
+                $indexOptions['unique'] = true;
+            }
 
-        //Number of characters for nonbinary string types (CHAR, VARCHAR, TEXT)
-        // and number of bytes for binary string types (BINARY, VARBINARY, BLOB)
-        if (isset($indexData['Sub_part'])) {
-            $tableOptions['limit'] = $indexData['Sub_part'];
-        }
-        // MyISAM only
-        if (isset($indexData['Index_type']) && $indexData['Index_type'] === 'FULLTEXT') {
-            $tableOptions['type'] = 'fulltext';
+            //Number of characters for nonbinary string types (CHAR, VARCHAR, TEXT)
+            // and number of bytes for binary string types (BINARY, VARBINARY, BLOB)
+            if (isset($indexPerColumn['Sub_part'])) {
+                $indexOptions['limit'][$indexPerColumn['Column_name']] = $indexPerColumn['Sub_part'];
+            }
+            // MyISAM only
+            if (isset($indexPerColumn['Index_type']) && $indexPerColumn['Index_type'] === 'FULLTEXT') {
+                $indexOptions['type'] = 'fulltext';
+            }
         }
 
         $result = '';
-        if (!empty($tableOptions)) {
-            $result = $this->array->prettifyArray($tableOptions, 3);
+        if (!empty($indexOptions)) {
+            $result = $this->array->prettifyArray($indexOptions, 3);
         }
 
         return $result;
