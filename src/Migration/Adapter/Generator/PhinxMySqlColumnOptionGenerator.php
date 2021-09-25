@@ -45,8 +45,6 @@ final class PhinxMySqlColumnOptionGenerator
      */
     public function getPhinxColumnOptions(string $phinxType, array $columnData, array $columns): string
     {
-        $dbVersion = $this->dba->getVersion();
-
         $attributes = [];
 
         $attributes = $this->getPhinxColumnOptionsNull($attributes, $columnData);
