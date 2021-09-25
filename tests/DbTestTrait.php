@@ -351,11 +351,11 @@ trait DbTestTrait
         $command = $application->find('generate');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-                                    'command' => $command->getName(),
-                                    '--name' => 'Test' . $number,
-                                    '--overwrite' => '1',
-                                    '--path' => __DIR__,
-                                ]);
+            'command' => $command->getName(),
+            '--name' => 'Test' . $number,
+            '--overwrite' => '1',
+            '--path' => __DIR__,
+        ]);
 
         // debugging: print content (only for travis-ci)
         /*
