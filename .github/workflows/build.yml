@@ -64,6 +64,6 @@ jobs:
 
       - name: Run test suite
         if: matrix.php-versions > '7.2'
-        run: composer check
+        run: composer test:all
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
