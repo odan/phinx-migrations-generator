@@ -1,5 +1,9 @@
 parameters:
+	level: max
 	checkMissingIterableValueType: false
+	paths:
+		- src
+		- tests
 	excludes_analyse:
 		- tests/test.php
 		- tests/phinx.php

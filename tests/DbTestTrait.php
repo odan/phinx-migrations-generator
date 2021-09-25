@@ -176,8 +176,8 @@ trait DbTestTrait
      */
     protected function getDatabaseVariable(string $variable): ?string
     {
-        $statement = $this->getConnection()->prepare('SHOW VARIABLES LIKE ?');
-        if (!$statement || $statement->execute([$variable]) === false) {
+        $statement = $this->createPreparedStatement('SHOW VARIABLES LIKE ?');
+        if ($statement->execute([$variable]) === false) {
             throw new UnexpectedValueException('Invalid SQL statement');
         }
 
@@ -351,11 +351,11 @@ trait DbTestTrait
         $command = $application->find('generate');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'command' => $command->getName(),
-            '--name' => 'Test' . $number,
-            '--overwrite' => '1',
-            '--path' => __DIR__,
-        ]);
+                                    'command' => $command->getName(),
+                                    '--name' => 'Test' . $number,
+                                    '--overwrite' => '1',
+                                    '--path' => __DIR__,
+                                ]);
 
         // debugging: print content (only for travis-ci)
         /*
