@@ -35,6 +35,7 @@ trait DbTestTrait
      */
     protected function setUp(): void
     {
+        $this->unsetStatsExpiry();
         $this->dropTables();
         $this->deleteTestFiles();
     }
@@ -103,7 +104,7 @@ trait DbTestTrait
      *
      * @return PDO The connection
      */
-    public function getPdo(): PDO
+    public function getConnection(): PDO
     {
         if ($this->pdo !== null) {
             return $this->pdo;
@@ -150,6 +151,47 @@ trait DbTestTrait
     }
 
     /**
+     * Workaround for MySQL 8: update_time not working.
+     *
+     * https://bugs.mysql.com/bug.php?id=95407
+     *
+     * @return void
+     */
+    private function unsetStatsExpiry()
+    {
+        $expiry = $this->getDatabaseVariable('information_schema_stats_expiry');
+        $version = (string)$this->getDatabaseVariable('version');
+
+        if ($expiry !== null && version_compare($version, '8.0.0', '>=')) {
+            $this->getConnection()->exec('SET information_schema_stats_expiry=0;');
+        }
+    }
+
+    /**
+     * Get database variable.
+     *
+     * @param string $variable The variable
+     *
+     * @return string|null The value
+     */
+    protected function getDatabaseVariable(string $variable): ?string
+    {
+        $statement = $this->getConnection()->prepare('SHOW VARIABLES LIKE ?');
+        if (!$statement || $statement->execute([$variable]) === false) {
+            throw new UnexpectedValueException('Invalid SQL statement');
+        }
+
+        $row = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($row === false) {
+            // Database variable not defined
+            return null;
+        }
+
+        return (string)$row['Value'];
+    }
+
+    /**
      * Clean-Up Database. Truncate tables.
      *
      * @return void
@@ -160,9 +202,9 @@ trait DbTestTrait
                 FROM information_schema.tables
                 WHERE table_schema = database()';
 
-        $db = $this->getPdo();
+        $db = $this->getConnection();
 
-        $db->exec('SET unique_checks=0; SET foreign_key_checks=0; SET information_schema_stats_expiry=0');
+        $db->exec('SET unique_checks=0; SET foreign_key_checks=0;');
 
         $statement = $db->query($sql);
 
@@ -231,7 +273,7 @@ trait DbTestTrait
      */
     private function createQueryStatement(string $sql): PDOStatement
     {
-        $statement = $this->getPdo()->query($sql);
+        $statement = $this->getConnection()->query($sql);
 
         if (!$statement instanceof PDOStatement) {
             throw new UnexpectedValueException('Invalid statement');
@@ -251,7 +293,7 @@ trait DbTestTrait
      */
     private function createPreparedStatement(string $sql): PDOStatement
     {
-        $statement = $this->getPdo()->prepare($sql);
+        $statement = $this->getConnection()->prepare($sql);
 
         if (!$statement instanceof PDOStatement) {
             throw new UnexpectedValueException('Invalid statement');
@@ -269,7 +311,7 @@ trait DbTestTrait
      */
     private function execSql(string $sql): void
     {
-        $pdo = $this->getPdo();
+        $pdo = $this->getConnection();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         try {
             $pdo->exec($sql);
@@ -309,11 +351,11 @@ trait DbTestTrait
         $command = $application->find('generate');
         $commandTester = new CommandTester($command);
         $commandTester->execute([
-            'command' => $command->getName(),
-            '--name' => 'Test' . $number,
-            '--overwrite' => '1',
-            '--path' => __DIR__,
-        ]);
+                                    'command' => $command->getName(),
+                                    '--name' => 'Test' . $number,
+                                    '--overwrite' => '1',
+                                    '--path' => __DIR__,
+                                ]);
 
         // debugging: print content (only for travis-ci)
         /*

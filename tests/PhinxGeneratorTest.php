@@ -23,7 +23,7 @@ final class PhinxGeneratorTest extends TestCase
     {
         $settings = $this->getSettings();
         $output = new NullOutput();
-        $pdo = $this->getPdo();
+        $pdo = $this->getConnection();
         $dba = new MySqlSchemaAdapter($pdo, $output);
         $generator = new PhinxMySqlGenerator($dba, $settings);
 

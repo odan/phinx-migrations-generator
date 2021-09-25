@@ -21,7 +21,7 @@ final class MySqlSchemaAdapterTest extends TestCase
     public function testEsc(): void
     {
         $output = new NullOutput();
-        $pdo = $this->getPdo();
+        $pdo = $this->getConnection();
         $dba = new MySqlSchemaAdapter($pdo, $output);
 
         $this->assertSame('NULL', $dba->esc(null));
@@ -36,7 +36,7 @@ final class MySqlSchemaAdapterTest extends TestCase
     public function testQuote(): void
     {
         $output = new NullOutput();
-        $pdo = $this->getPdo();
+        $pdo = $this->getConnection();
         $dba = new MySqlSchemaAdapter($pdo, $output);
 
         $this->assertSame('NULL', $dba->quote(null));
@@ -51,7 +51,7 @@ final class MySqlSchemaAdapterTest extends TestCase
     public function testIdent(): void
     {
         $output = new NullOutput();
-        $pdo = $this->getPdo();
+        $pdo = $this->getConnection();
         $dba = new MySqlSchemaAdapter($pdo, $output);
 
         $this->assertSame('`db`', $dba->ident('db'));
