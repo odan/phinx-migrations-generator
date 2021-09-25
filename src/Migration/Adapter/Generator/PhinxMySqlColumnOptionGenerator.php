@@ -52,7 +52,7 @@ final class PhinxMySqlColumnOptionGenerator
         $attributes = $this->getPhinxColumnOptionsNull($attributes, $columnData);
 
         // Default value
-        $attributes = $this->getPhinxColumnOptionsDefault($attributes, $columnData, $dbVersion);
+        $attributes = $this->getPhinxColumnOptionsDefault($phinxType, $attributes, $columnData);
 
         // For timestamp columns
         $attributes = $this->getPhinxColumnOptionsTimestamp($attributes, $columnData);
@@ -64,7 +64,7 @@ final class PhinxMySqlColumnOptionGenerator
         $attributes = $this->getPhinxColumnOptionsNumeric($attributes, $columnData);
 
         // Enum and set values
-        if ($phinxType === 'enum' || $phinxType === 'set') {
+        if ($phinxType === AdapterInterface::PHINX_TYPE_ENUM || $phinxType === AdapterInterface::PHINX_TYPE_SET) {
             $attributes = $this->getOptionEnumAndSetValues($attributes, $columnData);
         }
 
@@ -121,16 +121,29 @@ final class PhinxMySqlColumnOptionGenerator
     /**
      * Generate phinx column options (default value).
      *
+     * @param string $phinxType The phinx type
      * @param array $attributes The attributes
      * @param array $columnData The column data
-     * @param string $dbVersion The database version
      *
      * @return array The attributes
      */
-    private function getPhinxColumnOptionsDefault(array $attributes, array $columnData, string $dbVersion): array
+    private function getPhinxColumnOptionsDefault(string $phinxType, array $attributes, array $columnData): array
     {
         if ($columnData['COLUMN_DEFAULT'] !== null) {
             $attributes['default'] = $columnData['COLUMN_DEFAULT'];
+        }
+
+        if (isset($attributes['default']) && $phinxType === AdapterInterface::PHINX_TYPE_BIT) {
+            // Note that default values like b'1111' are not supported by phinx
+            $bitMappings = [
+                "b'1'" => true,
+                "b'0'" => false,
+            ];
+
+            $attributes['default'] = $bitMappings[$attributes['default']] ?? $attributes['default'];
+
+            // Return here because we do not want to escape it for MariaDB
+            return $attributes;
         }
 
         // MariaDB contains 'NULL' as string to define null as default
@@ -138,7 +151,7 @@ final class PhinxMySqlColumnOptionGenerator
             $attributes['default'] = null;
         }
 
-        // MariaDB quotes the the values
+        // MariaDB quotes the values
         if (isset($attributes['default']) && $this->isMariaDb()) {
             $attributes['default'] = trim($attributes['default'], "'");
         }

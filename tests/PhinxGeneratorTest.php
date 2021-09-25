@@ -499,4 +499,30 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema = $this->getTableSchema('table');
         $this->assertSame($oldSchema, $newSchema);
     }
+
+    /**
+     * Test #103.
+     *
+     * @return void
+     */
+    public function testDefaultValueForColumnOfTypeBit(): void
+    {
+        $this->execSql(
+            "CREATE TABLE `table` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `mybit` bit(1) NOT NULL,
+          `mybit_true` bit(1) NOT NULL DEFAULT b'1',
+          `mybit_false` bit(1) NOT NULL DEFAULT b'0',
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC"
+        );
+
+        $oldSchema = $this->getTableSchema('table');
+        $this->generate();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table');
+        $this->assertSame($oldSchema, $newSchema);
+    }
 }

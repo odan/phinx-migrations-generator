@@ -4,6 +4,7 @@ namespace Odan\Migration\Adapter\Generator;
 
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Utility\ArrayUtil;
+use Phinx\Db\Adapter\AdapterInterface;
 
 /**
  * Generator.
@@ -139,21 +140,22 @@ final class PhinxMySqlColumnGenerator
     {
         $columnType = $columnData['COLUMN_TYPE'];
         if ($columnType === 'tinyint(1)') {
-            return 'boolean';
+            return AdapterInterface::PHINX_TYPE_BOOLEAN;
         }
         $map = [
-            'tinyint' => 'integer',
-            'smallint' => 'integer',
-            'int' => 'integer',
-            'mediumint' => 'integer',
-            'bigint' => 'integer',
-            'tinytext' => 'text',
-            'mediumtext' => 'text',
-            'longtext' => 'text',
-            'varchar' => 'string',
-            'tinyblob' => 'blob',
-            'mediumblob' => 'blob',
-            'longblob' => 'blob',
+            'tinyint' => AdapterInterface::PHINX_TYPE_INTEGER,
+            'smallint' => AdapterInterface::PHINX_TYPE_INTEGER,
+            'int' => AdapterInterface::PHINX_TYPE_INTEGER,
+            'mediumint' => AdapterInterface::PHINX_TYPE_INTEGER,
+            'bigint' => AdapterInterface::PHINX_TYPE_INTEGER,
+            'tinytext' => AdapterInterface::PHINX_TYPE_TEXT,
+            'mediumtext' => AdapterInterface::PHINX_TYPE_TEXT,
+            'longtext' => AdapterInterface::PHINX_TYPE_TEXT,
+            'varchar' => AdapterInterface::PHINX_TYPE_STRING,
+            'tinyblob' => AdapterInterface::PHINX_TYPE_BLOB,
+            'mediumblob' => AdapterInterface::PHINX_TYPE_BLOB,
+            'longblob' => AdapterInterface::PHINX_TYPE_BLOB,
+            'bit' => AdapterInterface::PHINX_TYPE_BIT,
         ];
 
         $type = $this->columnOptionGenerator->getMySQLColumnType($columnData);
