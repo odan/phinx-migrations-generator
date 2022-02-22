@@ -151,7 +151,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
             WHERE schema_name = %s;';
         $sql = sprintf($sql, $this->quote($dbName));
 
-        return $this->createQueryStatement($sql)->fetch();
+        return $this->queryFetch($sql);
     }
 
     /**
@@ -241,10 +241,13 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
         }
 
         $quotedNames = $this->quoteArray($tableNames);
-        $sql = sprintf('SELECT * FROM information_schema.columns
+        $sql = sprintf(
+            'SELECT * FROM information_schema.columns
                     WHERE table_schema=database()
                     AND table_name in (%s)
-                    ORDER BY ORDINAL_POSITION', implode(',', $quotedNames));
+                    ORDER BY ORDINAL_POSITION',
+            implode(',', $quotedNames)
+        );
 
         $rows = $this->queryFetchAll($sql);
 
@@ -272,7 +275,8 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
         }
 
         $quotedNames = $this->quoteArray($tableNames);
-        $sql = sprintf("SELECT
+        $sql = sprintf(
+            "SELECT
                 `TABLE_NAME` as 'Table',
                 `NON_UNIQUE` as 'Non_unique',
                 `INDEX_NAME` as 'Key_name',
@@ -287,7 +291,9 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
                 `INDEX_COMMENT` as 'Index_comment'
                 FROM information_schema.statistics
                     WHERE table_schema=database()
-                    AND table_name in (%s)", implode(',', $quotedNames));
+                    AND table_name in (%s)",
+            implode(',', $quotedNames)
+        );
 
         $rows = $this->queryFetchAll($sql);
         $result = [];
@@ -341,7 +347,8 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
         }
 
         $quotedNames = $this->quoteArray($tableNames);
-        $sql = sprintf("SELECT
+        $sql = sprintf(
+            "SELECT
                 cols.TABLE_NAME,
                 cols.COLUMN_NAME,
                 cRefs.CONSTRAINT_NAME,
@@ -367,7 +374,9 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
                 AND cols.TABLE_SCHEMA = DATABASE()
                 AND refs.REFERENCED_TABLE_NAME IS NOT NULL
                 AND cons.CONSTRAINT_TYPE = 'FOREIGN KEY'
-            ;", implode(',', $quotedNames));
+            ;",
+            implode(',', $quotedNames)
+        );
 
         $rows = $this->queryFetchAll($sql);
 
@@ -406,8 +415,22 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      */
     public function getVersion(): string
     {
-        $row = $this->createQueryStatement('SHOW VARIABLES LIKE "version";')->fetch();
+        $row = $this->queryFetch('SHOW VARIABLES LIKE "version";');
 
-        return (string)$row['Value'];
+        return isset($row['Value']) ? (string)$row['Value'] : '';
+    }
+
+    /**
+     * Query and fetch row.
+     *
+     * @param string $sql The sql statement
+     *
+     * @return array The row
+     */
+    private function queryFetch(string $sql): array
+    {
+        $row = $this->createQueryStatement($sql)->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        return (array)$row;
     }
 }

@@ -187,9 +187,9 @@ final class MigrationGenerator
      *
      * @param array $settings
      *
-     * @return mixed
+     * @return array
      */
-    private function getOldSchema(array $settings)
+    private function getOldSchema(array $settings): array
     {
         return $this->getSchemaFileData($settings);
     }
@@ -213,10 +213,10 @@ final class MigrationGenerator
         }
 
         if ($fileExt === 'php') {
-            $data = $this->read($schemaFile);
+            $data = (array)$this->read($schemaFile);
         } elseif ($fileExt === 'json') {
             $content = file_get_contents($schemaFile) ?: '';
-            $data = json_decode($content, true);
+            $data = (array)json_decode($content, true);
         } else {
             throw new InvalidArgumentException(sprintf('Invalid schema file extension: %s', $fileExt));
         }
@@ -387,9 +387,9 @@ final class MigrationGenerator
         $name = $this->generateDefaultMigrationName();
 
         if ($this->settings['generate_migration_name'] === false) {
-            $name = $this->io->ask('Enter migration name', $name);
+            $name = (string)$this->io->ask('Enter migration name', $name);
         }
 
-        return (string)$name;
+        return $name;
     }
 }

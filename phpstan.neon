@@ -1,10 +1,10 @@
 parameters:
-	level: max
+	level: 8
 	checkMissingIterableValueType: false
 	paths:
 		- src
 		- tests
-	excludes_analyse:
+	excludePaths:
 		- tests/test.php
 		- tests/phinx.php
 		- tests/diffs

@@ -133,7 +133,9 @@ final class GenerateCommand extends AbstractCommand
         if (isset($environmentOptions['name'])) {
             $output->writeln('<info>using database</info> ' . $environmentOptions['name']);
         } else {
-            $output->writeln('<error>Could not determine database name! Please specify a database name in your config file.</error>');
+            $output->writeln(
+                '<error>Could not determine database name! Please specify a database name in your config file.</error>'
+            );
 
             return false;
         }

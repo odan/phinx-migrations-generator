@@ -1,9 +1,10 @@
 <?php
 
-return (new PhpCsFixer\Config())
+use PhpCsFixer\Config;
+
+return (new Config())
     ->setUsingCache(false)
     ->setRiskyAllowed(true)
-    //->setCacheFile(__DIR__ . '/.php_cs.cache')
     ->setRules(
         [
             '@PSR1' => true,
@@ -42,9 +43,6 @@ return (new PhpCsFixer\Config())
         PhpCsFixer\Finder::create()
             ->in(__DIR__ . '/src')
             ->in(__DIR__ . '/tests')
-            ->notName('actual.php')
-            ->notName('newtable.php')
-            ->notName('newtable_expected.php')
             ->name('*.php')
             ->ignoreDotFiles(true)
             ->ignoreVCS(true)
