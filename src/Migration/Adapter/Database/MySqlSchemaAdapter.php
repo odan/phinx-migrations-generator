@@ -105,7 +105,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
 
         $result = [];
 
-        $result['database'] = $this->getDatabaseSchemata($this->dbName);
+        $result['database'] = array_change_key_case($this->getDatabaseSchemata($this->dbName),CASE_LOWER);
 
         // processing by chunks for better speed when we have hundreds of tables
         $tables = $this->getTables($tableNames);
