@@ -10,6 +10,7 @@ use Phinx\Console\Command\Migrate;
 use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\String\UnicodeString;
 use UnexpectedValueException;
 
 /**
@@ -340,8 +341,9 @@ trait DbTestTrait
             sleep(1);
         }
 
-        // must be unique
-        $number = date('YmdHisu') . '_' . ++static::$counter . '_' . uuid_create();
+        // must be unique and camel-case
+        $number = date('YmdHisu') . '_' . ++static::$counter . '_' .
+            (new UnicodeString(uuid_create()))->camel()->toString();
 
         // generate
         $application = new Application();
