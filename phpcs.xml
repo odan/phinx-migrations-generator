@@ -14,6 +14,7 @@
     <rule ref="PSR2"></rule>
     <rule ref="PSR12"></rule>
 
+	<!--
     <rule ref="Squiz.Commenting.ClassComment">
         <type>warning</type>
     </rule>
@@ -36,4 +37,5 @@
     <rule ref="Squiz.Commenting.FunctionComment.ParamCommentNotCapital">
         <type>warning</type>
     </rule>
+    -->
 </ruleset>

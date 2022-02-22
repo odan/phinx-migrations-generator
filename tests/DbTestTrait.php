@@ -2,7 +2,6 @@
 
 namespace Odan\Migration\Test;
 
-use Exception;
 use Odan\Migration\Command\GenerateCommand;
 use PDO;
 use PDOException;
@@ -341,8 +340,8 @@ trait DbTestTrait
             sleep(1);
         }
 
-        // must be really unique
-        $number = date('YmdHisu') . '_' . ++static::$counter . '_' . $this->uuid();
+        // must be unique
+        $number = date('YmdHisu') . '_' . ++static::$counter . '_' . uuid_create();
 
         // generate
         $application = new Application();
@@ -396,36 +395,5 @@ trait DbTestTrait
         }
 
         return true;
-    }
-
-    /**
-     * Returns a `UUID` v4 created from a cryptographically secure random value.
-     *
-     * @see https://www.ietf.org/rfc/rfc4122.txt
-     *
-     * @throws Exception
-     *
-     * @return string RFC 4122 UUID
-     */
-    private function uuid(): string
-    {
-        return sprintf(
-            '%04x%04x%04x%04x%04x%04x%04x%04x',
-            // 32 bits for "time_low"
-            random_int(0, 65535),
-            random_int(0, 65535),
-            // 16 bits for "time_mid"
-            random_int(0, 65535),
-            // 12 bits before the 0100 of (version) 4 for "time_hi_and_version"
-            random_int(0, 4095) | 0x4000,
-            // 16 bits, 8 bits for "clk_seq_hi_res",
-            // 8 bits for "clk_seq_low",
-            // two most significant bits holds zero and one for variant DCE1.1
-            random_int(0, 0x3fff) | 0x8000,
-            // 48 bits for "node"
-            random_int(0, 65535),
-            random_int(0, 65535),
-            random_int(0, 65535)
-        );
     }
 }
