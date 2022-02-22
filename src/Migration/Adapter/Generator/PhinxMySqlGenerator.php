@@ -190,11 +190,11 @@ final class PhinxMySqlGenerator
         if (empty($new['database'])) {
             return $output;
         }
-        if ($this->array->neq($new, $old, ['database', 'default_character_set_name'])) {
-            $output[] = $this->getAlterDatabaseCharset($new['database']['default_character_set_name']);
+        if ($this->array->neq($new, $old, ['database', 'DEFAULT_CHARACTER_SET_NAME'])) {
+            $output[] = $this->getAlterDatabaseCharset($new['database']['DEFAULT_CHARACTER_SET_NAME']);
         }
-        if ($this->array->neq($new, $old, ['database', 'default_collation_name'])) {
-            $output[] = $this->getAlterDatabaseCollate($new['database']['default_collation_name']);
+        if ($this->array->neq($new, $old, ['database', 'DEFAULT_COLLATION_NAME'])) {
+            $output[] = $this->getAlterDatabaseCollate($new['database']['DEFAULT_COLLATION_NAME']);
         }
 
         return $output;
