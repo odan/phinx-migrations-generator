@@ -11,6 +11,7 @@ use RuntimeException;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\String\UnicodeString;
+use Symfony\Component\Uid\Uuid;
 use UnexpectedValueException;
 
 /**
@@ -343,7 +344,7 @@ trait DbTestTrait
 
         // must be unique and camel-case
         $number = date('YmdHisu') . '_' . ++static::$counter . '_' .
-            (new UnicodeString(uuid_create()))->camel()->toString();
+            (new UnicodeString(Uuid::v4()->toRfc4122()))->camel()->toString();
 
         // generate
         $application = new Application();
