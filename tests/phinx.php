@@ -1,7 +1,7 @@
 <?php
 
 // Framework bootstrap code here
-//require_once __DIR__ . '/bootstrap.php';
+// require_once __DIR__ . '/bootstrap.php';
 
 // Get PDO object
 $pdo = new PDO(
@@ -22,25 +22,25 @@ return [
     'paths' => [
         'migrations' => $migrationPath,
     ],
-    //'table_prefix' => 'dev_',
-    //'table_suffix' => '_v1',
+    // 'table_prefix' => 'dev_',
+    // 'table_suffix' => '_v1',
     'foreign_keys' => true,
     'environments' => [
-        //'default_migration_table' => 'my_migration_table',
+        // 'default_migration_table' => 'my_migration_table',
         'default_environment' => 'local',
         'local' => [
             // Database name
             'name' => $pdo->query('select database()')->fetchColumn(),
             'connection' => $pdo,
-            //'adapter' => 'mysql',
-            //'wrapper' => 'testwrapper',
-            //'host' => 'localhost',
-            //'name' => 'test',
-            //'user' => 'root',
+            // 'adapter' => 'mysql',
+            // 'wrapper' => 'testwrapper',
+            // 'host' => 'localhost',
+            // 'name' => 'test',
+            // 'user' => 'root',
             // 'pass' => '',
-            //'port' => 3306,
-            //'table_prefix' => 'dev_',
-            //'table_suffix' => '_v1',
+            // 'port' => 3306,
+            // 'table_prefix' => 'dev_',
+            // 'table_suffix' => '_v1',
         ],
     ],
 ];

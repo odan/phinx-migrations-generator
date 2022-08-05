@@ -150,7 +150,7 @@ final class PhinxMySqlIndexGenerator
                 $indexOptions['unique'] = true;
             }
 
-            //Number of characters for nonbinary string types (CHAR, VARCHAR, TEXT)
+            // Number of characters for nonbinary string types (CHAR, VARCHAR, TEXT)
             // and number of bytes for binary string types (BINARY, VARBINARY, BLOB)
             if (isset($indexPerColumn['Sub_part'])) {
                 $indexOptions['limit'][$indexPerColumn['Column_name']] = $indexPerColumn['Sub_part'];
