@@ -37,6 +37,8 @@ return (new Config())
                 'imports_order' => ['class', 'const', 'function']
             ],
             'single_line_throw' => false,
+            'fully_qualified_strict_types' => true,
+            'global_namespace_import' => false,
         ]
     )
     ->setFinder(
@@ -44,9 +46,6 @@ return (new Config())
             ->in(__DIR__ . '/src')
             ->in(__DIR__ . '/tests')
             ->name('*.php')
-            ->notName('actual.php')
-            ->notName('newtable.php')
-            ->notName('newtable_expected.php')
             ->ignoreDotFiles(true)
             ->ignoreVCS(true)
     );
