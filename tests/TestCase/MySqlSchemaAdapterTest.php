@@ -1,6 +1,6 @@
 <?php
 
-namespace Odan\Migration\Test;
+namespace Odan\Migration\Test\TestCase;
 
 use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use PHPUnit\Framework\TestCase;

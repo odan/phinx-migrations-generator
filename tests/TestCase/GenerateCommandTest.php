@@ -1,6 +1,6 @@
 <?php
 
-namespace Odan\Migration\Test;
+namespace Odan\Migration\Test\TestCase;
 
 use Exception;
 use Odan\Migration\Command\GenerateCommand;

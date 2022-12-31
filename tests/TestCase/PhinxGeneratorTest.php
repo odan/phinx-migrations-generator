@@ -1,6 +1,6 @@
 <?php
 
-namespace Odan\Migration\Test;
+namespace Odan\Migration\Test\TestCase;
 
 use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
@@ -27,11 +27,11 @@ final class PhinxGeneratorTest extends TestCase
         $dba = new MySqlSchemaAdapter($pdo, $output);
         $generator = new PhinxMySqlGenerator($dba, $settings);
 
-        $diff = $this->read(__DIR__ . '/diffs/newtable.php');
+        $diff = $this->read(__DIR__ . '/../diffs/newtable.php');
         $actual = $generator->createMigration('MyNewMigration', $diff, []);
-        file_put_contents(__DIR__ . '/diffs/actual.php', $actual);
+        file_put_contents(__DIR__ . '/../diffs/actual.php', $actual);
 
-        $expected = file_get_contents(__DIR__ . '/diffs/MyNewMigration.php');
+        $expected = file_get_contents(__DIR__ . '/../diffs/MyNewMigration.php');
         $this->assertEquals($expected, $actual);
     }
 
