@@ -11,7 +11,7 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 
 ## Requirements
 
-* PHP 7.2+ or 8.0+
+* PHP 7.4, 8.0, 8.1, 8.2
 
 ## Features
 
@@ -30,7 +30,7 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 Via Composer
 
 ```
-$ composer require odan/phinx-migrations-generator --dev
+composer require odan/phinx-migrations-generator --dev
 ```
 
 ## Usage
@@ -42,7 +42,7 @@ The file `schema.php` contains the previous database schema and is compared with
 Based on the difference, a Phinx migration class is generated.
 
 ```
-$ vendor/bin/phinx-migrations generate
+vendor/bin/phinx-migrations generate
 ```
 
 When the `generate` command is executed again, only the difference to the last schema is generated.
@@ -63,7 +63,7 @@ The [Phinx migrate command](http://docs.phinx.org/en/latest/commands.html#the-mi
 runs all the available migrations.
 
 ```
-$ vendor/bin/phinx migrate
+vendor/bin/phinx migrate
 ```
 
 ## Configuration
@@ -122,8 +122,8 @@ return [
 
 ## Testing
 
-```bash
-$ composer test
+```
+composer test
 ```
 
 ## Contributing
