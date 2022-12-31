@@ -51,7 +51,7 @@
     "scripts": {
         "cs:check": "php-cs-fixer fix --dry-run --format=txt --verbose --diff --config=.cs.php",
         "cs:fix": "php-cs-fixer fix --config=.cs.php",
-        "stan": "phpstan analyse -c phpstan.neon --no-progress --ansi",
+        "stan": "phpstan analyse -c phpstan.neon --no-progress --ansi --xdebug",
         "sniffer:check": "phpcs --standard=phpcs.xml",
         "sniffer:fix": "phpcbf --standard=phpcs.xml",
         "test": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always",
