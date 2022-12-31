@@ -31,7 +31,7 @@ final class PhinxGeneratorTest extends TestCase
         $actual = $generator->createMigration('MyNewMigration', $diff, []);
         file_put_contents(__DIR__ . '/diffs/actual.php', $actual);
 
-        $expected = file_get_contents(__DIR__ . '/diffs/newtable_expected.php');
+        $expected = file_get_contents(__DIR__ . '/diffs/MyNewMigration.php');
         $this->assertEquals($expected, $actual);
     }
 

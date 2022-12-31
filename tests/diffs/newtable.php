@@ -1,20 +1,15 @@
 <?php
 
-return array(
-    'tables' =>
-    array(
-        'newtable' =>
-        array(
-            'table' =>
-            array(
+return [
+    'tables' => [
+        'newtable' => [
+            'table' => [
                 'table_name' => 'newtable',
                 'engine' => 'InnoDB',
                 'table_comment' => '',
-            ),
-            'columns' =>
-            array(
-                'id' =>
-                array(
+            ],
+            'columns' => [
+                'id' => [
                     'TABLE_CATALOG' => 'def',
                     'TABLE_SCHEMA' => 'test',
                     'TABLE_NAME' => 'newtable2',
@@ -35,12 +30,10 @@ return array(
                     'EXTRA' => 'auto_increment',
                     'PRIVILEGES' => 'select,insert,update,references',
                     'COLUMN_COMMENT' => '',
-                ),
-            ),
-            'indexes' =>
-            array(
-                'PRIMARY' =>
-                array(
+                ],
+            ],
+            'indexes' => [
+                'PRIMARY' => [
                     'Table' => 'newtable',
                     'Non_unique' => '0',
                     'Key_name' => 'PRIMARY',
@@ -54,11 +47,10 @@ return array(
                     'Index_type' => 'BTREE',
                     'Comment' => '',
                     'Index_comment' => '',
-                ),
-            ),
-            'foreign_keys' =>
-            array(
-            ),
-        ),
-    ),
-);
+                ],
+            ],
+            'foreign_keys' => [
+            ],
+        ],
+    ],
+];

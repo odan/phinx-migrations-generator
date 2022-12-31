@@ -13,29 +13,4 @@
 	<exclude-pattern>*/tests/schema.php</exclude-pattern>
     <rule ref="PSR2"></rule>
     <rule ref="PSR12"></rule>
-
-	<!--
-    <rule ref="Squiz.Commenting.ClassComment">
-        <type>warning</type>
-    </rule>
-    <rule ref="Squiz.Commenting.ClassComment.TagNotAllowed">
-        <type>warning</type>
-        <exclude-pattern>*/tests/</exclude-pattern>
-    </rule>
-    <rule ref="Squiz.Commenting.ClassComment.Missing">
-        <type>warning</type>
-    </rule>
-    <rule ref="Squiz.Commenting.FunctionComment.Missing">
-        <type>warning</type>
-    </rule>
-    <rule ref="Squiz.Commenting.FunctionComment.MissingParamTag">
-        <type>warning</type>
-    </rule>
-    <rule ref="Squiz.Commenting.FunctionComment.MissingParamComment">
-        <type>warning</type>
-    </rule>
-    <rule ref="Squiz.Commenting.FunctionComment.ParamCommentNotCapital">
-        <type>warning</type>
-    </rule>
-    -->
 </ruleset>
