@@ -525,4 +525,28 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema = $this->getTableSchema('table');
         $this->assertSame($oldSchema, $newSchema);
     }
+
+    /**
+     * Test #111.
+     *
+     * @return void
+     */
+    public function testDefaultValueForColumnOfDateTime(): void
+    {
+        $this->execSql(
+            "CREATE TABLE `table` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `ceated_at` datetime DEFAULT current_timestamp(),
+          PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC"
+        );
+
+        $oldSchema = $this->getTableSchema('table');
+        $this->generate();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('table');
+        $this->assertSame($oldSchema, $newSchema);
+    }
 }

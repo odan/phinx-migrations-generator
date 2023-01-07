@@ -131,6 +131,17 @@ final class PhinxMySqlColumnOptionGenerator
             $attributes['default'] = $columnData['COLUMN_DEFAULT'];
         }
 
+        if (
+            $phinxType === AdapterInterface::PHINX_TYPE_DATETIME &&
+            isset($attributes['default']) &&
+            strtolower($attributes['default']) === 'current_timestamp()'
+        ) {
+            $attributes['default'] = 'CURRENT_TIMESTAMP';
+
+            // Return here because we do not want to escape it for MariaDB
+            return $attributes;
+        }
+
         if (isset($attributes['default']) && $phinxType === AdapterInterface::PHINX_TYPE_BIT) {
             // Note that default values like b'1111' are not supported by phinx
             $bitMappings = [
