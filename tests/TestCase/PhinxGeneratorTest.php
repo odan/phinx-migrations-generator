@@ -534,11 +534,11 @@ final class PhinxGeneratorTest extends TestCase
     public function testDefaultValueForColumnOfDateTime(): void
     {
         $this->execSql(
-            "CREATE TABLE `table` (
+            'CREATE TABLE `table` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `ceated_at` datetime DEFAULT current_timestamp(),
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC"
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC'
         );
 
         $oldSchema = $this->getTableSchema('table');
