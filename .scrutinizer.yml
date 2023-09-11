@@ -1,6 +1,6 @@
 filter:
-    paths: ["src/*"]
-    excluded_paths: ["vendor/*", "tests/*"]
+    paths: [ "src/*" ]
+    excluded_paths: [ "vendor/*", "tests/*" ]
 
 checks:
     php:
@@ -12,7 +12,7 @@ tools:
 
 build:
     environment:
-        php: 7.4
+        php: 8.1.2
         mysql: true
         node: false
         postgresql: false
@@ -36,8 +36,7 @@ build:
             - mysql -uroot -e 'CREATE DATABASE phinx_test'
     tests:
         before:
-            -
-                command: composer test:coverage
+            -   command: composer test:coverage
                 coverage:
                     file: 'build/logs/clover.xml'
                     format: 'clover'

@@ -13,7 +13,7 @@
     "homepage": "https://github.com/odan/phinx-migrations-generator",
     "license": "MIT",
     "require": {
-        "php": "^7.4 || ~8.0 || ~8.1 || ~8.2",
+        "php": "~8.1 || ~8.2",
         "ext-json": "*",
         "ext-pdo": "*",
         "riimu/kit-phpencoder": "^2.4",
@@ -22,10 +22,10 @@
         "symfony/polyfill-php73": "^1.18"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
-        "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^8 || ^9",
-        "squizlabs/php_codesniffer": "^3.4",
+        "friendsofphp/php-cs-fixer": "^3",
+        "phpstan/phpstan": "^1",
+        "phpunit/phpunit": "^10",
+        "squizlabs/php_codesniffer": "^3",
         "symfony/event-dispatcher": "^5 || 6.0.*",
         "symfony/finder": "^5 || 6.0.*",
         "symfony/filesystem": "^5 || 6.0.*",
@@ -49,11 +49,17 @@
         "./bin/phinx-migrations"
     ],
     "scripts": {
-        "cs:check": "php-cs-fixer fix --dry-run --format=txt --verbose --diff --config=.cs.php",
-        "cs:fix": "php-cs-fixer fix --config=.cs.php",
-        "stan": "phpstan analyse -c phpstan.neon --no-progress --ansi --xdebug",
+        "cs:check": [
+            "@putenv PHP_CS_FIXER_IGNORE_ENV=1",
+            "php-cs-fixer fix --dry-run --format=txt --verbose --diff --config=.cs.php --ansi"
+        ],
+        "cs:fix": [
+            "@putenv PHP_CS_FIXER_IGNORE_ENV=1",
+            "php-cs-fixer fix --config=.cs.php --ansi --verbose"
+        ],
         "sniffer:check": "phpcs --standard=phpcs.xml",
         "sniffer:fix": "phpcbf --standard=phpcs.xml",
+        "stan": "phpstan analyse -c phpstan.neon --no-progress --ansi",
         "test": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always",
         "test:all": [
             "@cs:check",

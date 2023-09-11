@@ -11,7 +11,7 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 
 ## Requirements
 
-* PHP 7.4, 8.0, 8.1, 8.2
+* PHP 8.1, 8.2
 
 ## Features
 
