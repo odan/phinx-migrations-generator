@@ -32,7 +32,6 @@ build:
     dependencies:
         before:
             - composer self-update
-            - composer update --no-interaction --prefer-dist --no-progress
             - mysql -uroot -e 'CREATE DATABASE phinx_test'
     tests:
         before:
