@@ -132,9 +132,9 @@ final class PhinxMySqlColumnOptionGenerator
         }
 
         if (
-            $phinxType === AdapterInterface::PHINX_TYPE_DATETIME &&
-            isset($attributes['default']) &&
-            strtolower($attributes['default']) === 'current_timestamp()'
+            $phinxType === AdapterInterface::PHINX_TYPE_DATETIME
+            && isset($attributes['default'])
+            && strtolower($attributes['default']) === 'current_timestamp()'
         ) {
             $attributes['default'] = 'CURRENT_TIMESTAMP';
 
