@@ -290,7 +290,7 @@ final class PhinxMySqlColumnOptionGenerator
 
             // identity enable or disable automatic incrementing
             if ($columnData['EXTRA'] === 'auto_increment') {
-                $attributes['identity'] = 'enable';
+                $attributes['identity'] = true;
             }
         }
 

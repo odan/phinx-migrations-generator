@@ -17,7 +17,7 @@ class MyNewMigration extends \Phinx\Migration\AbstractMigration
             ->addColumn('id', 'integer', [
                 'null' => false,
                 'limit' => MysqlAdapter::INT_REGULAR,
-                'identity' => 'enable',
+                'identity' => true,
             ])
             ->create();
     }
