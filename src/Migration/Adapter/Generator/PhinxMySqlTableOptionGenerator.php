@@ -127,14 +127,14 @@ final class PhinxMySqlTableOptionGenerator
         if (!empty($table['table']['character_set_name'])) {
             $attributes['encoding'] = $table['table']['character_set_name'];
         } else {
-            $attributes['encoding'] = 'utf8';
+            $attributes['encoding'] = 'utf8mb4';
         }
 
         return $attributes;
     }
 
     /**
-     * Define table collation (defaults to `utf8_general_ci`).
+     * Define table collation (defaults to `utf8mb4_unicode_ci`).
      *
      * @param array $attributes The attributes
      * @param array $table The table
@@ -146,7 +146,7 @@ final class PhinxMySqlTableOptionGenerator
         if (!empty($table['table']['table_collation'])) {
             $attributes['collation'] = $table['table']['table_collation'];
         } else {
-            $attributes['collation'] = 'utf8_general_ci';
+            $attributes['collation'] = 'utf8mb4_unicode_ci';
         }
 
         return $attributes;
