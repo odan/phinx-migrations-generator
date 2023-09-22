@@ -3,8 +3,3 @@ parameters:
 	checkMissingIterableValueType: false
 	paths:
 		- src
-		- tests
-	excludePaths:
-		- tests/TestCase/test.php
-		- tests/TestCase/phinx.php
-		- tests/diffs
