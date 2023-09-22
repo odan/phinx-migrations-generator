@@ -394,7 +394,7 @@ trait DbTestTrait
         $phinxDisplay = $phinxCommandTester->getDisplay();
         $phinxStatusCode = $phinxCommandTester->getStatusCode();
         if ($phinxStatusCode > 0 || !strpos($phinxDisplay, 'All Done.')) {
-            throw new RuntimeException('Running migration failed');
+            throw new RuntimeException('Running migration failed.' . "\n" . $phinxDisplay);
         }
 
         return true;
