@@ -6,6 +6,7 @@ use Odan\Migration\Adapter\Database\MySqlSchemaAdapter;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\NullOutput;
+use Throwable;
 
 /**
  * @coversDefaultClass \Odan\Migration\Adapter\Generator\PhinxMySqlGenerator
@@ -145,8 +146,14 @@ final class PhinxGeneratorTest extends TestCase
      */
     public function testCreateTableWithIntColumns(): void
     {
-        $this->execSql(
-            'CREATE TABLE `table_int` (
+        $stdout = fopen("php://stdout", "w");
+        fwrite($stdout, "Test: testCreateTableWithIntColumns\n");
+
+        try {
+            fwrite($stdout, "execSql\n");
+
+            $this->execSql(
+                'CREATE TABLE `table_int` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `value_int_10` int(10) DEFAULT NULL,
             `value_int_1` int(1) DEFAULT NULL,
@@ -161,15 +168,28 @@ final class PhinxGeneratorTest extends TestCase
             # `value7` bigint(21) DEFAULT NULL,
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
-        );
+            );
 
-        $oldSchema = $this->getTableSchema('table_int');
-        $this->generate();
+            fwrite($stdout, "getTableSchema\n");
+            $oldSchema = $this->getTableSchema('table_int');
+            fwrite($stdout, "generate\n");
+            $this->generate();
 
-        $this->dropTables();
-        $this->migrate();
-        $newSchema = $this->getTableSchema('table_int');
-        $this->assertSame($oldSchema, $newSchema);
+            fwrite($stdout, "dropTables\n");
+            $this->dropTables();
+            fwrite($stdout, "migrate\n");
+            $this->migrate();
+            fwrite($stdout, "getTableSchema\n");
+            $newSchema = $this->getTableSchema('table_int');
+            fwrite($stdout, "assertSame\n");
+            $this->assertSame($oldSchema, $newSchema);
+        } catch (Throwable $exception) {
+            fwrite($stdout, sprintf("Error: %s - %s\n", $exception->getCode(), $exception->getMessage()));
+            fwrite($stdout, sprintf("File: %s, Line: %s\n", $exception->getFile(), $exception->getLine()));
+            fwrite($stdout, sprintf("Trace: %s\n", $exception->getTraceAsString()));
+        }
+
+        fclose($stdout);
     }
 
     /**
