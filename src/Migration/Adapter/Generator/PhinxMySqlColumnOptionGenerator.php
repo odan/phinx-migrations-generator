@@ -208,8 +208,8 @@ final class PhinxMySqlColumnOptionGenerator
     private function getPhinxColumnOptionsLimit(array $attributes, array $columnData): array
     {
         $limit = $this->getColumnLimit($columnData);
-        if ($limit) {
-            $attributes['limit'] = new RawPhpValue($limit);
+        if ($limit !== null) {
+            $attributes['limit'] = $limit;
         }
 
         return $attributes;
@@ -220,11 +220,10 @@ final class PhinxMySqlColumnOptionGenerator
      *
      * @param array $columnData
      *
-     * @return string
+     * @return int|RawPhpValue|null The limit
      */
-    private function getColumnLimit(array $columnData): string
+    private function getColumnLimit(array $columnData): RawPhpValue|int|null
     {
-        $limit = '0';
         $type = $this->getMySQLColumnType($columnData);
 
         $mappings = [
@@ -245,14 +244,18 @@ final class PhinxMySqlColumnOptionGenerator
         $adapterConst = $mappings[$type] ?? null;
 
         if ($adapterConst) {
-            $limit = $adapterConst;
-        } elseif (!empty($columnData['CHARACTER_MAXIMUM_LENGTH'])) {
-            $limit = $columnData['CHARACTER_MAXIMUM_LENGTH'];
-        } elseif (preg_match('/\((\d+)\)/', $columnData['COLUMN_TYPE'], $match) === 1) {
-            $limit = $match[1];
+            return new RawPhpValue($adapterConst);
         }
 
-        return $limit;
+        if (!empty($columnData['CHARACTER_MAXIMUM_LENGTH'])) {
+            return (int)$columnData['CHARACTER_MAXIMUM_LENGTH'];
+        }
+
+        if (preg_match('/\((\d+)\)/', $columnData['COLUMN_TYPE'], $match) === 1) {
+            return (int)$match[1];
+        }
+
+        return null;
     }
 
     /**
@@ -277,7 +280,7 @@ final class PhinxMySqlColumnOptionGenerator
             $match = null;
             if (preg_match('/\((\d+)\)/', $columnData['COLUMN_TYPE'], $match) === 1) {
                 if ($match[1] !== $intDefaultLimits[$dataType]) {
-                    $attributes['limit'] = $match[1];
+                    $attributes['limit'] = (int)$match[1];
                 }
             }
 
