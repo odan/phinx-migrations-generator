@@ -239,7 +239,7 @@ final class PhinxMySqlGenerator
     /**
      * Get table migration (new tables).
      *
-     * @param array $output The outout
+     * @param array $output The output
      * @param array $new The new schema
      * @param array $old The old schema
      *
