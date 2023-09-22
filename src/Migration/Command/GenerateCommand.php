@@ -240,7 +240,7 @@ final class GenerateCommand extends AbstractCommand
         $defaultMigrationPrefix = $config['default_migration_prefix'] ?? null;
         $generateMigrationName = $config['generate_migration_name'] ?? false;
         $markMigration = $config['mark_generated_migration'] ?? true;
-        $defaultMigrationTable = $envOptions['default_migration_table'] ?? 'phinxlog';
+        $defaultMigrationTable = $envOptions['migration_table'] ?? 'phinxlog';
         $namespace = $config instanceof NamespaceAwareInterface ?
             $config->getMigrationNamespaceByPath($migrationsPath) :
             null;
@@ -257,7 +257,7 @@ final class GenerateCommand extends AbstractCommand
             'name' => $input->getOption('name'),
             'overwrite' => $input->getOption('overwrite'),
             'mark_migration' => $markMigration,
-            'default_migration_table' => $defaultMigrationTable,
+            'migration_table' => $defaultMigrationTable,
             'default_migration_prefix' => $defaultMigrationPrefix,
             'generate_migration_name' => $generateMigrationName,
             'migration_base_class' => $config->getMigrationBaseClassName(false),

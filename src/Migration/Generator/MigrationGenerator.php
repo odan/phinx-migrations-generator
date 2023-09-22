@@ -313,7 +313,7 @@ final class MigrationGenerator
     {
         $this->output->writeln('Mark migration');
 
-        $schemaTableName = $this->settings['default_migration_table'];
+        $schemaTableName = $this->settings['migration_table'];
 
         /** @var AdapterInterface $adapter */
         $adapter = $this->settings['adapter'];
