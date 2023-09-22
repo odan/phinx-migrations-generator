@@ -98,8 +98,8 @@ final class PhinxGeneratorTest extends TestCase
         $this->execSql(
             "CREATE TABLE `table3` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
-          `email_verified` char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
-          `password` char(60) COLLATE utf8_unicode_ci NOT NULL,
+          `email_verified` char(1) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'N',
+          `password` char(60) COLLATE utf8mb4_unicode_ci NOT NULL,
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT"
         );
@@ -501,7 +501,7 @@ final class PhinxGeneratorTest extends TestCase
         $this->execSql(
             "CREATE TABLE `table` (
           `id` int(11) NOT NULL AUTO_INCREMENT,
-          `version` varchar (255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'v1.0.0',
+          `version` varchar (255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'v1.0.0',
           PRIMARY KEY (`id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT"
         );

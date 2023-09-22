@@ -10,8 +10,8 @@ class MyNewMigration extends \Phinx\Migration\AbstractMigration
                 'id' => false,
                 'primary_key' => ['id'],
                 'engine' => 'InnoDB',
-                'encoding' => 'utf8',
-                'collation' => 'utf8_general_ci',
+                'encoding' => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
                 'comment' => '',
             ])
             ->addColumn('id', 'integer', [
