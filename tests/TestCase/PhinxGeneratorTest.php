@@ -57,7 +57,7 @@ final class PhinxGeneratorTest extends TestCase
     {
         $this->execSql(
             'CREATE TABLE `table1` (`id` int(11) NOT NULL AUTO_INCREMENT,
-              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
         $oldSchema = $this->getTableSchema('table1');
         $this->generate();
@@ -77,7 +77,7 @@ final class PhinxGeneratorTest extends TestCase
     {
         $this->execSql(
             'CREATE TABLE `table2` (`id` int(11) NOT NULL AUTO_INCREMENT,
-              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+              PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
         $oldSchema = $this->getTableSchema('table2');
         $this->generate();
@@ -101,7 +101,7 @@ final class PhinxGeneratorTest extends TestCase
           `email_verified` char(1) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
           `password` char(60) COLLATE utf8_unicode_ci NOT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT"
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT"
         );
 
         $oldSchema = $this->getTableSchema('table3');
@@ -127,7 +127,7 @@ final class PhinxGeneratorTest extends TestCase
           `value2` decimal(15,2) DEFAULT NULL,
           `value3` decimal(19,4) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
 
         $oldSchema = $this->getTableSchema('table3');
@@ -142,18 +142,14 @@ final class PhinxGeneratorTest extends TestCase
     /**
      * Test.
      *
+     * @throws Throwable
+     *
      * @return void
      */
     public function testCreateTableWithIntColumns(): void
     {
-        $stdout = fopen("php://stdout", "w");
-        fwrite($stdout, "Test: testCreateTableWithIntColumns\n");
-
-        try {
-            fwrite($stdout, "execSql\n");
-
-            $this->execSql(
-                'CREATE TABLE `table_int` (
+        $this->execSql(
+            'CREATE TABLE `table_int` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `value_int_10` int(10) DEFAULT NULL,
             `value_int_1` int(1) DEFAULT NULL,
@@ -167,29 +163,28 @@ final class PhinxGeneratorTest extends TestCase
             # `value6` bigint(19) DEFAULT NULL,
             # `value7` bigint(21) DEFAULT NULL,
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
-            );
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
+        );
 
-            fwrite($stdout, "getTableSchema\n");
-            $oldSchema = $this->getTableSchema('table_int');
-            fwrite($stdout, "generate\n");
-            $this->generate();
+        $oldSchema = $this->getTableSchema('table_int');
+        $this->generate();
 
-            fwrite($stdout, "dropTables\n");
-            $this->dropTables();
-            fwrite($stdout, "migrate\n");
+        $this->dropTables();
+
+        try {
             $this->migrate();
-            fwrite($stdout, "getTableSchema\n");
-            $newSchema = $this->getTableSchema('table_int');
-            fwrite($stdout, "assertSame\n");
-            $this->assertSame($oldSchema, $newSchema);
         } catch (Throwable $exception) {
+            $stdout = fopen('php://stdout', 'w');
             fwrite($stdout, sprintf("Error: %s - %s\n", $exception->getCode(), $exception->getMessage()));
             fwrite($stdout, sprintf("File: %s, Line: %s\n", $exception->getFile(), $exception->getLine()));
             fwrite($stdout, sprintf("Trace: %s\n", $exception->getTraceAsString()));
+            fclose($stdout);
+
+            throw $exception;
         }
 
-        fclose($stdout);
+        $newSchema = $this->getTableSchema('table_int');
+        $this->assertSame($oldSchema, $newSchema);
     }
 
     /**
@@ -203,7 +198,7 @@ final class PhinxGeneratorTest extends TestCase
             'CREATE TABLE `table1` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             `field2` INT,
-            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+            PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
         $this->generate();
 
@@ -230,7 +225,7 @@ final class PhinxGeneratorTest extends TestCase
               `field` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`),
               KEY `field` (`field`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
 
         $oldSchema = $this->getTableSchema('table3');
@@ -255,7 +250,7 @@ final class PhinxGeneratorTest extends TestCase
               `field` int(11) DEFAULT NULL,
               `field2` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
 
         $this->generate();
@@ -382,14 +377,14 @@ final class PhinxGeneratorTest extends TestCase
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `table2_id` int(11) DEFAULT NULL,
               PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
 
         $this->execSql(
             'CREATE TABLE `table2` (
               `id` int(11) NOT NULL AUTO_INCREMENT,
               PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT'
         );
 
         // 1. migration
@@ -435,7 +430,7 @@ final class PhinxGeneratorTest extends TestCase
         PRIMARY KEY (`id`),
         KEY `table1_table2_id` (`table2_id`),
         CONSTRAINT `table1_table2_id` FOREIGN KEY (`table2_id`) REFERENCES `table1` (`id`)
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
       '
         );
 
@@ -444,7 +439,7 @@ final class PhinxGeneratorTest extends TestCase
           CREATE TABLE `table2` (
             `id` int(11) NOT NULL AUTO_INCREMENT,
             PRIMARY KEY (`id`)
-          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci'
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
         );
 
         $this->generate();
@@ -508,7 +503,7 @@ final class PhinxGeneratorTest extends TestCase
           `id` int(11) NOT NULL AUTO_INCREMENT,
           `version` varchar (255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'v1.0.0',
           PRIMARY KEY (`id`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=COMPACT"
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=COMPACT"
         );
 
         $oldSchema = $this->getTableSchema('table');

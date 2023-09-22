@@ -84,11 +84,11 @@ trait DbTestTrait
     public function getSettings(): array
     {
         return [
-            'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8',
+            'dsn' => 'mysql:host=127.0.0.1;dbname=phinx_test;charset=utf8mb4',
             'username' => 'root',
             'password' => isset($_SERVER['GITHUB_ACTION']) ? 'root' : '',
             'options' => [
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8 COLLATE utf8_unicode_ci',
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci',
                 // Enable exceptions
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 // Set default fetch mode
@@ -137,7 +137,7 @@ trait DbTestTrait
      */
     private function createDatabase(): void
     {
-        $this->execSql('CREATE DATABASE `phinx_test` CHARACTER SET utf8 COLLATE utf8_unicode_ci;');
+        $this->execSql('CREATE DATABASE `phinx_test` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;');
         $this->execSql('USE `phinx_test`');
     }
 
