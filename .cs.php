@@ -19,7 +19,7 @@ return (new Config())
             'array_syntax' => ['syntax' => 'short'],
             'cast_spaces' => ['space' => 'none'],
             'concat_space' => ['spacing' => 'one'],
-            'compact_nullable_typehint' => true,
+            'compact_nullable_type_declaration' => true,
             'declare_equal_normalize' => ['space' => 'single'],
             'general_phpdoc_annotation_remove' => [
                 'annotations' => [
@@ -47,6 +47,7 @@ return (new Config())
             'blank_line_between_import_groups' => true,
             'fully_qualified_strict_types' => true,
             'no_null_property_initialization' => false,
+            'nullable_type_declaration_for_default_null_value' => false,
             'operator_linebreak' => [
                 'only_booleans' => true,
                 'position' => 'beginning',
@@ -55,7 +56,10 @@ return (new Config())
                 'import_classes' => true,
                 'import_constants' => null,
                 'import_functions' => null
-            ]
+            ],
+            'class_definition' => [
+                'space_before_parenthesis' => true,
+            ],
         ]
     )
     ->setFinder(
