@@ -190,7 +190,7 @@ final class PhinxMySqlColumnOptionGenerator
     {
         // default set default value (use with CURRENT_TIMESTAMP)
         // on update CURRENT_TIMESTAMP
-        if (strpos($columnData['EXTRA'], 'on update CURRENT_TIMESTAMP') !== false) {
+        if (stripos($columnData['EXTRA'], 'on update CURRENT_TIMESTAMP') !== false) {
             $attributes['update'] = 'CURRENT_TIMESTAMP';
         }
 
