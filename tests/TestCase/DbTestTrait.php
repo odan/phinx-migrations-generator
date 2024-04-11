@@ -158,7 +158,7 @@ trait DbTestTrait
      *
      * @return void
      */
-    private function unsetStatsExpiry()
+    private function unsetStatsExpiry(): void
     {
         $expiry = $this->getDatabaseVariable('information_schema_stats_expiry');
         $version = (string)$this->getDatabaseVariable('version');
