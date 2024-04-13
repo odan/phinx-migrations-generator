@@ -17,8 +17,7 @@
         "ext-json": "*",
         "ext-pdo": "*",
         "riimu/kit-phpencoder": "^2.4",
-        "robmorgan/phinx": "^0.15.2",
-        "symfony/console": "^6"
+        "robmorgan/phinx": "^0.15.2 | ^0.16"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
