@@ -145,8 +145,8 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
     private function getDatabaseSchemata(string $dbName): array
     {
         $sql = 'SELECT
-            default_character_set_name,
-            default_collation_name
+            DEFAULT_CHARACTER_SET_NAME,
+            DEFAULT_COLLATION_NAME
             FROM information_schema.SCHEMATA
             WHERE schema_name = %s;';
         $sql = sprintf($sql, $this->quote($dbName));
