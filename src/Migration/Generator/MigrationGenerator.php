@@ -2,6 +2,8 @@
 
 namespace Odan\Migration\Generator;
 
+use DateTime;
+use DateTimeZone;
 use InvalidArgumentException;
 use Odan\Migration\Adapter\Database\SchemaAdapterInterface;
 use Odan\Migration\Adapter\Generator\PhinxMySqlGenerator;
@@ -146,7 +148,7 @@ final class MigrationGenerator
         }
 
         // Compute the file path
-        $fileName = Util::mapClassNameToFileName($className);
+        $fileName = $this->mapClassNameToFileName($className);
         $filePath = $path . DIRECTORY_SEPARATOR . $fileName;
 
         if (is_file($filePath)) {
@@ -180,6 +182,43 @@ final class MigrationGenerator
         $this->output->writeln('Generate migration finished');
 
         return 0;
+    }
+
+    /**
+     * Turn migration names like 'CreateUserTable' into file names like
+     * '12345678901234_create_user_table.php' or 'LimitResourceNamesTo30Chars' into
+     * '12345678901234_limit_resource_names_to_30_chars.php'.
+     *
+     * @param string $className Class Name
+     * @return string
+     */
+    private function mapClassNameToFileName(string $className): string
+    {
+        $snake = function ($matches) {
+            return '_' . strtolower($matches[0]);
+        };
+
+        $fileName = preg_replace_callback('/\d+|[A-Z]/', $snake, $className);
+
+        return $this->getCurrentTimestamp() . "$fileName.php";
+    }
+
+    /**
+     * Gets the current timestamp string, in UTC.
+     *
+     * @param ?int $offset
+     *
+     * @return string
+     */
+    private function getCurrentTimestamp(?int $offset = null): string
+    {
+        $dt = new DateTime('now', new DateTimeZone('UTC'));
+
+        if ($offset) {
+            $dt->modify('+' . $offset . ' seconds');
+        }
+
+        return $dt->format('YmdHis');
     }
 
     /**
