@@ -13,18 +13,18 @@
     "homepage": "https://github.com/odan/phinx-migrations-generator",
     "license": "MIT",
     "require": {
-        "php": "~8.1 || ~8.2",
+        "php": "8.1.* || 8.2.* || 8.3.* || 8.4.*",
         "ext-json": "*",
         "ext-pdo": "*",
         "riimu/kit-phpencoder": "^2.4",
-        "robmorgan/phinx": "^0.15.2 | ^0.16"
+        "robmorgan/phinx": "^0.15.2 || ^0.16"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
-        "phpstan/phpstan": "^1",
+        "phpstan/phpstan": "^1 || ^2",
         "phpunit/phpunit": "^10",
         "squizlabs/php_codesniffer": "^3",
-        "symfony/uid": "^6"
+        "symfony/uid": "^6 || ^7"
     },
     "config": {
         "sort-packages": true
@@ -54,13 +54,16 @@
         "sniffer:check": "phpcs --standard=phpcs.xml",
         "sniffer:fix": "phpcbf --standard=phpcs.xml",
         "stan": "phpstan analyse -c phpstan.neon --no-progress --ansi",
-        "test": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always",
+        "test": "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always --display-warnings --display-deprecations --no-coverage",
         "test:all": [
             "@cs:check",
             "@sniffer:check",
             "@stan",
             "@test"
         ],
-        "test:coverage": "php -d xdebug.mode=coverage -r \"require 'vendor/bin/phpunit';\" -- --configuration phpunit.xml --do-not-cache-result --colors=always --coverage-clover build/logs/clover.xml --coverage-html build/coverage"
+        "test:coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "phpunit --configuration phpunit.xml --do-not-cache-result --colors=always --display-warnings --display-deprecations --coverage-clover build/coverage/clover.xml --coverage-html build/coverage --coverage-text"
+        ]
     }
 }

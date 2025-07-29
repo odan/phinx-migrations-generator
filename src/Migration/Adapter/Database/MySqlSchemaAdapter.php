@@ -191,7 +191,7 @@ final class MySqlSchemaAdapter implements SchemaAdapterInterface
      *
      * @return array
      */
-    private function getTables(array $tableNames = null): array
+    private function getTables(?array $tableNames = null): array
     {
         $result = [];
         $sql = "SELECT *

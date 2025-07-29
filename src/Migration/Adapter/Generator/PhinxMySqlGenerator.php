@@ -208,7 +208,7 @@ final class PhinxMySqlGenerator
      *
      * @return string The sql
      */
-    private function getAlterDatabaseCharset(string $charset, string $database = null): string
+    private function getAlterDatabaseCharset(string $charset, ?string $database = null): string
     {
         if ($database !== null) {
             $database = ' ' . $this->dba->ident($database);
@@ -221,12 +221,12 @@ final class PhinxMySqlGenerator
     /**
      * Generate alter database collate.
      *
-     * @param string $collate The collate
+     * @param string $collate The collation
      * @param string|null $database The database name
      *
      * @return string The sql
      */
-    private function getAlterDatabaseCollate(string $collate, string $database = null): string
+    private function getAlterDatabaseCollate(string $collate, ?string $database = null): string
     {
         if ($database) {
             $database = ' ' . $this->dba->ident($database);

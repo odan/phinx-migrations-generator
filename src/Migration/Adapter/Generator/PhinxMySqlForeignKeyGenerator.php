@@ -117,7 +117,7 @@ final class PhinxMySqlForeignKeyGenerator
      *
      * @return string The code
      */
-    private function getForeignKeyOptions(array $fkData, string $fkName = null): string
+    private function getForeignKeyOptions(array $fkData, ?string $fkName = null): string
     {
         $tableOptions = [];
         if (isset($fkName)) {
