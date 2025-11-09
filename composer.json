@@ -1,7 +1,8 @@
 {
     "name": "odan/phinx-migrations-generator",
-    "type": "library",
     "description": "Migration generator for Phinx",
+    "license": "MIT",
+    "type": "library",
     "keywords": [
         "migration",
         "migrations",
@@ -11,9 +12,8 @@
         "mysql"
     ],
     "homepage": "https://github.com/odan/phinx-migrations-generator",
-    "license": "MIT",
     "require": {
-        "php": "8.1.* || 8.2.* || 8.3.* || 8.4.*",
+        "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
         "ext-json": "*",
         "ext-pdo": "*",
         "riimu/kit-phpencoder": "^2.4",
@@ -21,13 +21,10 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
-        "phpstan/phpstan": "^1 || ^2",
-        "phpunit/phpunit": "^10",
-        "squizlabs/php_codesniffer": "^3",
+        "phpstan/phpstan": "^2",
+        "phpunit/phpunit": "^10 || ^12",
+        "squizlabs/php_codesniffer": "^4",
         "symfony/uid": "^6 || ^7"
-    },
-    "config": {
-        "sort-packages": true
     },
     "autoload": {
         "psr-4": {
@@ -42,14 +39,15 @@
     "bin": [
         "./bin/phinx-migrations"
     ],
+    "config": {
+        "sort-packages": true
+    },
     "scripts": {
         "cs:check": [
-            "@putenv PHP_CS_FIXER_IGNORE_ENV=1",
-            "php-cs-fixer fix --dry-run --format=txt --verbose --diff --config=.cs.php --ansi"
+            "php-cs-fixer fix --dry-run --format=txt --verbose --diff --config=.cs.php --ansi --allow-unsupported-php-version=yes"
         ],
         "cs:fix": [
-            "@putenv PHP_CS_FIXER_IGNORE_ENV=1",
-            "php-cs-fixer fix --config=.cs.php --ansi --verbose"
+            "php-cs-fixer fix --config=.cs.php --ansi --verbose --allow-unsupported-php-version=yes"
         ],
         "sniffer:check": "phpcs --standard=phpcs.xml",
         "sniffer:fix": "phpcbf --standard=phpcs.xml",

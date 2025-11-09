@@ -2,7 +2,7 @@
 
 Contributions are **welcome** and will be fully **credited**.
 
-We accept contributions via Pull Requests on [Github](https://github.com/odan/phinx-migrations-generator).
+We accept contributions via Pull Requests on [GitHub](https://github.com/odan/phinx-migrations-generator).
 
 
 ## Pull Requests

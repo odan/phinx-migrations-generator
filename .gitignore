@@ -18,4 +18,5 @@ tests/*_test1.php
 tests/TestCase/schema.php
 bin/phinx.php
 tests/diffs/actual.php
-.phpunit.result.cache
+/.phpunit.result.cache
+/.phpunit.cache

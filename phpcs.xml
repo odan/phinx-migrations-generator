@@ -11,7 +11,7 @@
 
 	<exclude-pattern>*/tests/diffs/*$</exclude-pattern>
 	<exclude-pattern>*/tests/TestCase/schema.php</exclude-pattern>
-	<rule ref="PSR12"></rule>
+    <rule ref="PSR12"/>
 
 	<rule ref="PSR12">
 		<exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace"/>

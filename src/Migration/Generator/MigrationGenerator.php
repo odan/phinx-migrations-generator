@@ -163,7 +163,7 @@ final class MigrationGenerator
         $migration = $this->generator->createMigration($className, $schema, $oldSchema);
         $this->saveMigrationFile($filePath, $migration);
 
-        // Mark migration as as completed
+        // Mark migration as completed
         if (!empty($this->settings['mark_migration'])) {
             $this->markMigration($className, $fileName);
         }

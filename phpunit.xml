@@ -3,10 +3,7 @@
          bootstrap="vendor/autoload.php"
          colors="true"
          backupGlobals="false"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.3/phpunit.xsd"
-         cacheDirectory=".phpunit.cache"
-         backupStaticProperties="false">
-    <coverage/>
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd">
     <testsuites>
         <testsuite name="Tests">
             <directory suffix="Test.php">tests</directory>

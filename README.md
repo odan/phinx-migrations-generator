@@ -9,7 +9,7 @@ Generates [Phinx](https://phinx.org/) migrations by comparing your current datab
 
 ## Requirements
 
-* PHP 8.1 - 8.4
+* PHP 8.1 - 8.5
 
 ## Features
 
@@ -119,6 +119,8 @@ return [
 ```
 
 ## Testing
+
+Create a local database: phinx_test
 
 ```
 composer test

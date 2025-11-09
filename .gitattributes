@@ -24,7 +24,6 @@ docs/* linguist-documentation
 /.editorconfig      export-ignore
 /.gitattributes     export-ignore
 /.gitignore         export-ignore
-/.scrutinizer.*     export-ignore
 /._config.yml       export-ignore
 /phpcs.xml          export-ignore
 /phpstan.neon       export-ignore
