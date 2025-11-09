@@ -247,10 +247,11 @@ trait DbTestTrait
      * Get table schema.
      *
      * @param string $table The table name
+     * @param bool $clean
      *
      * @return string The schema sql
      */
-    private function getTableSchema(string $table): string
+    private function getTableSchema(string $table, bool $clean = false): string
     {
         $sql = sprintf('SHOW CREATE TABLE `%s`;', $table);
         $statement = $this->createQueryStatement($sql);
@@ -260,7 +261,21 @@ trait DbTestTrait
             throw new RuntimeException(sprintf('Table not found: %s', $table));
         }
 
-        return (string)$row['Create Table'];
+        $sql = (string)$row['Create Table'];
+
+        if ($clean) {
+            $sql = preg_replace([
+                '/\s*ENGINE=\w+/i',
+                '/\s*AUTO_INCREMENT=\d+/i',
+                '/\s*DEFAULT CHARSET=\w+/i',
+                '/\s*CHARSET=\w+/i',
+                '/\s*COLLATE=\w+/i',
+                '/\s*ROW_FORMAT=\w+/i',
+            ], '', $sql);
+            $sql = trim($sql);
+        }
+
+        return $sql;
     }
 
     /**
@@ -269,8 +284,8 @@ trait DbTestTrait
      * @param string $sql The sql
      *
      * @throws UnexpectedValueException
-     *
      * @return PDOStatement The statement
+     *
      */
     private function createQueryStatement(string $sql): PDOStatement
     {
@@ -289,8 +304,8 @@ trait DbTestTrait
      * @param string $sql The sql
      *
      * @throws UnexpectedValueException
-     *
      * @return PDOStatement The statement
+     *
      */
     private function createPreparedStatement(string $sql): PDOStatement
     {

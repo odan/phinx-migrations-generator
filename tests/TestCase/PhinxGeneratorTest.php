@@ -564,4 +564,47 @@ final class PhinxGeneratorTest extends TestCase
         $newSchema = $this->getTableSchema('table');
         $this->assertSame($oldSchema, $newSchema);
     }
+
+    /**
+     * Test #122.
+     * Test correct use of column name in dropForeignKey.
+     * Fix: No foreign key on column(s) `fk_x` exist
+     *
+     * @return void
+     */
+    public function testDropForeignKey(): void
+    {
+        $this->execSql(
+            'CREATE TABLE users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(100) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DEFAULT;
+            
+            -- the child table
+            CREATE TABLE orders (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                total DECIMAL(10,2) NOT NULL,
+            
+                -- Foreign Key Definition
+                CONSTRAINT fk_orders_user
+                    FOREIGN KEY (user_id)
+                    REFERENCES users(id)
+                    ON DELETE CASCADE
+                    ON UPDATE CASCADE
+            );'
+        );
+        $this->generate();
+
+        $this->execSql('ALTER TABLE orders DROP FOREIGN KEY fk_orders_user;');
+        $oldSchema = $this->getTableSchema('orders', true);
+        $this->generateAgain();
+
+        $this->dropTables();
+        $this->migrate();
+        $newSchema = $this->getTableSchema('orders', true);
+        $this->assertSame($oldSchema, $newSchema);
+    }
 }

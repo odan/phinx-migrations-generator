@@ -324,7 +324,7 @@ final class PhinxMySqlColumnOptionGenerator
         $match = null;
         $pattern = '/(enum|set)\((.*)\)/';
         if (preg_match($pattern, $columnData['COLUMN_TYPE'], $match) === 1) {
-            $values = str_getcsv($match[2], ',', "'");
+            $values = str_getcsv($match[2], ',', "'", "\\");
             $attributes['values'] = $values;
         }
 
