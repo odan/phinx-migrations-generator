@@ -50,7 +50,8 @@ final class PhinxMySqlForeignKeyGenerator
         if (!empty($oldTable['foreign_keys'])) {
             foreach ($oldTable['foreign_keys'] as $fkName => $fkData) {
                 if (!isset($newTable['foreign_keys'][$fkName])) {
-                    $output = $this->getForeignKeyRemove($output, $fkName);
+                    $columnName = (string)$fkData['COLUMN_NAME'];
+                    $output = $this->getForeignKeyRemove($output, $columnName);
                 }
             }
         }
