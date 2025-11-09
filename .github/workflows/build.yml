@@ -32,8 +32,26 @@ jobs:
           extensions: mbstring, pdo, pdo_mysql, intl, zip
           coverage: xdebug
 
-      - name: Check Composer Version
+      - name: Check PHP version
+        run: php -v
+
+      - name: Check Composer version
         run: composer -V
+
+      - name: Check PHP extensions
+        run: php -m
+
+      - name: Check MySQL version
+        run: mysql -V
+
+      - name: Start MySQL
+        run: sudo systemctl start mysql
+
+      - name: Check MySQL variables
+        run: mysql -uroot -proot -e "SHOW VARIABLES LIKE 'version%';"
+
+      - name: Create database
+        run: mysql -uroot -proot -e 'CREATE DATABASE IF NOT EXISTS phinx_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;'
 
       - name: Validate composer.json and composer.lock
         run: composer validate
